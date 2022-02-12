@@ -11,10 +11,10 @@ services:
 env:
   global:
     - NODE_ENV=test
-    - JWT_SECRET=prhhh
+    - JWT_SECRET=if_you_fail_to_study_you_would_be_rich_negatively
 before_script:
-  - psql -c 'create database banka;' -U postgres
-  - psql -c "CREATE USER codepreneur WITH PASSWORD null;" -U postgres
+  - psql -c 'create database wiretransfer;' -U postgres
+  - psql -c "CREATE USER saladinjake WITH PASSWORD null;" -U postgres
   - npm run build
 script:
   - npm test
