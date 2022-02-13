@@ -48,8 +48,9 @@
     "build-babel": "babel ./api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
-    "migration": "DEBUG=pg/connection node ./dist/models/db/migrations.db",
-    "seeder": "DEBUG=pg/seeder node ./dist/models/db/seeders.db",
+    "build-dev": "npm run build-babel",
+    "migration": "DEBUG=pg/connection node ./dist/api/core/models/db/migrations.db",
+    "seeder": "DEBUG=pg/seeder node ./dist/api/core/models/db/seeders.db",
     "db-exec": "npm run migration && npm run seeder",
     "heroku-postbuild": "NODE_ENV=production && npm run build"
   },

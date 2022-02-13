@@ -8,7 +8,7 @@ debug('pg/connection')(config);
 
 let pool = null;
 
-if (env === 'development') {
+if (env === 'development' || env === 'production') {
    pool = new Pool({ 
   	connectionString: process.env[configEnv.use_heroku_db_variable] ,
   	ssl: {
