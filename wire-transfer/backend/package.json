@@ -43,9 +43,8 @@
     "should": "^13.2.3"
   },
   "scripts": {
-    "start-dev": "set DEBUG=development nodemon --exec babel-node api/index.js",
+    "start-dev": "nodemon --exec babel-node ./api/index.js",
     "start": "npm run db-exec && node dist/index.js"
-   
   },
   "env": {
     "NODE_ENV": "development"
