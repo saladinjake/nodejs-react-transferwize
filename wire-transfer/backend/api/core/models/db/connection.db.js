@@ -10,7 +10,7 @@ let pool = null;
 
 if (env === 'development' || env === 'production') {
    pool = new Pool({ 
-  	connectionString: process.env[configEnv.use_heroku_db_variable] ,
+  	connectionString: process.env.PG_DATABASE_HEROKU ,
   	ssl: {
         rejectUnauthorized: false,
     },
