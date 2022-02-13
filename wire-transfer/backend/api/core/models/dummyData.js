@@ -1,4 +1,4 @@
-import Utils from '../utils/common';
+import Utils from '../helpers/common';
 
 export default {
   accounts: [
