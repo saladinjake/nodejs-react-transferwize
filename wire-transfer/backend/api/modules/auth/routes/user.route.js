@@ -10,7 +10,7 @@ const validateRequest = RequestValidator();
 router
   .post('/signup',
     validateRequest,
-    UserController.createUser);
+    UserController.signUp);
 
 router
   .post('/signin',

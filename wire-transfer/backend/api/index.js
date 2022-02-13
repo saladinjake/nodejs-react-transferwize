@@ -6,14 +6,22 @@ import { json } from 'body-parser';
 import debug from 'debug';
 import configJson from './core/config/config.ini';
 
+import authRoutes from './modules/auth/routes/user.route';
+import accountRoutes from './modules/e-transactions/routes/account.route';
+import transactionRoutes from './modules/e-transactions/routes/transaction.route';
+
+
 /*express configurations*/
 config.config();
 const app = express();
 const port = process.env.PORT || 7888;
-const API_VERSION = '/api/v1';
+const API_VERSION_CONTROLLER = '/api/v1';
 app.use(json());
 app.use(cors());
 
+app.use(`${API_VERSION_CONTROLLER}/auth`, authRoutes);
+app.use(`${API_VERSION_CONTROLLER}`, accountRoutes);
+app.use(`${API_VERSION_CONTROLLER}`, transactionRoutes);
 /*routes and midddlewares*/
 app.get('/', (req, res) => {
   res.send('App server is running');
