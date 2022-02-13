@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import debug from 'debug';
-import configJson from '../../config.ini';
+import configJson from '../../config/config.ini';
 
 const env = process.env.NODE_ENV || 'development';
 const config = configJson[env];
