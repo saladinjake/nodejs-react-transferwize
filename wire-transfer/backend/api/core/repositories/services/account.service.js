@@ -1,5 +1,5 @@
-import AccountModel from '../models/account.model';
-import UserModel from '../models/user.model';
+import AccountModel from '../../models/account.model';
+import UserModel from '../../models/user.model';
 
 const User = new UserModel('users');
 const Account = new AccountModel('accounts');

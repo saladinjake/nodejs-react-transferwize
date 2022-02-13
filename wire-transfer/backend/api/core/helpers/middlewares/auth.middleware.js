@@ -2,8 +2,6 @@ import jwt from 'jsonwebtoken';
 import ResponseApi from '../ResponseApi';
 
 const response = new ResponseApi();
-
-
 const decodeToken = (req, res, next, token) => {
   jwt.verify(token, process.env.JWT_SECRET, (error, decode) => {
     if (!error) {
@@ -14,8 +12,6 @@ const decodeToken = (req, res, next, token) => {
   });
 };
 
-
-
 const authMiddleware = (req, res, next) => {
   let token = req.headers['x-access-token']
       || req.headers.Authorization
@@ -25,11 +21,9 @@ const authMiddleware = (req, res, next) => {
   if (token && token.startsWith('Bearer ')) {
     token = token.slice(7, token.length);
   }
-
   if (token) {
     return decodeToken(req, res, next, token);
   }
-
   return response.sendError(res, 401, 'please assign a access token as header');
 };
 export default authMiddleware;

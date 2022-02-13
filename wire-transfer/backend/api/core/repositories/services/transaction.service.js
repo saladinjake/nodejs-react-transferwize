@@ -1,7 +1,7 @@
 import TransactionModel from '../../models/transaction.model';
 import AccountModel from '../../models/account.model';
 import UserModel from '../../models/user.model';
-import mailer from '../../utils/mailer';
+import mailer from '../../helpers/mailer';
 
 
 const Account = new AccountModel('accounts');
