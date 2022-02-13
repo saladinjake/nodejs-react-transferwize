@@ -84,10 +84,10 @@ class CurrencyConverter {
          const html = await axios.get(`https://www.google.co.in/search?q=${this.currencyAmount}+${this.currencyFrom}+to+${this.currencyTo}`);
          const $ = await cheerio.load(html.data);
          let val=  $(".iBp4i").text().split(" ")[0]
-         console.log(val);
+         //console.log(val);
          return val;
        
-        }
+    }
 
     rates(){
         if(this.currencyFrom === this.currencyTo)

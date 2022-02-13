@@ -1,6 +1,6 @@
 
-import TransactionService from '../../core/repositories/services/transaction.service';
-import ResponseApi from '../../core/helpers/ResponseApi';
+import TransactionService from '../../../core/repositories/services/transaction.service';
+import ResponseApi from '../../../core/helpers/ResponseApi';
 
 const response = new ResponseApi();
 

@@ -1,5 +1,4 @@
 import Model from './db/index.db';
-
 class User extends Model {
   async createUser(user) {
     try {

@@ -1,5 +1,5 @@
-import UserService from '../../core/repositories/services/user.service';
-import ResponseApi from '../../core/helpers/ResponseApi';
+import UserService from '../../../core/repositories/services/user.service';
+import ResponseApi from '../../../core/helpers/ResponseApi';
 
 const response = new ResponseApi();
 class UserController {

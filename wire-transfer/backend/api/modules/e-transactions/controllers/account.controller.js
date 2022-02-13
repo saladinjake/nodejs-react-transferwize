@@ -1,6 +1,6 @@
 
-import AccountService from '../../core/repositories/services/account.service';
-import ResponseApi from '../../core/helpers/ResponseApi';
+import AccountService from '../../../core/repositories/services/account.service';
+import ResponseApi from '../../../core/helpers/ResponseApi';
 
 const response = new ResponseApi();
 
