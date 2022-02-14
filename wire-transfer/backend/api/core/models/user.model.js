@@ -14,6 +14,7 @@ class User extends Model {
           user.password,
         ],
       );
+      
       this.logJSON(rows[0]);
       return rows[0];
     } catch (error) {
