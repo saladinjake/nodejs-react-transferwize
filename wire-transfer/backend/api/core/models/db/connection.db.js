@@ -10,7 +10,7 @@ debug('pg/connection')(config);
 let pool = null;
 
 if ( env === 'production') {
-  console.log( process.env.PG_DATABASE_HEROKU)
+  //console.log( process.env.PG_DATABASE_HEROKU)
 pool = new Pool({ 
   	connectionString: process.env.PG_DATABASE_HEROKU ,
   	// ssl: {
