@@ -56,9 +56,9 @@
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
     "build-dev": "npm run build-babel",
-    "seeder": "node ./dist/core/models/db/seeders.db.js",
+    
     "db-exec": "heroku pg:psql --app transferwise-apitest < ./dist/core/models/db/migrations.sql",
-    "heroku-postbuild": "NODE_ENV=production && npm run build",
+    "heroku-postbuild": "NODE_ENV=production && npm run db-exec && npm run build",
     "pretest": "npm run db-exec",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "coverage": "nyc report --reporter=text-lcov | coveralls",

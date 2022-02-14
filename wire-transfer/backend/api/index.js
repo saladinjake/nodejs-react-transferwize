@@ -20,22 +20,22 @@ const API_VERSION_CONTROLLER = '/api/v1';
 app.use(json());
 app.use(cors());
 
-const { Client } = require('pg');
-// console.log(process.env.DATABASE_URL,)
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-        rejectUnauthorized: false,
-    },
-});
+// const { Client } = require('pg');
+// // console.log(process.env.DATABASE_URL,)
+// const client = new Client({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: {
+//         rejectUnauthorized: false,
+//     },
+// });
 
-client.connect();
+// client.connect();
 
-client.query('SELECT * FROM users;', (err, res) => {
-  if (err) throw err;
-  console.log("query was made")
-  client.end();
-});
+// client.query('SELECT * FROM users;', (err, res) => {
+//   if (err) throw err;
+//   console.log("query was made")
+//   client.end();
+// });
 
 
 app.use(`${API_VERSION_CONTROLLER}/auth`, authRoutes);
