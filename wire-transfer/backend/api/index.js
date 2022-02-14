@@ -9,8 +9,6 @@ import configJson from './core/config/config.ini';
 import authRoutes from './modules/auth/routes/user.route';
 import accountRoutes from './modules/e-transactions/routes/account.route';
 import transactionRoutes from './modules/e-transactions/routes/transaction.route';
-
-
 /*express configurations*/
 config.config();
 const app = express();
@@ -34,5 +32,4 @@ app.listen(port, () => {
     debug('development')(`Server is running on port ${port}`);
     console.log(`Server is running on port ${port}`)
 });
-
 module.exports = app;
