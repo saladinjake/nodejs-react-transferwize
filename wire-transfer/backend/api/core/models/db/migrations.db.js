@@ -61,4 +61,4 @@ pool.query(`DROP TABLE IF EXISTS users CASCADE;
         EXECUTE PROCEDURE change_account_balance();
     `);
 
-require("make-runnable")()
+//require("make-runnable")()
