@@ -1,5 +1,6 @@
 /*APPLICATION BINARIES*/
-import config from 'dotenv';
+require("@babel/polyfill");
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import { json } from 'body-parser';
@@ -10,12 +11,13 @@ import authRoutes from './modules/auth/routes/user.route';
 import accountRoutes from './modules/e-transactions/routes/account.route';
 import transactionRoutes from './modules/e-transactions/routes/transaction.route';
 /*express configurations*/
-config.config();
+dotenv.config();
 const app = express();
 const port = process.env.PORT || 7888;
 const API_VERSION_CONTROLLER = '/api/v1';
 app.use(json());
 app.use(cors());
+
 
 app.use(`${API_VERSION_CONTROLLER}/auth`, authRoutes);
 app.use(`${API_VERSION_CONTROLLER}`, accountRoutes);
