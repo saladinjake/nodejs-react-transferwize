@@ -18,6 +18,7 @@ class Model {
     }
   }
 
+
   async selectWhere(columns, selector, values) {
     const queryString = `SELECT ${columns} FROM ${this.table} WHERE ${selector}`;
     try {
