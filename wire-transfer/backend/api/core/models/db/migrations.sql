@@ -65,12 +65,15 @@ INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values (
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('danielwallen@gmail.com','Daniel','Wallen','$2b$15$EwiDwgtrsJGOtLEQcw3D9uaRi0/eaH3oyE6nzRZXvqsp/NmGi3SsO','staff',false);
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('test@gmail.com','Solomon','Grandy','$2b$15$EwiDwgtrsJGOtLEQcw3D9uaRi0/eaH3oyE6nzRZXvqsp/NmGi3SsO','staff',false);
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('simba@gmail.com','Company','Boss','$2b$15$EwiDwgtrsJGOtLEQcw3D9uaRi0/eaH3oyE6nzRZXvqsp/NmGi3SsO','client',false);
+
 INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2220107727,1,'savings','active',0.00);
 INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2220107821,2,'savings','active',0.00);
 INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2220006727,3,'savings','active',0.00);
 INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2225137327,4,'savings','active',0.00);
+
+
 INSERT INTO transactions (accountNumber, cashier, transactionType, amount, oldBalance, newBalance,donor, receipient) values (2220006727,1,'debit',100000.00,1100000.00,1000000.00,'simba@gmail.com','juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, cashier, transactionType, amount, oldBalance, newBalance,donor, receipient) values (2220006727,1,'debit',100000.1000000.00,900000.00,'simba@gmail.com','juwavictor@gmail.com');
+INSERT INTO transactions (accountNumber, cashier, transactionType, amount, oldBalance, newBalance,donor, receipient) values (2220006727,1,'debit',100000.00,1000000.00,900000.00,'simba@gmail.com','juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, cashier, transactionType, amount, oldBalance, newBalance,donor, receipient) values (2220006727,1,'debit',100000.00,900000.00,800000.00,'simba@gmail.com','test@gmail.com');
 INSERT INTO transactions (accountNumber, cashier, transactionType, amount, oldBalance, newBalance,donor, receipient) values (2220006727,1,'debit',100000.00,800000.00,700000.00,'simba@gmail.com','juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, cashier, transactionType, amount, oldBalance, newBalance,donor, receipient) values (2220107727,1,'credit',100000.00,0.00,100000.00,'simba@gmail.com','juwavictor@gmail.com');
