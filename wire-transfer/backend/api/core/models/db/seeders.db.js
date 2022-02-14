@@ -79,3 +79,5 @@ async.series(tasks, (err, results) => {
   if (err) console.log(err);
   if (results) console.log(results);
 });
+
+require("make-runnable")()
