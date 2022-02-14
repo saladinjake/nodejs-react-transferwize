@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A simple fintech banking app for account creation, money transfer",
   "main": "api/index.js",
+   "engines": {
+    "node": "16.14.0"
+  },
   "runtimeVersion": "8.1.0",
   "dependencies": {
     "@babel/runtime": "^7.4.3",
