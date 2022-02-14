@@ -1,5 +1,5 @@
 /*APPLICATION BINARIES*/
-require("@babel/polyfill");
+// require("@babel/polyfill");
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
