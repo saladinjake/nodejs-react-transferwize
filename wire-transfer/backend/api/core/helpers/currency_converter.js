@@ -80,7 +80,7 @@ class CurrencyConverter {
         return this
     }
 
-    webScraper = async () => {
+    async webScraper() {
          const html = await axios.get(`https://www.google.co.in/search?q=${this.currencyAmount}+${this.currencyFrom}+to+${this.currencyTo}`);
          const $ = await cheerio.load(html.data);
          let val=  $(".iBp4i").text().split(" ")[0]

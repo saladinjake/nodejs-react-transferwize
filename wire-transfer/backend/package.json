@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "A simple fintech banking app for account creation, money transfer",
   "main": "api/index.js",
+  "runtimeVersion": "8.1.0",
   "dependencies": {
     "@babel/runtime": "^7.4.3",
     "async": "^2.6.2",
     "axios": "^0.25.0",
-    "bcrypt": "^3.0.5",
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.10",
     "cors": "^2.8.5",
@@ -31,7 +32,7 @@
     "@babel/plugin-transform-runtime": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
     "@babel/register": "^7.4.0",
-    "browser-sync": "^2.26.3",
+    "browser-sync": "^2.27.7",
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "coveralls": "^3.0.3",
@@ -41,21 +42,42 @@
     "eslint-plugin-jsdoc": "^4.8.3",
     "mocha": "^6.0.2",
     "nodemon": "^1.18.10",
-    "nyc": "^13.3.0",
+    "nyc": "^15.1.0",
     "run-script-os": "^1.0.5",
     "should": "^13.2.3"
   },
   "scripts": {
-    "start-dev": "nodemon --exec babel-node ./api/index.js",
+    "start-dev": "npm run db-exec && nodemon --exec babel-node ./api/index.js",
     "start": "npm run db-exec && node dist/index.js",
     "build-babel": "babel ./api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
     "build-dev": "npm run build-babel",
-    "migration": "DEBUG=pg/connection node ./dist/core/models/db/migrations.db",
-    "seeder": "DEBUG=pg/seeder node ./dist/core/models/db/seeders.db",
+    "migration": "node ./dist/core/models/db/migrations.db",
+    "seeder": "node ./dist/core/models/db/seeders.db",
     "db-exec": "npm run migration && npm run seeder",
-    "heroku-postbuild": "NODE_ENV=production && npm run build"
+    "heroku-postbuild": "NODE_ENV=production && npm run build",
+    "pretest": "npm run db-exec",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "test": "nyc --require @babel/register ---reporter=html --reporter=text mocha  ./api/test/**.test.js",
+    "test:watch": "mocha --require @babel/register --watch --reporter min",
+    "test-dev":"nyc --require @babel/register ---reporter=html --reporter=text mocha ./api/test/**.test.js --timeout 20000 --watch --exit"
+  },
+  "nyc": {
+    "exclude": [
+      "**/*.spec.js*",
+      "test/**"
+    ],
+    "require": [
+      "@babel/register"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "sourceMap": false,
+    "instrument": false
   },
   "env": {
     "NODE_ENV": "development"
@@ -65,7 +87,7 @@
     "url": "git+https://github.com/saladinjake/trasferwise-app.git"
   },
   "keywords": [
-    "banka"
+    "authentication"
   ],
   "author": "saladinjake",
   "license": "ISC",

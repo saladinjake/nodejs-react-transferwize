@@ -4,6 +4,7 @@ import AccountContoller from '../controllers/account.controller';
 import RequestValidator from '../../../core/helpers/middlewares/request.middleware';
 import authMiddleware from '../../../core/helpers/middlewares/auth.middleware';
 import ParamsValidator from '../../../core/helpers/middlewares/params.middleware';
+import PermissionMiddleware from '../../../core/helpers/middlewares/permission.middleware';
 
 
 
@@ -30,12 +31,7 @@ router
     PermissionMiddleware.strictAccountPermission,
     AccountContoller.getAccount);
 
-router
-  .patch('/accounts/:accountNumber',
-    authMiddleware,
-    validateParams,
-    validateBody,
-    AccountContoller.changeStatus);
+
 
 router
   .delete('/accounts/:accountNumber',
