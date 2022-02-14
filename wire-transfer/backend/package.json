@@ -51,14 +51,14 @@
   },
   "scripts": {
     "start-dev": "npm run db-exec && nodemon --exec babel-node ./api/index.js",
-    "start": "npm run db-exec && node dist/index.js",
+    "start": "node dist/index.js",
     "build-babel": "babel ./api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
     "build-dev": "npm run build-babel",
     
     "db-exec": "heroku pg:psql --app transferwise-apitest < ./dist/core/models/db/migrations.sql",
-    "heroku-postbuild": "NODE_ENV=production && npm run db-exec && npm run build",
+    "heroku-postbuild": "NODE_ENV=production && npm run build",
     "pretest": "npm run db-exec",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
