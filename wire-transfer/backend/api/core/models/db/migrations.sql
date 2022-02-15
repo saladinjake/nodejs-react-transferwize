@@ -1,3 +1,11 @@
+ CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+        RETURNS TRIGGER AS $$
+        BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+        END;
+        $$ LANGUAGE PLPGSQL;
+
 DROP TABLE IF EXISTS users CASCADE;
         CREATE TABLE users(
             id SERIAL NOT NULL UNIQUE PRIMARY KEY,
@@ -7,7 +15,9 @@ DROP TABLE IF EXISTS users CASCADE;
             password VARCHAR NOT NULL,
             type VARCHAR(10) NOT NULL DEFAULT 'client',
             isAdmin BOOLEAN NOT NULL DEFAULT false,
-            createdOn TIMESTAMP NOT NULL DEFAULT NOW()
+           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            
         );
         DROP TABLE IF EXISTS accounts CASCADE;
         CREATE OR REPLACE FUNCTION acc_generator(OUT result bigint) AS $$
@@ -31,7 +41,9 @@ DROP TABLE IF EXISTS users CASCADE;
             type VARCHAR(10) NOT NULL,
             status VARCHAR(10) DEFAULT 'dormant' ,
             balance NUMERIC(10, 2) DEFAULT 0.00,
-            createdOn TIMESTAMP NOT NULL DEFAULT NOW()
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            
         );
         DROP TABLE IF EXISTS transactions CASCADE;
         CREATE OR REPLACE FUNCTION change_account_balance() RETURNS trigger AS $$
@@ -41,24 +53,17 @@ DROP TABLE IF EXISTS users CASCADE;
         END;
         $$ LANGUAGE PLPGSQL;
 
-        CREATE OR REPLACE FUNCTION trigger_set_timestamp()
-        RETURNS TRIGGER AS $$
-        BEGIN
-          NEW.updated_at = NOW();
-          RETURN NEW;
-        END;
-        $$ LANGUAGE PLPGSQL;
+       
         CREATE TABLE transactions(
             id SERIAL NOT NULL UNIQUE PRIMARY KEY,
             accountNumber BIGINT NOT NULL REFERENCES accounts(accountNumber) ON DELETE CASCADE,
-            cashier INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            senderId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             transactionType VARCHAR(10) NOT NULL,
             amount NUMERIC(10, 2) DEFAULT 0.00,
             oldBalance NUMERIC(10, 2) DEFAULT 0.00,
             newBalance NUMERIC(10, 2) DEFAULT 0.00,
             createdOn TIMESTAMP NOT NULL DEFAULT NOW(),
-            donor VARCHAR(100) NOT NULL,
-            receipient VARCHAR(100) NOT NULL,
+            receipientId VARCHAR(100) NOT NULL, 
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             completed_at TIMESTAMPTZ
@@ -69,6 +74,20 @@ DROP TABLE IF EXISTS users CASCADE;
         ON transactions
         FOR EACH ROW
         EXECUTE PROCEDURE change_account_balance();
+
+
+
+        CREATE TRIGGER set_timestamp
+        BEFORE UPDATE ON users
+        FOR EACH ROW
+        EXECUTE PROCEDURE trigger_set_timestamp();
+
+
+        CREATE TRIGGER set_timestamp
+        BEFORE UPDATE ON accounts
+        FOR EACH ROW
+        EXECUTE PROCEDURE trigger_set_timestamp();
+
 
         CREATE TRIGGER set_timestamp
         BEFORE UPDATE ON transactions

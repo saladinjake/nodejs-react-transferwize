@@ -1,11 +1,14 @@
-import  pg, { Pool } from 'pg';
+import  pg, { Pool, Client } from 'pg';
 import dotenv from "dotenv"
 import debug from 'debug';
 import configJson from '../../config/config.ini';
 dotenv.config()
 const env = process.env.NODE_ENV || 'development';
 const config = configJson[env];
-debug('pg/connection')(config);
+//debug('pg/connection')(config);
+
+
+// const { Client } = require('pg')
 
 
 let pool = null
@@ -21,7 +24,7 @@ if ( env === 'production') {
 //    );
 
 
-let pool = new Pool({
+let clients = new Client({
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
     password: process.env.PG_PASSWORD,
@@ -31,30 +34,48 @@ let pool = new Pool({
         rejectUnauthorized: false,
     },
  });
+
+  //console.log(clients)
 } else {
-    //console.log( config.username,config.host,config.database, config.password)
+
+
+  //console.log(clients)
+    console.log("local connection for dev here ..")
   pool = new Pool({
     user: "postgres",
     host: "localhost",
-    password: "saladin",
+    password: "saladin123!@#",
     database: "transferwise",
     port: 5432,
-    // ssl: {
-    //     rejectUnauthorized: false,
-    // },
+    ssl: {
+        rejectUnauthorized: false,
+    },
   });
+
+//   const client = new Client({
+//     user: "postgres",
+//     host: "localhost",
+//     password: "saladin123!@#",
+//     database: "transferwise",
+//     port: 5432,
+//     ssl: {
+//         rejectUnauthorized: false,
+//     },
+//   })
+// client.connect()
+// console.log(client)
+// client.query('SELECT * FROM users',(err, res) => {
+//   console.log(err ? err.stack : res.rows[0]) // Hello World!
+//   //client.end()
+// })
+
+
 }
 
-pool.on('error', (error) => {
-	console.log(error)
-  debug('pg/connection')(error);
-});
-
-pool.on('connect', (pooler) => {
-  console.log(pooler)
-});
+     
 
 export default pool;
+
 
 
 
