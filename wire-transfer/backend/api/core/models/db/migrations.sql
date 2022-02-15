@@ -40,6 +40,14 @@ DROP TABLE IF EXISTS users CASCADE;
             RETURN NEW;
         END;
         $$ LANGUAGE PLPGSQL;
+
+        CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+        RETURNS TRIGGER AS $$
+        BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+        END;
+        $$ LANGUAGE PLPGSQL;
         CREATE TABLE transactions(
             id SERIAL NOT NULL UNIQUE PRIMARY KEY,
             accountNumber BIGINT NOT NULL REFERENCES accounts(accountNumber) ON DELETE CASCADE,
@@ -50,13 +58,22 @@ DROP TABLE IF EXISTS users CASCADE;
             newBalance NUMERIC(10, 2) DEFAULT 0.00,
             createdOn TIMESTAMP NOT NULL DEFAULT NOW(),
             donor VARCHAR(100) NOT NULL,
-            receipient VARCHAR(100) NOT NULL
+            receipient VARCHAR(100) NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            completed_at TIMESTAMPTZ
+
         );
         CREATE TRIGGER new_transactions_entry
         AFTER INSERT
         ON transactions
         FOR EACH ROW
         EXECUTE PROCEDURE change_account_balance();
+
+        CREATE TRIGGER set_timestamp
+        BEFORE UPDATE ON transactions
+        FOR EACH ROW
+        EXECUTE PROCEDURE trigger_set_timestamp();
 
 
 

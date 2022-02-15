@@ -3,7 +3,6 @@ import ResponseApi from '../../../core/helpers/ResponseApi';
 
 const response = new ResponseApi();
 class UserController {
-
   static async signUp(req, res) {
     const user = req.body;
     try {
@@ -17,13 +16,12 @@ class UserController {
     }
   }
 
-
   static async loginUser(req, res) {
     const login = req.body;
     console.log(login)
     try {
       const user = await UserService.signUser(login);
-
+      console.log(user)
       if (user) {
         return response.sendSuccess(res, 200, user, 'Login was successful');
       }
