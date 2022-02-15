@@ -63,7 +63,7 @@ class UserService {
   static async signUser(login) {
     try {
       const user = await User.findUserByEmail(login.email);
-
+      console.log(user)
       if (user) {
         const bycrptResponse = Utils.validatePassword(login.password, user.password);
         if (bycrptResponse) {

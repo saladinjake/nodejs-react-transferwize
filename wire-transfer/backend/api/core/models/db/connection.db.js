@@ -11,26 +11,26 @@ debug('pg/connection')(config);
 
 let connectionString= `postgres://sxqxifycivjczb:ffa691b4cc9702002f7e148135d6e05455205f69a5d43012f8dc7cc8f0c95645@ec2-18-235-114-62.compute-1.amazonaws.com:5432/d3ufd2rj057hmf`
   	
-let pool = new Pool({
-   connectionString: connectionString,
-   ssl: true,
- //   ssl: {
- //    rejectUnauthorized: false
- // }
-});
+// let pool = new Pool({
+//    connectionString: connectionString,
+//    ssl: true,
+//    // ssl: {
+//    //  rejectUnauthorized: false
+//    // }
+// });
 
-pool.query(`SELECT * FROM users;`, (err, res) => {
-    if (err) {
-        console.log("Error - Failed to select all from Users");
-        console.log(err);
-    }
-    else{
-        console.log(res.rows);
-    }
-});
+ let pool = new Pool({
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    password: process.env.PG_PASSWORD,
+    database: process.env.PG_DATABASE,
+    port: process.env.PG_PORT,
+    // ssl: {
+    //     rejectUnauthorized: false,
+    // },
+  });
 
-
-
+console.log(pool)
 // if ( env === 'production') {
 //   //console.log( process.env.PG_DATABASE_HEROKU)
 // pool = new Pool({ 
@@ -55,7 +55,12 @@ pool.query(`SELECT * FROM users;`, (err, res) => {
 // }
 
 pool.on('error', (error) => {
+	console.log(error)
   debug('pg/connection')(error);
+});
+
+pool.on('connect', (pooler) => {
+  console.log(pooler)
 });
 
 export default pool;
