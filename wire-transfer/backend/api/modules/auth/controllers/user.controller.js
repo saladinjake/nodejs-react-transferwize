@@ -20,13 +20,16 @@ class UserController {
 
   static async loginUser(req, res) {
     const login = req.body;
+    console.log(login)
     try {
       const user = await UserService.signUser(login);
+
       if (user) {
         return response.sendSuccess(res, 200, user, 'Login was successful');
       }
       return response.sendError(res, 400, 'something went wrong');
     } catch (error) {
+       console.log(error)
       return response.sendError(res, 401, error.message);
     }
   }

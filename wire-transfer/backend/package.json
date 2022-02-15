@@ -50,7 +50,7 @@
     "should": "^13.2.3"
   },
   "scripts": {
-    "start-dev": "npm run db-exec && nodemon --exec babel-node ./api/index.js",
+    "start-dev": "nodemon --exec babel-node ./api/index.js",
     "start": "node dist/index.js",
     "build-babel": "babel ./api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
     "clean": "rm -rf dist && mkdir dist",
