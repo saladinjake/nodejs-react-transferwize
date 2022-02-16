@@ -3,7 +3,6 @@ import ResponseApi from '../../../core/helpers/ResponseApi';
 
 const response = new ResponseApi();
 class UserController {
-
   static async signUp(req, res) {
     const user = req.body;
     try {
@@ -17,17 +16,20 @@ class UserController {
     }
   }
 
-
   static async loginUser(req, res) {
     const login = req.body;
     console.log(login)
     try {
       const user = await UserService.signUser(login);
+      console.log(user)
+      // const user =[]
+   
+      // res.status(200).json({status:200 ,message:"Login success", data: user});
 
       if (user) {
         return response.sendSuccess(res, 200, user, 'Login was successful');
       }
-      return response.sendError(res, 400, 'something went wrong');
+       response.sendError(res, 400, 'something went wrong');
     } catch (error) {
        console.log(error)
       return response.sendError(res, 401, error.message);

@@ -15,7 +15,7 @@ class Account extends Model {
   /*did this for feature upgrade on the application features usually an admin or staff*/
   async findAll() {
     try {
-      const { rows } = await this.select('createdOn, accountNumber, owner, type, status, balance');
+      const { rows } = await this.select('created_at, accountNumber, owner, type, status, balance');
       return rows;
     } catch (error) {
       throw error;
@@ -25,7 +25,7 @@ class Account extends Model {
   async findByAccountNumberJoin(id) {
     try {
       const { rows } = await this.selectWithJoin(
-        'trans.id, trans.createdOn, transactiontype, trans.accountNumber, amount, oldBalance, newBalance, owner',
+        'trans.id, trans.created_at, transactiontype, trans.accountNumber, amount, oldBalance, newBalance, owner',
         'trans.id=$1',
         [id],
       );
@@ -38,7 +38,7 @@ class Account extends Model {
   async findByAccountNumber(accountNumber) {
     try {
       const { rows } = await this.selectWhere(
-        'createdOn, accountNumber,owner, type, status, balance',
+        'created_at, accountNumber,owner, type, status, balance',
         'accountNumber=$1',
         [accountNumber],
       );
@@ -51,7 +51,7 @@ class Account extends Model {
   async findAccountByOwner(id) {
     try {
       const { rows } = await this.selectWhere(
-        'createdOn, accountNumber, owner, type, status, balance',
+        'created_at, accountNumber, owner, type, status, balance',
         'owner=$1',
         [id],
       );
