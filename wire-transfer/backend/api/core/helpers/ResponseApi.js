@@ -20,13 +20,13 @@ class ResponseApi {
     return this.send(res);
   }
   send(res) {
-    const filteredResponse =// Utils.removeNullValues(
+    const filteredResponse =Utils.removeNullValues(
     {
       status: this.status,
       message: this.message,
       data: this.data,
     }
-    //);
+    );
     if (this.type === 'success') {
       return res.status(this.status).json(filteredResponse);
     }

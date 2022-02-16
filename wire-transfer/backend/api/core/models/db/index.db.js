@@ -6,20 +6,25 @@ class Model {
     this.table = table;
     this.pool = pool;
     this.logger = debug('pg/model');
+     
   }
 
   async select(columns) {
+    console.log(this.table)
     const queryString = `SELECT ${columns} FROM ${this.table}`;
     try {
       const response = await this.pool.query(queryString);
+      console.log(response)
       return response;
     } catch (err) {
+      console.log(err)
       throw err;
     }
   }
 
 
   async selectWhere(columns, selector, values) {
+     console.log(this.table)
     const queryString = `SELECT ${columns} FROM ${this.table} WHERE ${selector}`;
     try {
       const response = await this.pool.query(queryString, values);

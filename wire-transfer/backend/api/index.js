@@ -38,14 +38,14 @@ app.use((err, req, res, next) => {
   return res.status(500).send('Alexa your fintech AI just  broke!');
 });
 
-pool.on('error', (error) => {
-	console.log(error)
+// pool.on('error', (error) => {
+// 	console.log(error)
  
-});
+// });
 
-pool.on('connect', (pooler) => {
-  console.log(pooler)
-});
+// pool.on('connect', (pooler) => {
+//   console.log(pooler)
+// });
 
 app.listen(port, () => {
     debug('development')(`Server is running on port ${port}`);
