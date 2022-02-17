@@ -17,9 +17,9 @@ if ( env === 'production') {
   //console.log( process.env.PG_DATABASE_HEROKU)
   pool = new Pool({ 
       connectionString: `postgres://sxqxifycivjczb:ffa691b4cc9702002f7e148135d6e05455205f69a5d43012f8dc7cc8f0c95645@ec2-18-235-114-62.compute-1.amazonaws.com:5432/d3ufd2rj057hmf` ,
-      ssl: {
-          rejectUnauthorized: false,
-      },
+      // ssl: {
+      //     rejectUnauthorized: false,
+      // },
   });
 
 
@@ -36,18 +36,26 @@ if ( env === 'production') {
   //console.log(clients)
     console.log("local connection for dev here ..")
     try{
-
-     pool = new Pool({
-        user: process.env.PG_USER,
-        host: process.env.PG_HOST,
-        password: process.env.PG_PASSWORD,
-        database: process.env.PG_DATABASE,
-        port: process.env.PG_PORT,
-        ssl: {
-            rejectUnauthorized: false,
-        },
-     });
+       //local machine connection
+     // pool = new Pool({
+     //    user: process.env.PG_LOCAL_USER,
+     //    host: process.env.PG_LOCAL_HOST,
+     //    password: process.env.PG_LOCAL_PASSWORD,
+     //    database: process.env.PG_LOCAL_DATABASE,
+     //    port: process.env.PG_LOCAL_PORT,
+     //    ssl: {
+     //        rejectUnauthorized: false,
+     //    },
+     // });
     console.log(pool)
+
+    //local dev with cloud db
+    pool = new Pool({ 
+      connectionString: `postgres://sxqxifycivjczb:ffa691b4cc9702002f7e148135d6e05455205f69a5d43012f8dc7cc8f0c95645@ec2-18-235-114-62.compute-1.amazonaws.com:5432/d3ufd2rj057hmf` ,
+      // ssl: {
+      //     rejectUnauthorized: false,
+      // },
+  });
 
     pool.connect((err, client, release) => {
         if (err) {
