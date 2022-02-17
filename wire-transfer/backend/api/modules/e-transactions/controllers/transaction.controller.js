@@ -7,12 +7,13 @@ const response = new ResponseApi();
 class TransactionController {
  
   static async debitUserAccount(req, res) {
-    const { amount } = req.body;
-    const { id } = req.token;
+    const { amount , receipientId} = req.body;
+    console.log(req.token)
+    const { id } = req.identitySignal;
     const { accountNumber } = req.params;
 
     try {
-      const transaction = await TransactionService.debitAccount(id, accountNumber, amount);
+      const transaction = await TransactionService.debitAccount(id, accountNumber, amount, receipientId);
       return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
     } catch (error) {
       return response.sendError(res, 400, error.message);
@@ -22,7 +23,7 @@ class TransactionController {
 
   static async creditUserAccount(req, res) {
     const { amount } = req.body;
-    const { id } = req.token;
+    const { id } = req.locals.identitySignal;
     const { accountNumber } = req.params;
 
     try {

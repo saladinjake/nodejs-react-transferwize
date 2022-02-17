@@ -12,7 +12,7 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount(cashierId, accountNumber, amount) {
+  static async debitAccount( accountNumber,senderId, amount,receipientId) {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
 
@@ -23,7 +23,7 @@ class TransactionService {
         if (account.balance >= amount) {
           const user = await User.findUserById(Number(account.owner));
 
-          const transaction = await Transaction.debit(account, amount, cashierId);
+          const transaction = await Transaction.debit(account,senderId, amount,receipientId);
 
           const mailData = {
             subject: 'A transaction occured on your account',

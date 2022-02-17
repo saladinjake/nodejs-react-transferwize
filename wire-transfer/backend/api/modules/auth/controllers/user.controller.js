@@ -18,28 +18,24 @@ class UserController {
 
   static async loginUser(req, res) {
     let login = req.body;
-
-//      Object.entries(login).forEach(([key, value]) => {
-//   delete login[key]
-//   login[key.replace(/\n\t/g,"").split().pop()] = value
-//   login[key.replace(/\n/g,"").split().pop()] = value
-// })
-
-console.log(login)
-    
     try {
       const user = await UserService.signUser(login);
+
+      /*check if user has the custom application header*/
       console.log(user)
-      
       if (user) {
+        
         return response.sendSuccess(res, 200, user, 'Login was successful');
       }
        response.sendError(res, 400, 'something went wrong');
     } catch (error) {
-       console.log(error)
+       // console.log(error)
       return response.sendError(res, 401, error.message);
     }
   }
+
+
+  
 }
 
 export default UserController;

@@ -58,12 +58,12 @@
     "build-dev": "npm run build-babel",
     "db-exec": "heroku pg:psql --app transferwise-apitest < ./dist/core/models/db/migrations.sql",
     "heroku-postbuild": "NODE_ENV=production && npm run build",
-    "pretest": "npm run db-exec",
+    "runpretest": "npm run db-exec",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "test": "nyc --require @babel/register ---reporter=html --reporter=text mocha  ./api/test/**.test.js",
-    "test:watch": "mocha --require @babel/register --watch --reporter min",
-    "test-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./api/test/**.test.js --timeout 20000 --watch --exit"
+    "test:old": "nyc --require @babel/register ---reporter=html --reporter=text mocha  --timeout 10000 ./api/test/**.test.js",
+    "test": "mocha --require @babel/register ./api/test/**.test.js --timeout 10000 --reporter min",
+    "runtest-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./api/test/**.test.js --timeout 20000 --watch --exit"
   },
   "nyc": {
     "exclude": [

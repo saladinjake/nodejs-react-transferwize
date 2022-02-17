@@ -57,6 +57,7 @@ class UserService {
         type,
       };
     } catch (err) {
+      console.log(err)
       throw err;
     }
   }
@@ -64,7 +65,7 @@ class UserService {
     console.log(login)
     try {
       const user = await User.findUserByEmail(login.email);
-      console.log(user)
+      // console.log(user)
       if (user) {
         const bycrptResponse = Utils.validatePassword(login.password, user.password);
         if (bycrptResponse) {

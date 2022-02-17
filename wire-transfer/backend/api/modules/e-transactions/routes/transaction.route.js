@@ -16,10 +16,10 @@ const validateParams = ParamsValidator();
 
 router
   .post('/transactions/:accountNumber/debit',
-    authMiddleware,
-    PermissionMiddleware.strictAccountPermission,
-    validateParams,
-    validateBody,
+    // authMiddleware,
+    // //PermissionMiddleware.strictAccountPermission,
+    // validateParams,
+    // validateBody,
     TransactionContoller.debitUserAccount);
 
 router
