@@ -1,10 +1,7 @@
 import { Stack, Button, Box, Text } from "@chakra-ui/react";
 import { PaginationItem } from "./PaginationItem";
 
-
-
 const siblingsCount = 1;
-
 function generatePagesArray(from, to) {
   return [...new Array(to - from)]
     .map((_, index) => {

@@ -4,8 +4,6 @@ import { FormControl, FormLabel,
  Input as ChakraInput, InputProps as ChakraInputProps,
   FormErrorMessage } from "@chakra-ui/react";
 
-
-
 const InputMaker = ({ name, label, error = null, ...rest }, ref) => {
   return (
     <FormControl isInvalid={!!error}>

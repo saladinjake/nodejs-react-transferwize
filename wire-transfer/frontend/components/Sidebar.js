@@ -74,12 +74,9 @@ export default function TradeFairSidebar() {
                 </Flex>
             </Flex>
                 <NavItem  navSize={navSize} icon={FiHome} title="Dashboard" active description="This is the description for the dashboard." />
-                <NavItem navSize={navSize} icon={FiUser} title="User Profile" />
-                <NavItem navSize={navSize} icon={FiCalendar} title="Trading Chart"  />
-                 <NavItem navSize={navSize} icon={FiDollarSign} title="Hot Wallet" />
-                 <NavItem navSize={navSize} icon={FiBriefcase} title="History" />
-                <NavItem navSize={navSize} icon={IoPawOutline} title="Exchange Rates" />
-                <NavItem navSize={navSize} icon={FiSettings} title="Settings" />
+                <NavItem navSize={navSize} icon={FiUser} title="New Transaction" />
+                <NavItem navSize={navSize} icon={FiCalendar} title="Logout"  />
+                
             </Flex>
 
            
