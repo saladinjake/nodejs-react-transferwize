@@ -1,5 +1,5 @@
 import chai from 'chai';
-import 'chai/register-should';
+// import 'chai/register-should';
 import chaiHttp from 'chai-http';
 import app from '../index';
 
@@ -7,11 +7,12 @@ chai.use(chaiHttp);
 
 describe('Test transaction related endpoints - Debit and Credit an account', () => {
   let userToken = null;
+  let identitySignOn =null;
 
-  before('Sign in cashier to obtain auth token to be used in other account operations', (done) => {
+  before('Sign in as user to obtain auth token to be used in other account operations', (done) => {
     const userCredential = {
-      email: 'saladinjake@gmail.com',
-      password: 'password',
+      email: 'juwavictor@gmail.com',
+      password: 'mypassword',
     };
 
     chai.request(app)
@@ -21,6 +22,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         res.should.have.status(200);
         if (!err) {
           userToken = res.body.data.token;
+           identitySignOn = res.body.data.id;
         }
         done();
       });
@@ -29,8 +31,8 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
   describe('POST /transactions/:accountNumber/debit', () => {
     before('Sign in as a user', (done) => {
       const userCredential = {
-        email: 'saladinjake@gmail.com',
-        password: 'password',
+        email: 'simba@gmail.com', //the software company making payments to its developers
+        password: 'mypassword',
       };
 
       chai.request(app)
@@ -40,31 +42,32 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
           res.should.have.status(200);
           if (!err) {
             userToken = res.body.data.token;
+            identitySignOn = res.body.data.id;
           }
           done();
         });
     });
 
-    it('it should throw permission error if user is not a cashier', (done) => {
-      const accountNumber = 222010872;
-      const body = { amount: 50000 };
+    it('it should throw permission error if user is not a loggedin', (done) => {
+      const accountNumber = 2220107727;
+      const body = { amount: 50000,receipientId:"juwavictor@gmail.com" };
       chai
         .request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
-        .set('x-access-token', userToken)
+        .set('x-access-token', null)
         .send(body)
         .end((err, res) => {
-          res.should.have.status(403);
+          res.should.have.status(401);
           res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('only a cashier can perform this operation');
           done();
         });
     });
 
 
     it('it should throw an insufficient balance error', (done) => {
-      const accountNumber = 2220107727;
-      const body = { amount: 5000000 };
+      const accountNumber = 2220006727;
+      const receipientId ="juwavictor@gmail.com" 
+      const body = { amount: 500000000000,  receipientId};
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
         .set('x-access-token', userToken)
@@ -78,8 +81,8 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
     });
 
     it('it should throw an error when account number is not found', (done) => {
-      const accountNumber = 22201084472;
-      const body = { amount: 50000 };
+      const accountNumber = 22299084472999;
+      const body = { amount: 50000,receipientId:"juwavictor@gmail.com" };
 
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
@@ -94,8 +97,8 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
     });
 
     it('it should throw an error when "amount" in request body is not provided ', (done) => {
-      const accountNumber = 222010872;
-      const body = {};
+      const accountNumber = 2220107727;
+      const body = {receipientId:"juwavictor@gmail.com"};
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
         .set('x-access-token', userToken)
@@ -110,12 +113,31 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         });
     });
 
-    it('it should throw an error when "amount" is not a number', (done) => {
-      const accountNumber = 222010872;
-      const body = { amount: '50000hrh' };
+
+    it('it should throw an error when "email " in request body is invalid', (done) => {
+      const accountNumber = 2220107727;
+      const body = {amount:500,receipientId:"juwa.$$$victor.@@@@gmail.com"};
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
         .set('x-access-token', userToken)
+        .send(body)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have
+            .property('error')
+            .eql('receipientId must be a valid email');
+          done();
+        });
+    });
+
+    it('it should throw an error when "amount" is not a number', (done) => {
+      const accountNumber = 2220107727;
+      const body = { amount: '50000hrh',receipientId:"juwavictor@gmail.com" };
+      chai.request(app)
+        .post(`/api/v1/transactions/${accountNumber}/debit`)
+        .set('x-access-token', userToken)
+        .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
           res.should.have.status(400);
@@ -129,33 +151,37 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
 
     it('it throws an error if account number is invalid', (done) => {
       const accountNumber = '2220107727hsds.fjd';
-      const body = { amount: 500 };
+      const body = { amount: 500,receipientId:"juwavictor@gmail.com" };
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
         .set('x-access-token', userToken)
+        .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('accountNumber must be an integer');
+          // res.body.should.have.property('error').eql('invalid input syntax for type bigint');
           done();
         });
     });
 
     it('it should debit a wallet account', (done) => {
       const accountNumber = 2220107727;
-      const body = { amount: 500 };
+      console.log(identitySignOn)
+      const body = { amount: 500,receipientId:"juwavictor@gmail.com" };
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/debit`)
         .set('x-access-token', userToken)
+        // .set('x-identifier-transferwise-app', JSON.stringify(identitySignOn))
         .send(body)
         .end((err, res) => {
+          console.log(err)
+          console.log(res)
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.data.should.have.property('accountNumber').eql(accountNumber);
           res.body.data.should.have.property('transactionId');
           res.body.data.should.have.property('amount');
-          res.body.data.should.have.property('cashier');
           res.body.data.should.have.property('transactionType');
           res.body.data.should.have.property('accountBalance');
           done();
@@ -163,37 +189,48 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
     });
   });
 
+
+
+
+
+
+
+
+
+
   /**
      * Test the POST /transactions/:accountNumber/credit route
      */
   describe('POST /transactions/:accountNumber/credit', () => {
-    it('it should throw permission error if user is not a cashier', (done) => {
-      const accountNumber = 222010872;
-      const body = { amount: 50000 };
+    it('it should throw permission error if user is not a valid with token', (done) => {
+      const accountNumber = 2220107727;
+      const body = { amount: 500,receipientId:"juwavictor@gmail.com" };
       chai
         .request(app)
         .post(`/api/v1/transactions/${accountNumber}/credit`)
-        .set('x-access-token', userToken)
+        .set('x-access-token',null)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
-          res.should.have.status(403);
+          res.should.have.status(401);
           res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('only a cashier can perform this operation');
+          res.body.should.have.property('error').eql('invalid request token');
           done();
         });
     });
 
 
     it('it should throw an error when account number is not found', (done) => {
-      const accountNumber = 22201084472;
-      const body = { amount: 50000 };
+      const accountNumber = 22201044484472;
+      const body = { amount: 500,receipientId:"juwavictor@gmail.com" };
 
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/credit`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
-          res.should.have.status(400);
+          //res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('error').eql('account number doesn\'t exist');
           done();
@@ -202,10 +239,11 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
 
     it('it should throw an error when "amount" in request body is not provided ', (done) => {
       const accountNumber = 2220107727;
-      const body = {};
+      const body = { receipientId:"juwavictor@gmail.com" }
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/credit`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
           res.should.have.status(400);
@@ -219,10 +257,11 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
 
     it('it should throw an error when "amount" is not a number', (done) => {
       const accountNumber = 222010872;
-      const body = { amount: '50000hrh' };
+      const body = { amount: '50000hrh' ,receipientId:"juwavictor@gmail.com"};
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/credit`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
           res.should.have.status(400);
@@ -236,25 +275,27 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
 
     it('it should throw an error if account number is invalid', (done) => {
       const accountNumber = '2220107727hsds.fjd';
-      const body = { amount: 500 };
+      const body = { amount: 500,receipientId:"juwavictor@gmail.com" };
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/credit`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('accountNumber must be an integer');
+          res.body.should.have.property('error').eql('invalid input syntax for integer: "2220107727hsds.fjd"');
           done();
         });
     });
 
     it('it should credit a wallet account', (done) => {
-      const accountNumber = 2220107727;
-      const body = { amount: 50000 };
+      const accountNumber = 2220006727; 
+      const body = { amount: 50000,receipientId:"test@gmail.com" };
       chai.request(app)
         .post(`/api/v1/transactions/${accountNumber}/credit`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .send(body)
         .end((err, res) => {
           res.should.have.status(200);
@@ -262,7 +303,6 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
           res.body.data.should.have.property('accountNumber').eql(accountNumber);
           res.body.data.should.have.property('transactionId');
           res.body.data.should.have.property('amount');
-          res.body.data.should.have.property('cashier');
           res.body.data.should.have.property('transactionType');
           res.body.data.should.have.property('accountBalance');
           done();
@@ -270,24 +310,11 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
     });
   });
 
-  /**
-     * Test the GET accounts/:accountNumber/transactions route
-     */
+  // /**
+  //    * Test the GET accounts/:accountNumber/transactions route
+  //    */
   describe('GET accounts/:accountNumber/transactions', () => {
-    it('it should throw permission error if a user wants to get all transactions', (done) => {
-      const accountNumber = 2220107727;
-
-      chai
-        .request(app)
-        .get(`/api/v1/accounts/${accountNumber}/transactions`)
-        .set('x-access-token', userToken)
-        .end((err, res) => {
-          res.should.have.status(403);
-          res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('only a staff has the permission to view other accounts and transactions');
-          done();
-        });
-    });
+    
 
     it('it should throw an error when account number is not valid', (done) => {
       const accountNumber = '2220107727hhd';
@@ -296,6 +323,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .request(app)
         .get(`/api/v1/accounts/${accountNumber}/transactions`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
@@ -311,6 +339,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .request(app)
         .get(`/api/v1/accounts/${accountNumber}/transactions`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
@@ -320,12 +349,13 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
     });
 
     it('it should get an account transactions', (done) => {
-      const accountNumber = 2220220303;
+      const accountNumber = 2220107727;
 
       chai
         .request(app)
         .get(`/api/v1/accounts/${accountNumber}/transactions`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
@@ -343,6 +373,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .request(app)
         .get(`/api/v1/transactions/${transactionId}`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
@@ -358,6 +389,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .request(app)
         .get(`/api/v1/transactions/${transactionId}`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
@@ -373,11 +405,12 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .request(app)
         .get(`/api/v1/transactions/${transactionId}`)
         .set('x-access-token', userToken)
+  .set('x-identifier-transferwise-app', identitySignOn)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.data.should.have.property('transactionId');
-          res.body.data.should.have.property('createdOn');
+          res.body.data.should.have.property('created_at');
           res.body.data.should.have.property('type');
           res.body.data.should.have.property('accountNumber');
           res.body.data.should.have.property('amount');
@@ -387,19 +420,20 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         });
     });
 
-    it('it should throw permission error if user wants to see other users transactions', (done) => {
-      const transactionId = 1;
+  //   it('it should throw permission error if user wants to see other users transactions', (done) => {
+  //     const transactionId = 6;
 
-      chai
-        .request(app)
-        .get(`/api/v1/transactions/${transactionId}`)
-        .set('x-access-token', userToken)
-        .end((err, res) => {
-          res.should.have.status(403);
-          res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('only a staff has the permission to view other accounts and transactions');
-          done();
-        });
-    });
+  //     chai
+  //       .request(app)
+  //       .get(`/api/v1/transactions/${transactionId}`)
+  //       .set('x-access-token', userToken)
+  // .set('x-identifier-transferwise-app', identitySignOn)
+  //       .end((err, res) => {
+  //         res.should.have.status(403);
+  //         res.body.should.be.a('object');
+  //         res.body.should.have.property('error').eql('only a staff has the permission to view other accounts and transactions');
+  //         done();
+  //       });
+  //   });
   });
 });

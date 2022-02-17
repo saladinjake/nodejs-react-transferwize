@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS users CASCADE;
             firstName VARCHAR(128),
             lastName VARCHAR(128),
             email VARCHAR(128) UNIQUE NOT NULL,
-            password VARCHAR NOT NULL,
+            password VARCHAR(255) NOT NULL,
             type VARCHAR(10) NOT NULL DEFAULT 'client',
             isAdmin BOOLEAN NOT NULL DEFAULT false,
            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -62,7 +62,6 @@ DROP TABLE IF EXISTS users CASCADE;
             amount NUMERIC(10, 2) DEFAULT 0.00,
             oldBalance NUMERIC(10, 2) DEFAULT 0.00,
             newBalance NUMERIC(10, 2) DEFAULT 0.00,
-            createdOn TIMESTAMP NOT NULL DEFAULT NOW(),
             receipientId VARCHAR(100) NOT NULL, 
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -116,7 +115,7 @@ INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldB
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220006727,4,'debit',100000.00,800000.00,700000.00,'juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107727,1,'credit',100000.00,0.00,100000.00,'juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107727,1,'credit',200000.00,100000.00,300000.00,'juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107821,2,'credit',100000.00,300000.00,400000.00,'danielwollen@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107821,2,'credit',100000.00,300000.00,400000.00,'danielwallen@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2225137327,3,'credit',100000.00,0.00,100000.00,'test@gmail.com');
 
 

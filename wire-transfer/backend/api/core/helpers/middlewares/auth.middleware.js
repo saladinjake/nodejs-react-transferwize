@@ -6,6 +6,7 @@ const decodeToken = (req, res, next, token) => {
   jwt.verify(token, process.env.JWT_SECRET, (error, decode) => {
     if (!error) {
       req.token = decode;
+      // console.log(req.token)
       return next();
     }
     return response.sendError(res, 401, 'invalid request token');

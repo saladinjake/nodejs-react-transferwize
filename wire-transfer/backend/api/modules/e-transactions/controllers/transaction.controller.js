@@ -7,30 +7,53 @@ const response = new ResponseApi();
 class TransactionController {
  
   static async debitUserAccount(req, res) {
-    const { amount } = req.body;
-    const { id } = req.token;
-    const { accountNumber } = req.params;
-
-    try {
-      const transaction = await TransactionService.debitAccount(id, accountNumber, amount);
-      return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
-    } catch (error) {
-      return response.sendError(res, 400, error.message);
+    const { amount , receipientId} = req.body;
+    const emailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+   if (!emailFilter.test(receipientId)) {
+     
+        return response.sendError(res, 400, "receipientId must be a valid email");
     }
+  else
+  {
+    const  id = req?.token?.id;
+    const { accountNumber } = req.params;
+    console.log(id,accountNumber,amount , receipientId)
+  
+    try {    
+        const transaction = await TransactionService.debitAccount( accountNumber,id, amount, receipientId);
+        return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
+    
+    } catch (error) {
+      // console.log(error)
+      return response.sendError(res, 400, error.message|| error);
+    }
+
+   }
   }
 
 
   static async creditUserAccount(req, res) {
-    const { amount } = req.body;
-    const { id } = req.token;
-    const { accountNumber } = req.params;
 
+      const { amount , receipientId} = req.body;
+    const emailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+   if (!emailFilter.test(receipientId)) {
+     
+        return response.sendError(res, 400, "receipientId must be a valid email");
+    }
+  else
+  {
+    const  id = req?.token?.id;
+    const { accountNumber } = req.params;    
     try {
-      const transaction = await TransactionService.creditAccount(id, accountNumber, amount);
+      const transaction = await TransactionService.creditAccount( accountNumber,id, amount, receipientId);
+      console.log(transaction)
       return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
     } catch (error) {
+      console.log(error)
       return response.sendError(res, 400, error.message);
     }
+
+   }
   }
 
   static async getTransactions(req, res) {

@@ -1,6 +1,6 @@
 import UserService from '../../../core/repositories/services/user.service';
 import ResponseApi from '../../../core/helpers/ResponseApi';
-
+import Utils from "../../../core/helpers/common"
 const response = new ResponseApi();
 class UserController {
   static async signUp(req, res) {
@@ -17,21 +17,25 @@ class UserController {
   }
 
   static async loginUser(req, res) {
-    const login = req.body;
-    console.log(login)
+    let login = req.body;
     try {
       const user = await UserService.signUser(login);
-      console.log(user)
-      
+
+      /*check if user has the custom application header*/
+      // console.log(user)
       if (user) {
+        
         return response.sendSuccess(res, 200, user, 'Login was successful');
       }
        response.sendError(res, 400, 'something went wrong');
     } catch (error) {
-       console.log(error)
+       // console.log(error)
       return response.sendError(res, 401, error.message);
     }
   }
+
+
+  
 }
 
 export default UserController;

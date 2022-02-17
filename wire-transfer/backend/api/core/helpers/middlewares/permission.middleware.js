@@ -22,10 +22,12 @@ export default class PermissionMiddleware {
       const isMyAccount = await AccountService.isMyAccount(id, accountNumber);
 
       if (!isMyAccount && type !== 'client') {
+          console.log(error)
         return response.sendError(res, 403, 'Permission denied');
       }
       return next();
     } catch (error) {
+        console.log(error)
       return response.sendError(res, 400, error.message);
     }
   }
@@ -47,13 +49,33 @@ export default class PermissionMiddleware {
       const isMyAccount = transaction.owner === id;
 
       if (!isMyAccount && type !== 'client') {
+          console.log(error)
         return response.sendError(res, 403, 'Permission denied');
       }
       return next();
     } catch (error) {
+      console.log(error)
       return response.sendError(res, 400, error.message);
     }
   }
+
+
+  static adminPermission(req, res, next) {
+    if (!req.token) {
+      return response.sendError(
+        res,
+        419,
+        'unauthorized access',
+      );
+    }
+    const { isAdmin } = req.token;
+
+    if (!isAdmin) {
+      return response.sendError(res, 403, 'Admin authentication required');
+    }
+    return next();
+  }
+
 
 
   

@@ -57,17 +57,17 @@ class UserService {
         type,
       };
     } catch (err) {
+      console.log(err)
       throw err;
     }
   }
   static async signUser(login) {
     // console.log(login)
     try {
-      
       const user = await User.findUserByEmail(login.email);
-      console.log(user)
+      // console.log(user)
       if (user) {
-        const bycrptResponse = Utils.validatePassword(login.password,user.password);
+        const bycrptResponse = Utils.validatePassword(login.password, user.password);
         if (bycrptResponse) {
           const {
             id, firstname, lastname, isadmin, password: userPassword, ...data
@@ -78,6 +78,7 @@ class UserService {
             ...data,
           };
           const token = Utils.jwtSigner(userProfile);
+          
           return {
             token,
             id,

@@ -1,18 +1,34 @@
 import chai from 'chai';
-import 'chai/register-should';
+// import 'chai/register-should';
 import chaiHttp from 'chai-http';
 import app from '../index';
 
 chai.use(chaiHttp);
+const expect  = chai.expect()
+const should = chai.should()
 
 describe('login and signup', () => {
+  before(function () {
+    this.timeout(20000); // 20 second timeout for setup
+  });
   /**
    * Test the POST /auth/signup endpoint
    */
   describe('POST /auth/signup', () => {
     it('it should create a new user', (done) => {
+      // this.timeout(30000);
+      function makeUniqueUser(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * 
+     charactersLength));
+     }
+   return result;
+}
       const newUser = {
-        email: 'saladinjake@gmail.com',
+        email: makeUniqueUser(15)+'@gmail.com',
         firstName: 'tester',
         lastName: 'testers',
         password: 'password',
@@ -35,7 +51,7 @@ describe('login and signup', () => {
 
     it('it should throw an error if the email address is already taken', (done) => {
       const newUser = {
-        email: 'saladinjake@gmail.com',
+        email: 'juwavictor@gmail.com',
         firstName: 'tester',
         lastName: 'testers',
         password: 'password',
@@ -57,7 +73,7 @@ describe('login and signup', () => {
     it('it should throw an error if firstName is missing in the request body', (done) => {
       const invalidPayload = {
         lastName: 'tester',
-        email: 'test@gmail.com',
+        email: 'testnew@gmail.com',
         password: 'password',
         confirmPassword: 'password',
       };
@@ -77,7 +93,7 @@ describe('login and signup', () => {
     it('it should throw an error if lastName is missing in the request body', (done) => {
       const invalidPayload = {
         firstName: 'tester',
-        email: 'test@gmail.com',
+        email: 'testnew@gmail.com',
         password: 'password',
         confirmPassword: 'password',
       };
@@ -162,14 +178,15 @@ describe('login and signup', () => {
   describe('POST /auth/signin', () => {
     it('it should sign in a user', (done) => {
       const loginCredential = {
-        email: 'test@gmail.com',
-        password: 'password',
+        email: 'juwavictor@gmail.com',
+        password: 'mypassword',
       };
       chai
         .request(app)
         .post('/api/v1/auth/signin')
         .send(loginCredential)
         .end((err, res) => {
+          // console.log(res)
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.data.should.have.property('token');
@@ -218,8 +235,8 @@ describe('login and signup', () => {
 
     it('it should throw an error if user supply a wrong email or password combination ', (done) => {
       const loginCredential = {
-        email: 'test@gmail.com',
-        password: 'passwordd',
+        email: 'testy@gmail.com',
+        password: 'mypassword',
       };
 
       chai

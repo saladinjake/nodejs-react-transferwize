@@ -32,6 +32,7 @@ const updateStatusSchema = Joi.object({
 
 const transactionSchema = Joi.object({
   amount: Joi.number().positive().precision(2).required(),
+  receipientId:email,
 });
 
 

@@ -8,7 +8,6 @@ import authMiddleware from '../../../core/helpers/middlewares/auth.middleware';
 import PermissionMiddleware from '../../../core/helpers/middlewares/permission.middleware';
 
 
-
 const router = Router();
 const validateBody = RequestValidator();
 const validateParams = ParamsValidator();

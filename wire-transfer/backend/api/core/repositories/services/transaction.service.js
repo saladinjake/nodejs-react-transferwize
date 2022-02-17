@@ -12,10 +12,10 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount(cashierId, accountNumber, amount) {
+  static async debitAccount( accountNumber,senderId, amount,receipientId)  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
-
+      //console.log(account)
       if (account) {
         if (account.status === 'dormant') {
           throw new Error('You can\'t perform a transaction on a dormant account');
@@ -23,7 +23,7 @@ class TransactionService {
         if (account.balance >= amount) {
           const user = await User.findUserById(Number(account.owner));
 
-          const transaction = await Transaction.debit(account, amount, cashierId);
+          const transaction = await Transaction.debit(account,senderId, amount,receipientId);
 
           const mailData = {
             subject: 'A transaction occured on your account',
@@ -50,25 +50,33 @@ class TransactionService {
       }
       throw new Error('account number doesn\'t exist');
     } catch (error) {
+      console.log(error)
       throw error;
     }
   }
 
 
 
-  static async creditAccount(cashierId, accountNumber, amount) {
+  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount, receipientId/*reciever email*/) {
     try {
-      const account = await Account.findByAccountNumber(accountNumber);
 
+       const account = await Account.findByAccountNumber(Number(accountNumber));
+      //console.log(account)
       if (account) {
-        const user = await User.findUserById(Number(account.owner));
 
-        const transaction = await Transaction.credit(account, amount, cashierId);
+      const recieverDetail = await User.findUserByEmail(receipientId);
 
+      //console.log(recieverDetail)
+      const recieverAccount = await  Account.findAccountByOwner(parseInt(recieverDetail.id))
+     
+      if (Array.isArray(recieverAccount) ){
+       
+         const transaction = await Transaction.credit(recieverAccount[0], senderId, amount, receipientId);
+        
         const mailData = {
           subject: 'A transaction occured on your account',
           text: 'A credit transaction occured on your TWISER account',
-          to: user.email,
+          to: recieverDetail.email,
           html: `<b>Amount: ${amount}<br/><br/>
             Transaction type: credit<br/><br/>
             Account Balance: ${transaction.newbalance}<br/><br/>
@@ -86,9 +94,31 @@ class TransactionService {
           accountBalance: transaction.newbalance,
         };
       }
-      throw new Error('account number doesn\'t exist');
+        throw new Error('account number doesn\'t exist');
+    }
+    throw new Error('account number doesn\'t exist');
     } catch (error) {
+      console.log(error)
       throw error;
+    }
+  }
+
+  atmTransferTransaction(accountNumber,senderId, amount,receipientId){
+    /*this is where debit and credit of the user is done*/
+    const atmTransactionDebit = this.debitAccount(accountNumber,senderId, amount,receipientId)
+    if(this.successfulTransaction(atmTransactionDebit)){
+      const atmTransactionCredit = this.creditAccount(accountNumber,senderId, amount,receipientId)
+      if(this.successfulTransaction(atmTransactionCredit)){
+        return {
+          debitLedger:atmTransactionDebit,
+          creditLedger: atmTransactionCredit
+        }
+      }else{
+        //reverse payment already made by the sender
+        // this.creditAccount()
+      }
+    } else{
+      throw new Error('ATM OUT OF SERVICE.. TRY AGAIN LATER')
     }
   }
 
@@ -102,12 +132,12 @@ class TransactionService {
 
         return transactions.map((transaction) => {
           const {
-            id, transactiontype, accountnumber, createdon, oldbalance, newbalance, ...data
+            id, transactiontype, accountnumber, created_at, oldbalance, newbalance, ...data
           } = transaction;
 
           return {
             transactionId: id,
-            createdOn: createdon,
+            createdOn: created_at,
             type: transactiontype,
             accountNumber: accountnumber,
             ...data,
@@ -132,12 +162,12 @@ class TransactionService {
 
       if (transaction) {
         const {
-          id, transactiontype, accountnumber, createdon, oldbalance, newbalance, ...data
+          id, transactiontype, accountnumber, created_at, oldbalance, newbalance, ...data
         } = transaction;
 
         return {
           transactionId: id,
-          createdOn: createdon,
+          createdOn: created_at,
           type: transactiontype,
           accountNumber: accountnumber,
           ...data,

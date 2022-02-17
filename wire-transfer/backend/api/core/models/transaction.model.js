@@ -1,39 +1,60 @@
 import Model from './db/index.db';
 export default class Transaction extends Model {
-  async credit(account, amount, cashierId, receipient) {
-    const userAccount = account;
-    const newBalance = parseFloat(userAccount.balance) + amount;
-    try {
-      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance,receipientId, created_at', '$1, $2, $3, $4, $5, $6, $7, $8', [
-        Number(account.accountnumber),
-        cashierId, // the fintech ai transactor responsible for the transaction tobe done automatically
-        'credit',
-        amount,
-        userAccount.balance,
-        newBalance,
-        account.accountnumber, receipient.accountnumber
+  async credit(account, cashierId, amount,  receipient) {
 
-      ]);
-      return rows[0];
+   
+    try {
+
+     
+         const userAccount = account;
+         const newBalance = parseFloat(userAccount.balance) + amount;
+          console.log(account, cashierId,amount,receipient)
+          const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance,receipientId', '$1, $2, $3, $4, $5, $6, $7', [
+          Number(userAccount.accountnumber),
+          cashierId, // the user debited  automatically
+          'credit',
+          amount,
+          userAccount.balance,
+          newBalance,
+          receipient // the reciever of the money
+
+        ]);
+      /*
+      *  perform the exchange rates before above
+       * To do perform deebit on the other users bank account
+      */
+         return rows[0];
+       
+      
     } catch (error) {
       throw error;
     }
   }
 
-  async debit(account, amount, cashierId, receipient) {
+  async debit(account, senderId, amount,  receipientId) {
     const userAccount = account;
     const newBalance = parseFloat(userAccount.balance) - amount;
-
-    try {
-      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance, donor, receipient', '$1, $2, $3, $4, $5, $6, $7, $8', [
-        Number(account.accountnumber),
-        cashierId, // // the automated fintech ai transactor robot responsible for the transaction tobe done automatically
+     console.log(Number(account.accountnumber),
+        senderId, // // the user sending the money
         'debit',
         amount,
         userAccount.balance,
         newBalance,
-        account.accountnumber, receipient.accountnumber
+         receipientId)
+    try {
+      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance, receipientId', '$1, $2, $3, $4, $5, $6, $7', [
+        Number(account.accountnumber),
+        senderId, // // the user sending the money
+        'debit',
+        amount,
+        userAccount.balance,
+        newBalance,
+         receipientId
       ]);
+      /* Or
+      *  perform the exchange rates before above
+       * To do perform credit on the other users bank account
+      */
       return rows[0];
     } catch (error) {
       throw error;
@@ -42,11 +63,13 @@ export default class Transaction extends Model {
 
   async getTransactions(accountNumber) {
     try {
+      
       const { rows } = await this.selectWhere(
         'id, created_at, transactiontype, accountNumber, amount, oldBalance, newBalance',
         'accountNumber=$1',
         [accountNumber],
       );
+
       return rows;
     } catch (error) {
       throw error;
