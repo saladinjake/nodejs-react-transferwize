@@ -6,9 +6,12 @@ dotenv.config()
 const env = process.env.NODE_ENV || 'development';
 const config = configJson[env];
 //debug('pg/connection')(config);
-
+import Utils from "../../helpers/common"
 
 let pool = null
+
+// console.log(Utils.hashPassword("mypassword"))
+// console.log(Utils.validatePassword('mypassword','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG'))
 
 if ( env === 'production') {
   //console.log( process.env.PG_DATABASE_HEROKU)
@@ -52,6 +55,12 @@ if ( env === 'production') {
         }
         // Do what you have to do with the pool client now
         console.log("connection established")
+    })
+
+    pool.query('SELECT * FROM users', function(error,query,release){
+       if(!error){
+            console.log(query.rows)
+       }
     })
 
 

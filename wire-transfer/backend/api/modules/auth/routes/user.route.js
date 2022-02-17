@@ -14,7 +14,7 @@ router
 
 router
   .post('/signin',
-    // validateRequest,
+    validateRequest,
     UserController.loginUser);
 
 
