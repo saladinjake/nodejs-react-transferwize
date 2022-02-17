@@ -2,7 +2,6 @@ import { useToast as useToastUI } from "@chakra-ui/toast";
 
 const useToast = () => {
   const toast = useToastUI();
-
   const displayToast = ({
     description,
     status = "error",
@@ -18,7 +17,6 @@ const useToast = () => {
       position,
     });
   };
-
   return { display: displayToast };
 };
 

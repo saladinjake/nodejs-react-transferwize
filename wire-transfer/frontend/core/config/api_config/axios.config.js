@@ -1,5 +1,5 @@
 /*
-*@companyName: Questence
+*@companyName: SIMBA
 *@Location : Lagos Nigeria
 *@Author/Developer : juwa victor/saladinjake
 *@AuthorsEmail : juwavictor@gmail.com
@@ -10,7 +10,7 @@
 import axios from "axios";
 let baseURL = process.env.API_URL2
   ? process.env.API_URL2
-  : "https://questence.tqfe.net/api/v1/";
+  : "https://transferwise-apitest.herokuapp.com/api/v1/";
 let token;
 axios.defaults.headers.common["Content-Type"] ="application/x-www-form-urlencoded";
 axios.defaults.headers.common["Content-Type"] = "multipart/form-data";
