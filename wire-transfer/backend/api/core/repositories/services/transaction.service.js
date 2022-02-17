@@ -103,8 +103,23 @@ class TransactionService {
     }
   }
 
-  concurrencyTransaction(accountNumber,senderId, amount,receipientId){
-
+  atmTransferTransaction(accountNumber,senderId, amount,receipientId){
+    /*this is where debit and credit of the user is done*/
+    const atmTransactionDebit = this.debitAccount(accountNumber,senderId, amount,receipientId)
+    if(this.successfulTransaction(atmTransactionDebit)){
+      const atmTransactionCredit = this.creditAccount(accountNumber,senderId, amount,receipientId)
+      if(this.successfulTransaction(atmTransactionCredit)){
+        return {
+          debitLedger:atmTransactionDebit,
+          creditLedger: atmTransactionCredit
+        }
+      }else{
+        //reverse payment already made by the sender
+        // this.creditAccount()
+      }
+    } else{
+      throw new Error('ATM OUT OF SERVICE.. TRY AGAIN LATER')
+    }
   }
 
 
@@ -117,12 +132,12 @@ class TransactionService {
 
         return transactions.map((transaction) => {
           const {
-            id, transactiontype, accountnumber, createdon, oldbalance, newbalance, ...data
+            id, transactiontype, accountnumber, created_at, oldbalance, newbalance, ...data
           } = transaction;
 
           return {
             transactionId: id,
-            createdOn: createdon,
+            createdOn: created_at,
             type: transactiontype,
             accountNumber: accountnumber,
             ...data,
@@ -147,12 +162,12 @@ class TransactionService {
 
       if (transaction) {
         const {
-          id, transactiontype, accountnumber, createdon, oldbalance, newbalance, ...data
+          id, transactiontype, accountnumber, created_at, oldbalance, newbalance, ...data
         } = transaction;
 
         return {
           transactionId: id,
-          createdOn: createdon,
+          createdOn: created_at,
           type: transactiontype,
           accountNumber: accountnumber,
           ...data,
