@@ -62,7 +62,7 @@ class UserService {
     }
   }
   static async signUser(login) {
-    console.log(login)
+    // console.log(login)
     try {
       const user = await User.findUserByEmail(login.email);
       // console.log(user)
@@ -78,6 +78,7 @@ class UserService {
             ...data,
           };
           const token = Utils.jwtSigner(userProfile);
+          
           return {
             token,
             id,

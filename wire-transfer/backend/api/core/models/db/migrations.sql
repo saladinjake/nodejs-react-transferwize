@@ -62,7 +62,6 @@ DROP TABLE IF EXISTS users CASCADE;
             amount NUMERIC(10, 2) DEFAULT 0.00,
             oldBalance NUMERIC(10, 2) DEFAULT 0.00,
             newBalance NUMERIC(10, 2) DEFAULT 0.00,
-            createdOn TIMESTAMP NOT NULL DEFAULT NOW(),
             receipientId VARCHAR(100) NOT NULL, 
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -60,6 +60,24 @@ export default class PermissionMiddleware {
   }
 
 
+  static adminPermission(req, res, next) {
+    if (!req.token) {
+      return response.sendError(
+        res,
+        419,
+        'unauthorized access',
+      );
+    }
+    const { isAdmin } = req.token;
+
+    if (!isAdmin) {
+      return response.sendError(res, 403, 'Admin authentication required');
+    }
+    return next();
+  }
+
+
+
   
   
 }

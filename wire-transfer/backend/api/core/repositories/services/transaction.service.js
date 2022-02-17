@@ -12,10 +12,10 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount( accountNumber,senderId, amount,receipientId) {
+  static async debitAccount( accountNumber,senderId, amount,receipientId)  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
-
+      console.log(account)
       if (account) {
         if (account.status === 'dormant') {
           throw new Error('You can\'t perform a transaction on a dormant account');
@@ -50,6 +50,7 @@ class TransactionService {
       }
       throw new Error('account number doesn\'t exist');
     } catch (error) {
+      console.log(error)
       throw error;
     }
   }

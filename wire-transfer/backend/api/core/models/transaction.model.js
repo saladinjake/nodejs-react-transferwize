@@ -1,17 +1,18 @@
 import Model from './db/index.db';
 export default class Transaction extends Model {
-  async credit(account, amount, cashierId, receipient) {
+  async credit(account, cashierId, amount,  receipient) {
     const userAccount = account;
     const newBalance = parseFloat(userAccount.balance) + amount;
     try {
       const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance,receipientId, created_at', '$1, $2, $3, $4, $5, $6, $7, $8', [
         Number(account.accountnumber),
-        cashierId, // the fintech ai transactor responsible for the transaction tobe done automatically
+        cashierId, // the user debited  automatically
         'credit',
         amount,
         userAccount.balance,
         newBalance,
-        account.accountnumber, receipient.accountnumber
+        account.accountnumber,
+         receipient.accountnumber // the reciever of the money
 
       ]);
       /*
@@ -24,20 +25,25 @@ export default class Transaction extends Model {
     }
   }
 
-  async debit(account, senderId, amount,  receipientEmail) {
+  async debit(account, senderId, amount,  receipientId) {
     const userAccount = account;
     const newBalance = parseFloat(userAccount.balance) - amount;
-
-    
-    try {
-      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance,  receipientId', '$1, $2, $3, $4, $5, $6, $7', [
-        Number(account.accountnumber),
-        userId, // // the automated fintech ai transactor robot responsible for the transaction tobe done automatically
+     console.log(Number(account.accountnumber),
+        senderId, // // the user sending the money
         'debit',
         amount,
         userAccount.balance,
         newBalance,
-         receipientEmail
+         receipientId)
+    try {
+      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance, receipientId', '$1, $2, $3, $4, $5, $6, $7', [
+        Number(account.accountnumber),
+        senderId, // // the user sending the money
+        'debit',
+        amount,
+        userAccount.balance,
+        newBalance,
+         receipientId
       ]);
       /* Or
       *  perform the exchange rates before above

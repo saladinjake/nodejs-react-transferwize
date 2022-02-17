@@ -22,7 +22,7 @@ class UserController {
       const user = await UserService.signUser(login);
 
       /*check if user has the custom application header*/
-      console.log(user)
+      // console.log(user)
       if (user) {
         
         return response.sendSuccess(res, 200, user, 'Login was successful');

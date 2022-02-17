@@ -8,7 +8,6 @@ import authMiddleware from '../../../core/helpers/middlewares/auth.middleware';
 import PermissionMiddleware from '../../../core/helpers/middlewares/permission.middleware';
 
 
-
 const router = Router();
 const validateBody = RequestValidator();
 const validateParams = ParamsValidator();
@@ -16,10 +15,10 @@ const validateParams = ParamsValidator();
 
 router
   .post('/transactions/:accountNumber/debit',
-    // authMiddleware,
-    // //PermissionMiddleware.strictAccountPermission,
-    // validateParams,
-    // validateBody,
+    authMiddleware,
+    PermissionMiddleware.strictAccountPermission,
+    validateParams,
+    validateBody,
     TransactionContoller.debitUserAccount);
 
 router

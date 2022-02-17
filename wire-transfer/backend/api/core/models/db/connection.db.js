@@ -61,7 +61,7 @@ if ( env === 'production') {
         console.log("connection established")
     })
 
-    // pool.query('SELECT * FROM users', function(error,query,release){
+    // pool.query('SELECT * FROM accounts', function(error,query,release){
     //    if(!error){
     //         console.log(query.rows)
     //    }

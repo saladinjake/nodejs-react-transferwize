@@ -51,7 +51,7 @@ describe('login and signup', () => {
 
     it('it should throw an error if the email address is already taken', (done) => {
       const newUser = {
-        email: 'saladinjake@gmail.com',
+        email: 'juwavictor@gmail.com',
         firstName: 'tester',
         lastName: 'testers',
         password: 'password',
