@@ -46,8 +46,10 @@ class TransactionController {
     const { accountNumber } = req.params;    
     try {
       const transaction = await TransactionService.creditAccount( accountNumber,id, amount, receipientId);
+      console.log(transaction)
       return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
     } catch (error) {
+      console.log(error)
       return response.sendError(res, 400, error.message);
     }
 

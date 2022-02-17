@@ -48,6 +48,8 @@ class Account extends Model {
     }
   }
 
+
+
   async findAccountByOwner(id) {
     try {
       const { rows } = await this.selectWhere(

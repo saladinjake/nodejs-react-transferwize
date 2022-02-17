@@ -15,7 +15,7 @@ class TransactionService {
   static async debitAccount( accountNumber,senderId, amount,receipientId)  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
-      console.log(account)
+      //console.log(account)
       if (account) {
         if (account.status === 'dormant') {
           throw new Error('You can\'t perform a transaction on a dormant account');
@@ -57,19 +57,26 @@ class TransactionService {
 
 
 
-  static async creditAccount(cashierId, accountNumber, amount) {
+  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount, receipientId/*reciever email*/) {
     try {
-      const account = await Account.findByAccountNumber(accountNumber);
 
+       const account = await Account.findByAccountNumber(Number(accountNumber));
+      //console.log(account)
       if (account) {
-        const user = await User.findUserById(Number(account.owner));
 
-        const transaction = await Transaction.credit(account, amount, cashierId);
+      const recieverDetail = await User.findUserByEmail(receipientId);
 
+      //console.log(recieverDetail)
+      const recieverAccount = await  Account.findAccountByOwner(parseInt(recieverDetail.id))
+     
+      if (Array.isArray(recieverAccount) ){
+       
+         const transaction = await Transaction.credit(recieverAccount[0], senderId, amount, receipientId);
+        
         const mailData = {
           subject: 'A transaction occured on your account',
           text: 'A credit transaction occured on your TWISER account',
-          to: user.email,
+          to: recieverDetail.email,
           html: `<b>Amount: ${amount}<br/><br/>
             Transaction type: credit<br/><br/>
             Account Balance: ${transaction.newbalance}<br/><br/>
@@ -87,10 +94,17 @@ class TransactionService {
           accountBalance: transaction.newbalance,
         };
       }
-      throw new Error('account number doesn\'t exist');
+        throw new Error('account number doesn\'t exist');
+    }
+    throw new Error('account number doesn\'t exist');
     } catch (error) {
+      console.log(error)
       throw error;
     }
+  }
+
+  concurrencyTransaction(accountNumber,senderId, amount,receipientId){
+
   }
 
 
