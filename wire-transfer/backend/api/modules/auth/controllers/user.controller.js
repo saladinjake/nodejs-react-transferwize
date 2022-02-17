@@ -22,10 +22,7 @@ class UserController {
     try {
       const user = await UserService.signUser(login);
       console.log(user)
-      // const user =[]
-   
-      // res.status(200).json({status:200 ,message:"Login success", data: user});
-
+      
       if (user) {
         return response.sendSuccess(res, 200, user, 'Login was successful');
       }
