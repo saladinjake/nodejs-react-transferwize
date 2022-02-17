@@ -63,6 +63,7 @@ class UserService {
   static async signUser(login) {
     // console.log(login)
     try {
+      
       const user = await User.findUserByEmail(login.email);
       console.log(user)
       if (user) {
