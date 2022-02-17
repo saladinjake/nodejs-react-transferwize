@@ -96,6 +96,7 @@ describe('Test account related endpoints - POST, GET, PATH, DELETE', () => {
       const details = {
         balance: 0.00,
       };
+      
 
       chai
         .request(app)
