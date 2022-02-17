@@ -10,7 +10,7 @@ class Model {
   }
 
   async select(columns) {
-    console.log(this.table)
+    
     const queryString = `SELECT ${columns} FROM ${this.table}`;
     try {
       const response = await this.pool.query(queryString);
@@ -24,7 +24,7 @@ class Model {
 
 
   async selectWhere(columns, selector, values) {
-     console.log(this.table)
+     
     const queryString = `SELECT ${columns} FROM ${this.table} WHERE ${selector}`;
     try {
       const response = await this.pool.query(queryString, values);

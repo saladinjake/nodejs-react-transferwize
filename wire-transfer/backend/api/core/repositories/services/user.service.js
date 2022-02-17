@@ -61,13 +61,12 @@ class UserService {
     }
   }
   static async signUser(login) {
-    // console.log(login)
+    console.log(login)
     try {
-      
       const user = await User.findUserByEmail(login.email);
       console.log(user)
       if (user) {
-        const bycrptResponse = Utils.validatePassword(login.password,user.password);
+        const bycrptResponse = Utils.validatePassword(login.password, user.password);
         if (bycrptResponse) {
           const {
             id, firstname, lastname, isadmin, password: userPassword, ...data

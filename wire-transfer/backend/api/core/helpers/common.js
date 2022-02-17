@@ -3,11 +3,13 @@ import jwt from 'jsonwebtoken';
 
 const Utils = {
   validatePassword(password, userPassword) {
+    //console.log(bcrypt.compareSync(password, userPassword))
     return bcrypt.compareSync(password, userPassword);
   },
   hashPassword(password) {
     const salt = bcrypt.genSaltSync(15);
     const pwd = bcrypt.hashSync(password, salt);
+    //console.log(pwd)
     return pwd;
   },
   jwtSigner(payload) {

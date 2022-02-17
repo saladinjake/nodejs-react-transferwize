@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS users CASCADE;
             firstName VARCHAR(128),
             lastName VARCHAR(128),
             email VARCHAR(128) UNIQUE NOT NULL,
-            password VARCHAR NOT NULL,
+            password VARCHAR(255) NOT NULL,
             type VARCHAR(10) NOT NULL DEFAULT 'client',
             isAdmin BOOLEAN NOT NULL DEFAULT false,
            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "A simple fintech banking app for account creation, money transfer",
   "main": "dist/index.js",
-   "engines": {
-    "node": "12.x" 
+  "engines": {
+    "node": "12.x"
   },
   "runtimeVersion": "8.1.0",
   "dependencies": {
-    "@babel/runtime": "^7.4.3",
-    "async": "^2.6.2",
+    "@babel/runtime": "^7.17.2",
+    "async": "^2.6.3",
     "axios": "^0.25.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.18.3",
@@ -24,21 +24,21 @@
     "make-runnable": "^1.3.6",
     "moment": "^2.24.0",
     "nodemailer": "^6.1.1",
-    "pg": "^7.9.0",
+    "pg": "^8.0.3",
     "swagger-ui-express": "^4.0.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.3",
-    "@babel/core": "^7.4.3",
-    "@babel/node": "^7.2.2",
-    "@babel/plugin-transform-runtime": "^7.4.3",
-    "@babel/preset-env": "^7.4.3",
-    "@babel/register": "^7.4.0",
+    "@babel/cli": "^7.17.3",
+    "@babel/core": "^7.17.4",
+    "@babel/node": "^7.16.8",
+    "@babel/plugin-transform-runtime": "^7.17.0",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/register": "^7.17.0",
     "browser-sync": "^2.27.7",
-    "chai": "^4.2.0",
-    "chai-http": "^4.2.1",
-    "coveralls": "^3.0.3",
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "coveralls": "^3.1.1",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
@@ -56,8 +56,6 @@
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
     "build-dev": "npm run build-babel",
-    
-    
     "db-exec": "heroku pg:psql --app transferwise-apitest < ./dist/core/models/db/migrations.sql",
     "heroku-postbuild": "NODE_ENV=production && npm run build",
     "pretest": "npm run db-exec",
@@ -65,7 +63,7 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "test": "nyc --require @babel/register ---reporter=html --reporter=text mocha  ./api/test/**.test.js",
     "test:watch": "mocha --require @babel/register --watch --reporter min",
-    "test-dev":"nyc --require @babel/register ---reporter=html --reporter=text mocha ./api/test/**.test.js --timeout 20000 --watch --exit"
+    "test-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./api/test/**.test.js --timeout 20000 --watch --exit"
   },
   "nyc": {
     "exclude": [

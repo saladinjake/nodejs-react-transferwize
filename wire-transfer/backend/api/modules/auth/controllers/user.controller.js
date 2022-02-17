@@ -1,6 +1,6 @@
 import UserService from '../../../core/repositories/services/user.service';
 import ResponseApi from '../../../core/helpers/ResponseApi';
-
+import Utils from "../../../core/helpers/common"
 const response = new ResponseApi();
 class UserController {
   static async signUp(req, res) {
@@ -17,8 +17,16 @@ class UserController {
   }
 
   static async loginUser(req, res) {
-    const login = req.body;
-    console.log(login)
+    let login = req.body;
+
+//      Object.entries(login).forEach(([key, value]) => {
+//   delete login[key]
+//   login[key.replace(/\n\t/g,"").split().pop()] = value
+//   login[key.replace(/\n/g,"").split().pop()] = value
+// })
+
+console.log(login)
+    
     try {
       const user = await UserService.signUser(login);
       console.log(user)
