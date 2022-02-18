@@ -1,7 +1,9 @@
-import React, { ReactNode,ReactElement } from 'react';
-import Select     from 'react-select'
-import axios      from 'axios'
+import React, { ReactNode,ReactElement, useState, useEffect } from "react";
+
+
 import Currency from 'react-currency-icons'
+import AsyncSelect from 'react-select/async';
+import axios      from 'axios'
 import {
   IconButton,
   Avatar,
@@ -29,7 +31,7 @@ import {
    SimpleGrid,
 
 
-
+Select,
   FormControl,
   FormLabel,
   Input,
@@ -49,10 +51,17 @@ import {
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
-
-
 import { FcLock } from 'react-icons/fc';
-
+import * as  CurrencyIconSet from 'react-currency-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSyncAlt,
+  faDollarSign,
+  faEuroSign,
+} from "@fortawesome/free-solid-svg-icons";
+/*apis*/
+import { searchUser } from "../core/services/auth.services"
+import currencies from "../core/services/currencylist.service.json";
 
 const LinkItems = [
   { name: 'dashboard', icon: FiHome },
@@ -261,70 +270,175 @@ const MobileNav = ({ onOpen, ...rest }) => {
 
 
 
-class NewTransfer() {
-  componentDidMount(){
+function NewTransfer() {
+  const handleInputChange = (newValue) => {
+    const inputValue = newValue.replace(/\W/g, '');
+    // setState({ inputValue });
+    // return inputValue;
+  };
 
-  getUsers = (input) => {
-    axios.get(`https://transferwise-apitest.herokuapp.com/search/users?q=${input}`)
-    .then((res) => {
-      console.log(res.data.items);
-    })
-    .catch(
-      err => console.log(err)
-    );
-  }
-  }
+  const [inputFrom, setInputFrom] = useState(0);
+  const [inputTo, setInputTo] = useState(0);
+  const [rate, setRate] = useState(0);
+  const [currencyFrom, setCurrencyFrom] = useState("USD");
+  const [currencyTo, setCurrencyTo] = useState("EUR");
+
+  const handleChangeFrom = (event) => {
+    const { value } = event.target;
+    setInputFrom(value);
+    setInputTo(value * rate);
+  };
+
+  const handleChangeTo = (event) => {
+    const { value } = event.target;
+    setInputTo(value);
+    setInputFrom(value / rate);
+  };
+
+  const handleSelectFrom = (event) => {
+    const { value } = event.target;
+    setCurrencyFrom(value);
+  };
+
+  const handleSelectTo = (event) => {
+    const { value } = event.target;
+    setCurrencyTo(value);
+  };
+
+  const handleSwap = () => {
+    setCurrencyFrom(currencyTo);
+    setCurrencyTo(currencyFrom);
+  };
+
+  useEffect(() => {
+    const fetchConversionRates = async () => {
+      const result = await fetch(
+        `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
+      );
+      console.log(result);
+      if (result.ok) {
+        const rates = await result.json();
+        setRate(rates.conversion_rate);
+      }
+    };
+    fetchConversionRates();
+  }, [currencyFrom, currencyTo]);
+
   return (
     <Flex
       minH={'100vh'}
 
-      align={'center'}
-         
+      
+      w="100%"
       bg={useColorModeValue('gray.50', 'gray.800')}>
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-        <Stack align={'center'}>
-          <Heading fontSize={'4xl'}>Send Money</Heading>
-          <Text fontSize={'lg'} color={'gray.600'}>
-            make payments in dollars,euros and naira 
-          </Text>
-        </Stack>
+      <Stack  w="100%" spacing={8} maxW={'lg'} >
+        
         <Box
+
           rounded={'lg'}
           bg={useColorModeValue('white', 'gray.700')}
           boxShadow={'lg'}
           p={8}>
-          <Stack spacing={4}>
-
-
+          <Stack >
             <FormControl id="email">
-              <FormLabel>Search for user</FormLabel>
-              <div>
-                <Select.Async
-                  name="form-field-name"
-                  value="one"
-                  loadOptions={this.getOptions}
-                />
-              </div>
+              <FormLabel>Find User</FormLabel>
+                <div>
+                  <AsyncSelect
+                    name="form-field-name"
+                    value="one"
+                    loadOptions={searchUser}
+                    searchUser onInputChange={handleInputChange}
+                  />
+                </div>
             </FormControl>
-            <FormControl id="password">
-              <FormLabel>Password</FormLabel>
-              <Input type="password" />
-            </FormControl>
-            <Stack spacing={10}>
-              <Stack
+
+
+
+            <div className="App">
+      <Flex justifyContent="space-between">
+          <FontAwesomeIcon icon={faDollarSign} size="2x" />
+        <h2> TRANSFERWIZ </h2>
+        <FontAwesomeIcon icon={faEuroSign} size="2x" />
+      </Flex>
+
+      <Box p="20px">
+       <Stack
                 direction={{ base: 'column', sm: 'row' }}
                 align={'start'}
                 justify={'space-between'}>
-                <Checkbox>Remember me</Checkbox>
-                <Link color={'blue.400'}>Forgot password?</Link>
-              </Stack>
+                <p>
+                 1 {currencyFrom} = {rate} {currencyTo}
+               </p>
+                <Button id="swap-icon">
+              <Text  
+                onClick={handleSwap}
+              >Swap</Text>
+            </Button> 
+              </Stack>   
+</Box>
+      <div id="container">
+        <div id="content-box">
+          <FormControl id="email">
+              <FormLabel>From Amount</FormLabel>
+            <Input
+              id="amountFrom"
+              type="number"
+              value={inputFrom}
+              onChange={handleChangeFrom}
+            />
+
+            </FormControl>
+ <FormControl id="email">
+              <FormLabel>To Amount</FormLabel>
+            <Input
+              id="amountTo"
+              type="number"
+              value={inputTo}
+              onChange={handleChangeTo}
+            />
+           </FormControl>
+
+             <br/>
+          <div id="selectors">
+          <FormLabel>From Currency</FormLabel>
+            <Select onChange={handleSelectFrom} value={currencyFrom}>
+              {Object.keys(currencies).map((currency, index) => (
+                <option value={currency} key={index}>
+                  {currency} - {currencies[currency].name}
+                </option>
+              ))}
+            </Select>
+
+
+               <br/>
+<FormLabel>To Currency</FormLabel>
+            <Select onChange={handleSelectTo} value={currencyTo}>
+              {Object.keys(currencies).map((currency, index) => {
+                return (
+                  <option value={currency} key={index}>
+                    {currency} - {currencies[currency].name}
+                  </option>
+                );
+              })}
+            </Select>
+
+
+           
+
+          </div>
+        </div>
+      </div>
+    </div>
+            
+            <Stack spacing={10}>
+              
               <Button
                 bg={'blue.400'}
                 color={'white'}
                 _hover={{
                   bg: 'blue.500',
                 }}>
-                Sign in
+               Transfer Money
               </Button>
             </Stack>
           </Stack>

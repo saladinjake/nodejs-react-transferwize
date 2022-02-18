@@ -11,12 +11,8 @@
 /* eslint-disable no-unused-vars */
 import axios from "../config/api_config/axios.config";
 let base_url = "https://transferwise-apitest.herokuapp.com/api/v1/"; //process.env.REACT_APP_API_URL2
-/*django ajax set up here for post request*/
 var contentType = "application/json"; //"multipart/form-data"
-window.drf = {
-  csrfHeaderName: "X-CSRFTOKEN",
-  csrfToken: "BflbcAqq5u5i8NdzTKBhUZmfFrYXlb1tZwq3EQPrUornyky8l9Vn2AKUJkfHXVR6",
-};
+
 /*lms secured safe communication**/
 const csrfSafeMethod = (method) => {
   // these HTTP methods do not require CSRF protection
@@ -41,3 +37,16 @@ export const registerUser = async (details) => {
     }
   });
 };
+
+
+
+export const searchUser = (input) => {
+
+  let request = axios.get(`search/users?q=${input}`);
+  return request.then((response) => {
+    if (response.status === 200) {
+      return response && response;
+    }
+  });
+   
+}
