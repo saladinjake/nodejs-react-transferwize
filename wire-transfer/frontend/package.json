@@ -1,0 +1,41 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 4000",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@chakra-ui/icons": "^1.1.5",
+    "@chakra-ui/react": "^1.6.5",
+    "@emotion/react": "^11.4.0",
+    "@emotion/styled": "^11.3.0",
+    "axios": "^0.21.1",
+    "dateformat": "^4.5.1",
+    "framer-motion": "^4.1.17",
+    "next": "latest",
+    "next-seo": "^5.1.0",
+    "nextjs-progressbar": "^0.0.13",
+    "react": "17.0.2",
+    "react-currency-icons": "^1.0.3",
+    "react-dom": "17.0.2",
+    "react-hook-form": "^7.27.0",
+    "react-hot-toast": "^2.2.0",
+    "react-icons": "^4.2.0",
+    "react-intersection-observer": "^8.32.0",
+    "react-loading-skeleton": "^3.0.3",
+    "react-redux": "^7.2.6",
+    "react-select": "^5.2.2",
+    "redux": "^4.1.2",
+    "redux-devtools-extension": "^2.13.9",
+    "redux-logger": "^3.0.6",
+    "redux-persist": "^6.0.0",
+    "redux-thunk": "^2.4.1",
+    "sass": "^1.47.0",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "eslint": "7.31.0",
+    "eslint-config-next": "11.0.1"
+  }
+}
