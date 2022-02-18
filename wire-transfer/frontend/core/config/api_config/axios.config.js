@@ -20,7 +20,6 @@ axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 const instance = axios.create({
   baseURL,
 });
-
 instance.interceptors.request.use(
   function (config) {
     token = localStorage.getItem("token");
