@@ -8,25 +8,11 @@ import {
   SET_LOADING,
 } from "./../actions/types";
 import toast from "react-hot-toast"
+import { loadInitialState } from '../../helpers/utils/localStorageAPI'
 
-const cachedUser = localStorage && JSON?.parse(localStorage.getItem("user"));
-const cachedRole =
-  localStorage && JSON?.parse(localStorage.getItem("user_roles"));
-const cachedToken = localStorage && localStorage.getItem("token");
-const cachedAuthorization = localStorage.user && localStorage.token;
+const initialState = loadInitialState()
 
-const initialState = {
-  isAuthenticated: cachedAuthorization ? true : false,
-  user: cachedUser ? cachedUser : null,
-  token: cachedToken ? cachedToken : null,
-  user_roles: cachedRole ? cachedRole : null,
-  error: null,
-  loading: false,
-  errFlag: false,
-  prevPath: "",
-};
-
-
+console.log(initialState)
 /*
   *@companyName: SIMBA
   *@Location : Lagos Nigeria
@@ -44,6 +30,7 @@ export default (state = initialState, action) => {
       if(action.payload.user.hasOwnProperty("id") ){
         //more security check befor grants are allowed
         //all this should be encrypted so its not just plain
+      if (typeof window !== "undefined") {
         localStorage.setItem("access_token", action.payload.token);
         localStorage.setItem("user", JSON.stringify(action.payload));
         let userPayLoad = action.payload;
@@ -51,10 +38,14 @@ export default (state = initialState, action) => {
           "user_roles",
           JSON.stringify(action.payload.isAdmin)
         );
-      // toast.success("Login Successful");
+      }
+       toast.success("Login Successful");
       }else{
        toast.error("Login Credentials not found");
-       localStorage.clear()
+       if (typeof window !== "undefined") {
+      
+         localStorage.clear()
+       }
       }
       // set the lms token to cookies
       return {
@@ -69,9 +60,12 @@ export default (state = initialState, action) => {
     case AUTH_ERROR:
     case LOGIN_FAIL:
     case LOGOUT:
+    if (typeof window !== "undefined") {
+      
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
       localStorage.removeItem("user_roles");
+    }
       return {
         ...state,
         token: null,

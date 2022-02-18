@@ -10,9 +10,7 @@
 
 /* eslint-disable no-unused-vars */
 import axios from "../config/api_config/axios.config";
-
-/*lms config auth*/
-let base_url = "transferwise-apitest.herokuapp.com"; //process.env.REACT_APP_API_URL2
+let base_url = "https://transferwise-apitest.herokuapp.com/api/v1/"; //process.env.REACT_APP_API_URL2
 /*django ajax set up here for post request*/
 var contentType = "application/json"; //"multipart/form-data"
 window.drf = {
