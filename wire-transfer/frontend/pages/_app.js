@@ -5,6 +5,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { Provider as Provisioner }  from "react-redux";
 import QReduxStore from "../core/redux/store";
 import { LoadingProgressProvider } from '../core/views/components/Loading'
+import NextNprogress from 'nextjs-progressbar';
 
 export default function App({ Component, pageProps }) {
     return (
