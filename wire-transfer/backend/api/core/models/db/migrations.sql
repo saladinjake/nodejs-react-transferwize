@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS users CASCADE;
             def_acc bigint := 2220220201;
             last_id integer;
         BEGIN
-            SELECT id FROM accounts ORDER BY createdOn DESC LIMIT 1 INTO last_id;
+            SELECT id FROM accounts ORDER BY created_at DESC LIMIT 1 INTO last_id;
             IF last_id IS NULL OR last_id = 0
             THEN
                 result:= def_acc;

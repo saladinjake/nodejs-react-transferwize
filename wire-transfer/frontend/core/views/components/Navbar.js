@@ -22,8 +22,41 @@ import {
   ChevronRightIcon,
 } from '@chakra-ui/icons';
 
-export default function WithSubnavigation() {
+
+
+import * as Yup from "yup";
+import toast from "react-hot-toast";
+import { Formik } from "formik";
+
+import {
+  useHistory, //useLocation
+} from "react-router-dom"
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { login, logOut, setPrevPath } from "../../core/redux/actions/auth.action";
+
+import { 
+  loginUser,
+  registerUser,
+
+} from "../../core/services/auth.services";
+import { BASE_URL } from "../../core/config/api_config/constants";
+
+
+
+const Navigation = ({ auth: {isAuthenticated, user , prevPath }, login, logOut, setPrevPath  }) =>{
   const { isOpen, onToggle } = useDisclosure();
+
+  const handleLogout = async () => {
+    await logOut();
+    setTimeout(() => {
+      if(typeof window!==undefined){
+         window.location.reload();
+      }
+     
+    }, 2000);
+  };
+
 
   return (
     <Box>
@@ -90,6 +123,23 @@ export default function WithSubnavigation() {
     </Box>
   );
 }
+
+
+NavBar.propTypes = {
+  auth: PropTypes.object.isRequired,
+  login: PropTypes.func.isRequired,
+  logOut: PropTypes.func.isRequired,
+  setPrevPath: PropTypes.func.isRequired,
+  
+};
+
+
+
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+});
+
+
 
 const LargeScreenNavigation = () => {
   const linkColor = useColorModeValue('gray.600', 'gray.200');
@@ -247,3 +297,10 @@ const NAV_ITEMS = [
   },
   
 ];
+
+
+export default connect(mapStateToProps, {
+  login,
+  setPrevPath,
+  logOut,
+})(Navigation);

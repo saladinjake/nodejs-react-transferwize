@@ -6,7 +6,7 @@ import { Provider as Provisioner }  from "react-redux";
 import QReduxStore from "../core/redux/store";
 import { LoadingProgressProvider } from '../core/views/components/Loading'
 import NextNprogress from 'nextjs-progressbar';
-
+// import ToastNotification from "../core/helpers/utils/ToastNotification"
 export default function App({ Component, pageProps }) {
     return (
 
@@ -18,6 +18,7 @@ export default function App({ Component, pageProps }) {
           height={3}
           showOnShallow={true}
         />
+       
      {/*REDUX STATE ENHANCER*/}
     <Provisioner store={QReduxStore}>
         <ChakraProvider>
