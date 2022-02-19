@@ -13,7 +13,7 @@ class AccountService {
       const user = await User.findUserById(userId); // check if user already exist
 
       if (user) {
-        const account = await Account.findAccountByOwner(userId);
+        const account = await Account.findAccountByOwner(Number(userId));
 
         if (account.length > 0) {
           if (account.length === 2) {
@@ -124,22 +124,42 @@ class AccountService {
   static async getAUserAccounts(email) {
     try {
       const user = await User.findUserByEmail(email);
-      if (user) {
+      if (user && "id" in user) {
         const accounts = await Account.findAccountByOwner(user.id);
 
-        return accounts.map((account) => {
-          const {
-            createdon, accountnumber, owner, ...data
-          } = account;
+        if(accounts.length> 0 && 'accountnumber' in accounts[0]){
+          return accounts.map((account) => {
+                 const {
+                  created_at, accountnumber, owner, ...data
+                } = account;
 
-          return {
-            createdOn: createdon,
-            accountNumber: accountnumber,
-            ...data,
-          };
-        });
+                return {
+                  created_at: created_at,
+                  accountNumber: accountnumber,
+                  ...data,
+                };
+           });
+        }else if(accounts.length<= 0 && user && "id" in user){
+           //user exists but no account so create user account
+           await AccountService.createAccount(user.id, "savings", 1000.00);
+
+           const accounts = await Account.findAccountByOwner(user.id);
+
+           if(accounts.length> 0 && 'accountnumber' in accounts[0]){
+              return accounts.map((account) => {
+              const {
+                created_at, accountnumber, owner, ...data
+              } = account;
+              return {
+                created_at: created_at,
+                accountNumber: accountnumber,
+                ...data,
+              };
+            });
+           }
+        }   
       }
-      throw new Error('user with this email address not found');
+        throw new Error('user with this email address not found');
     } catch (error) {
       throw error;
     }

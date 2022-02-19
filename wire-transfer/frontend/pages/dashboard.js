@@ -1,4 +1,5 @@
-import React, { ReactNode,ReactElement } from 'react';
+import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
+import { login, logOut, setPrevPath } from "../core/redux/actions/auth.action";
 
 import Currency from 'react-currency-icons'
 import {
@@ -39,23 +40,48 @@ import {
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
-
+import Tradeoffs from "../core/views/components/Tradeoffs"
 
 import { FcLock } from 'react-icons/fc';
+import PropTypes from "prop-types";
 
 
+
+const handleLogout = async () => {
+  console.log("called")
+    await logOut();
+    setTimeout(() => {
+      if(typeof window!==undefined){
+         window.location.href="/login"
+      }
+     
+    }, 2000);
+  };
+
+  const redirectTo = (url) =>{
+      
+    setTimeout(() => {
+       if(typeof window!==undefined){
+        window.location.href=url
+      }
+    }, 1000);
+  }
 const LinkItems = [
-  { name: 'dashboard', icon: FiHome },
-  { name: 'New Transaction', icon: FiTrendingUp },
-  { name: 'Account Settings', icon: FiCompass },
-  { name: 'Logout', icon: FiStar },
+  { name: 'dashboard', icon: FiHome , clickHandler: redirectTo, route:"dashboard" },
+  { name: 'New Transaction', icon: FiTrendingUp, clickHandler: redirectTo, route:"newtransaction" },
+  
+  { name: 'Logout', icon: FiStar, clickHandler: handleLogout, route:""  },
   
 ];
+
+
 
 export default function Dashboard({
   children,
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+
   return (
     <>
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
@@ -83,9 +109,8 @@ export default function Dashboard({
         <AccountBalanceView/>
        
 
-        <TransactionComponent/>
-         <TransactionComponent/>
-          <TransactionComponent/>
+        <Tradeoffs/>
+         
       </Box>
 
 
@@ -188,87 +213,7 @@ function ActionComponent() {
 
 
 
-function TransactionComponent() {
-  return (
-    <Stack bg="#fff" p="4" boxShadow="lg" m="4" borderRadius="sm">
-      <Stack direction="row" alignItems="center">
-        <Text fontWeight="semibold">Your Transaction Date</Text>
-        <FcLock />
-      </Stack>
 
-
-
-      
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          FROM
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'6xl'}>
-          TO
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          AMOUNT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         CURRENCY
-        </Text>
-
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          CURRENCY
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         CREATED AT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         UPDATED AT
-        </Text>
-        <Stack direction={{ base: 'column', md: 'row' }}>
-          
-          <Button colorScheme="green">  Successful</Button>
-        </Stack>
-      </Stack>
-
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          SIMBA
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'6xl'}>
-          JUWAVICTOR 
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          2000
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         $
-        </Text>
-
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          CURRENCY
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         CREATED AT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         UPDATED AT
-        </Text>
-        <Stack direction={{ base: 'column', md: 'row' }}>
-          
-          
-        </Stack>
-      </Stack>
-    </Stack>
-  );
-}
-
-const TransactionHistory = () => {
-  return(
-    <>Hello tables</>
-  )
-}
 
 const SidebarNavigationContent = ({ onClose, ...rest }) => {
   return (
@@ -288,7 +233,7 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
+        <NavItem key={link.name} icon={link.icon} onClick={()=>{link.clickHandler()}}>
           {link.name}
         </NavItem>
       ))}
@@ -329,6 +274,7 @@ const NavItem = ({ icon, children, ...rest }) => {
 
 
 const MobileNav = ({ onOpen, ...rest }) => {
+
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -394,10 +340,10 @@ const MobileNav = ({ onOpen, ...rest }) => {
             <MenuList
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem>My Transactions</MenuItem>
-              <MenuItem>New Transaction</MenuItem>
+              <MenuItem onClick={(e)=>{redirectTo('/dashboard')}}>My Transactions</MenuItem>
+              <MenuItem onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</MenuItem>
               <MenuDivider />
-              <MenuItem>Logout</MenuItem>
+              <MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -405,3 +351,10 @@ const MobileNav = ({ onOpen, ...rest }) => {
     </Flex>
   );
 };
+
+
+
+
+
+
+

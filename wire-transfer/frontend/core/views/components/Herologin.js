@@ -38,6 +38,9 @@ import RequestLoader from "../../views/components/RequestLoader"
   const [showLogin, setShowLogin] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
  const toastedBread = useToast()
+ if(isAuthenticated && user.hasOwnProperty("token")){
+   window.location.href="/dashboard"
+ }
   
   const handleRegisterDisplay = (e) =>{
     e.preventDefault()
@@ -74,29 +77,29 @@ import RequestLoader from "../../views/components/RequestLoader"
        setLoading(true);
        console.log(values.email,values.password)
 
-       var formdata = new FormData();
-       formdata.append("email", values.email);
-       formdata.append("password", values.password);
-
-        var requestOptions = {
-          method: 'POST',
-          body: formdata,
-          redirect: 'follow'
+      
+        var data = {
+          email: values.email,
+          password:values.password
         };
 
         try{
-          let res = await loginUser(formdata)
+          let res = await loginUser(data);
+          //dispatch the redux action
+          console.log(res)
+          login(res);
            if(typeof window!=undefined){
             window.location.href="/dashboard"
           }
         }catch(error){
+          console.log(error)
 
           if(error){
             
 
                 toastedBread({
                   title: 'An error occurred.',
-                  description: error.message,
+                  description: "Invalid credentials. Try again or signup to create an account if an account dont exist.", //error.message,
                   status: 'error',
                   duration: 9000,
                   isClosable: true,
@@ -104,10 +107,7 @@ import RequestLoader from "../../views/components/RequestLoader"
 
 
           }else{
-            // toast.error('Invalid credentials. User dont exists')
-
-
-
+            
 
             toastedBread({
               title: 'An error occurred.',
@@ -155,46 +155,43 @@ const prevalidate = (setSubmitting)=>{
            showErrorOnce =true 
            if(showErrorOnce){
              showErrorOnce=false
-             toast.error("Please fill out the blank fields")
+             
+
+             toastedBread({
+                  title: 'An error occurred.',
+                  description: "Please fill out the blank fields", //error.message,
+                  status: 'error',
+                  duration: 9000,
+                  isClosable: true,
+                })
              setSubmitting(false);
               setLoading(false);
              return false
            }
           
          }
-         //validate email
-         if(keys=="email"){
-           if(!initial[keys].match(email_regex)){
-            showErrorOnce =true 
-             if(showErrorOnce){
-               showErrorOnce=false
-               toast.error(`Please ensure to use a valid email`)
-               setSubmitting(false);
-                setLoading(false);
-               return false
-            }
-           }
-         }
+         
 
          //check password match
          if(keys=="password"){
-            if(initial[keys]!=initial["password_confirmation"]){
-               showErrorOnce =true 
-               if(showErrorOnce){
-                 showErrorOnce=false
-                 toast.error("Password do not match")
-                 setSubmitting(false);
-                 setLoading(false);
-                 return false
-               }
-           }
+            
 
 
            if(!initial[keys].match(passwordRegex)){
                showErrorOnce =true 
                if(showErrorOnce){
                  showErrorOnce=false
-                 toast.error("Please use a strong password . Password should contain One capital letter, and atleast a minimum of 8 alphanumeric digits and other symbols ")
+                 // toast.error("Please use a strong password . Password should contain One capital letter, and atleast a minimum of 8 alphanumeric digits and other symbols ")
+                 
+
+                  toastedBread({
+                  title: 'An error occurred.',
+                  description: "Please use a strong password . Password should contain One capital letter, and atleast a minimum of 8 alphanumeric digits and other symbols ", //error.message,
+                  status: 'error',
+                  duration: 9000,
+                  isClosable: true,
+                })
+
                  setSubmitting(false);
                  setLoading(false);
                  return false
@@ -217,7 +214,18 @@ const prevalidate = (setSubmitting)=>{
       try {
         
         await registerUser(values);
-        toast.success("We have sent a verification mail to your email.");
+       // toast.success("We have sent a verification mail to your email.");
+        
+
+
+       toastedBread({
+            title: 'An error occurred.',
+            description: "Sign up was successful", //error.message,
+            status: 'success',
+            duration: 9000,
+            isClosable: true,
+          })
+         
         setTimeout(() => {
           if(typeof window!=undefined){
             window.location.reload()
@@ -227,10 +235,15 @@ const prevalidate = (setSubmitting)=>{
         }, 2000);
         setSubmitting(false);
       } catch (err) {
-        console.log(
-          err?.data?.message
-        );
-        toast.error(  err?.data?.message);
+        
+        
+       toastedBread({
+            title: 'An error occurred.',
+            description: err?.data?.message, //error.message,
+            status: 'error',
+            duration: 9000,
+            isClosable: true,
+          })
         setSubmitting(false);
 
       }
@@ -452,7 +465,7 @@ const prevalidate = (setSubmitting)=>{
               </Stack>
               <Button
               type="submit"
-              disabled={isSubmitting}
+              
                 bg={'blue.400'}
                 color={'white'}
                 _hover={{
