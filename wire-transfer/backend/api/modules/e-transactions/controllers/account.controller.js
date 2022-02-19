@@ -57,7 +57,7 @@ class AccountController {
     const { email } = req.params;
     try {
       const accounts = await AccountService.getAUserAccounts(email);
-      if (accounts) {
+      if (accounts.length> 0) {
         return response.sendSuccess(res, 200, accounts, 'Accounts was successfully fetched');
       }
       return response.sendError(res, 400, 'something went wrong');

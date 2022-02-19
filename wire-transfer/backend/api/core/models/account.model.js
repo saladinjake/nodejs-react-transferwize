@@ -2,10 +2,12 @@ import Model from './db/index.db';
 class Account extends Model {
   async create(account) {
     try {
-      const { rows } = await this.insert('owner, type, balance', '$1, $2, $3', [
-        account.owner,
+      const { rows } = await this.insert('owner, type, balance,balanceNaira, balanceEuros', '$1, $2, $3, $4, $5', [
+        account.owner, 
         account.type,
         account.balance,
+        0.00,
+        0.00
       ]);
       return rows[0];
     } catch (error) {
@@ -15,7 +17,7 @@ class Account extends Model {
   /*did this for feature upgrade on the application features usually an admin or staff*/
   async findAll() {
     try {
-      const { rows } = await this.select('created_at, accountNumber, owner, type, status, balance');
+      const { rows } = await this.select('created_at, accountNumber, owner, type, status, balance, balanceNaira, balanceEuros');
       return rows;
     } catch (error) {
       throw error;
@@ -25,7 +27,7 @@ class Account extends Model {
   async findByAccountNumberJoin(id) {
     try {
       const { rows } = await this.selectWithJoin(
-        'trans.id, trans.created_at, transactiontype, trans.accountNumber, amount, oldBalance, newBalance, owner',
+        'trans.id, trans.created_at, transactiontype, trans.accountNumber, amount, oldBalance, newBalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros, owner',
         'trans.id=$1',
         [id],
       );
@@ -38,7 +40,7 @@ class Account extends Model {
   async findByAccountNumber(accountNumber) {
     try {
       const { rows } = await this.selectWhere(
-        'created_at, accountNumber,owner, type, status, balance',
+        'created_at, accountNumber,owner, type, status, balance, balanceNaira, balanceEuros',
         'accountNumber=$1',
         [accountNumber],
       );
@@ -53,7 +55,7 @@ class Account extends Model {
   async findAccountByOwner(id) {
     try {
       const { rows } = await this.selectWhere(
-        'created_at, accountNumber, owner, type, status, balance',
+        'created_at, accountNumber, owner, type, status, balance, balanceNaira, balanceEuros',
         'owner=$1',
         [id],
       );

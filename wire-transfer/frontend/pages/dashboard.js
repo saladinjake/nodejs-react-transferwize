@@ -1,5 +1,6 @@
-import React, { ReactNode,ReactElement } from 'react';
-
+import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
+import { login, logOut, setPrevPath } from "../core/redux/actions/auth.action";
+import { myTransactions } from "../core/services/transactions.services"
 import Currency from 'react-currency-icons'
 import {
   IconButton,
@@ -39,23 +40,37 @@ import {
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
-
-
+import Tradeoffs from "../core/views/components/Tradeoffs"
 import { FcLock } from 'react-icons/fc';
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+
+import RequestLoader from "../core/views/components/RequestLoader"
+const handleLogout = async () => {
+    await logOut();
+    setTimeout(() => {
+      if(typeof window!==undefined){
+         window.location.href="/login"
+      }
+    }, 2000);
+  };
+
+  const redirectTo = (url) =>{
+    setTimeout(() => {
+       if(typeof window!==undefined){
+        window.location.href=url
+      }
+    }, 1000);
+  }
 
 
-const LinkItems = [
-  { name: 'dashboard', icon: FiHome },
-  { name: 'New Transaction', icon: FiTrendingUp },
-  { name: 'Account Settings', icon: FiCompass },
-  { name: 'Logout', icon: FiStar },
-  
-];
 
 export default function Dashboard({
   children,
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+
   return (
     <>
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
@@ -80,21 +95,9 @@ export default function Dashboard({
       <Box  ml={{ base: 0, md: 60 }} p="4">
         {children}
          <ActionComponent/>
-        <AccountBalanceView/>
-       
-
-        <TransactionComponent/>
-         <TransactionComponent/>
-          <TransactionComponent/>
+         <Tradeoffs/>
       </Box>
-
-
-      
     </Box>
-
-
-   
-
       </>
   );
 }
@@ -107,67 +110,12 @@ export default function Dashboard({
 
 
 
-
-const CardBalance = ({ title, text, icon }) => {
-  return (
-    <Stack  bg="#fff" boxShadow="lg" m="4" borderRadius="sm">
-      <Flex
-        w={16}
-        h={16}
-        align={'center'}
-        justify={'center'}
-        color={'white'}
-        rounded={'full'}
-        bg={'gray.100'}
-        mb={1}
-        padding="10px"
-        >
-        {icon}
-      </Flex>
-      <Text padding="10px" fontWeight={600}>{title}</Text>
-      <Text padding="10px" color={'gray.600'}>{text}</Text>
-    </Stack>
-  );
-};
-
-function AccountBalanceView() {
-  return (
-    <Box p={4}>
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
-        <CardBalance
-          icon={ <Currency code="USD" size="small" />}
-          title={'Lifetime Support'}
-          text={
-            '1000'
-          }
-        />
-        <CardBalance
-          icon={<Currency code="EUR" size="small" />}
-          title={'Unlimited Donations'}
-          text={
-            '0'
-          }
-        />
-        <CardBalance
-          icon={<Currency code="NGN" size="small" />}
-          title={'Instant Delivery'}
-          text={
-            '0'
-          }
-        />
-      </SimpleGrid>
-    </Box>
-  );
-}
-
 function ActionComponent() {
   return (
     <Stack  p="4" boxShadow="lg" m="4" borderRadius="sm">
       <Stack direction="row" alignItems="center">
         <Text fontWeight="semibold">All Transactions</Text>
-        
       </Stack>
-
       <Stack
         direction={{ base: 'column', md: 'row' }}
         justifyContent="space-between">
@@ -175,10 +123,9 @@ function ActionComponent() {
           Transaction History
         </Text>
         <Stack direction={{ base: 'column', md: 'row' }}>
-          <Button variant="outline" colorScheme="green">
-            Send Money
+          <Button onClick={()=>{redirectTo("/newtransaction")}} variant="outline" colorScheme="green">
+            Create a new transaction
           </Button>
-     
         </Stack>
       </Stack>
     </Stack>
@@ -188,87 +135,7 @@ function ActionComponent() {
 
 
 
-function TransactionComponent() {
-  return (
-    <Stack bg="#fff" p="4" boxShadow="lg" m="4" borderRadius="sm">
-      <Stack direction="row" alignItems="center">
-        <Text fontWeight="semibold">Your Transaction Date</Text>
-        <FcLock />
-      </Stack>
 
-
-
-      
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          FROM
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'6xl'}>
-          TO
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          AMOUNT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         CURRENCY
-        </Text>
-
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          CURRENCY
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         CREATED AT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         UPDATED AT
-        </Text>
-        <Stack direction={{ base: 'column', md: 'row' }}>
-          
-          <Button colorScheme="green">  Successful</Button>
-        </Stack>
-      </Stack>
-
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          SIMBA
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'6xl'}>
-          JUWAVICTOR 
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          2000
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         $
-        </Text>
-
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-          CURRENCY
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         CREATED AT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         UPDATED AT
-        </Text>
-        <Stack direction={{ base: 'column', md: 'row' }}>
-          
-          
-        </Stack>
-      </Stack>
-    </Stack>
-  );
-}
-
-const TransactionHistory = () => {
-  return(
-    <>Hello tables</>
-  )
-}
 
 const SidebarNavigationContent = ({ onClose, ...rest }) => {
   return (
@@ -287,14 +154,13 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
-          {link.name}
-        </NavItem>
-      ))}
+      <NavItem icon={FiHome} onClick={(e)=>{redirectTo('/dashboard')}}>Dashboard</NavItem>
+      <NavItem icon={FiTrendingUp} onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</NavItem>      
+      <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
     </Box>
   );
 };
+
 
 const NavItem = ({ icon, children, ...rest }) => {
   return (
@@ -329,6 +195,7 @@ const NavItem = ({ icon, children, ...rest }) => {
 
 
 const MobileNav = ({ onOpen, ...rest }) => {
+
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -394,10 +261,10 @@ const MobileNav = ({ onOpen, ...rest }) => {
             <MenuList
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem>My Transactions</MenuItem>
-              <MenuItem>New Transaction</MenuItem>
+              <MenuItem onClick={(e)=>{redirectTo('/dashboard')}}>My Transactions</MenuItem>
+              <MenuItem onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</MenuItem>
               <MenuDivider />
-              <MenuItem>Logout</MenuItem>
+              <MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -405,3 +272,10 @@ const MobileNav = ({ onOpen, ...rest }) => {
     </Flex>
   );
 };
+
+
+
+
+
+
+

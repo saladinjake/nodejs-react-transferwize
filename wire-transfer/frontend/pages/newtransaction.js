@@ -1,4 +1,5 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from "react";
+import { login, logOut, setPrevPath } from "../core/redux/actions/auth.action";
 
 
 import Currency from 'react-currency-icons'
@@ -62,7 +63,8 @@ import {
 /*apis*/
 import { searchUser } from "../core/services/auth.services"
 import currencies from "../core/services/currencylist.service.json";
-
+import RequestLoader from "../core/views/components/RequestLoader"
+import { useToast } from '@chakra-ui/react'
 const LinkItems = [
   { name: 'dashboard', icon: FiHome },
   { name: 'New Transaction', icon: FiTrendingUp },
@@ -70,6 +72,26 @@ const LinkItems = [
   { name: 'Logout', icon: FiStar },
   
 ];
+
+
+
+const handleLogout = async () => {
+    await logOut();
+    setTimeout(() => {
+      if(typeof window!==undefined){
+         window.location.href="/login"
+      }
+    }, 2000);
+  };
+
+  const redirectTo = (url) =>{
+    setTimeout(() => {
+       if(typeof window!==undefined){
+        window.location.href=url
+      }
+    }, 1000);
+  }
+
 
 export default function Dashboard({
   children,
@@ -139,11 +161,10 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
-          {link.name}
-        </NavItem>
-      ))}
+       <NavItem icon={FiHome} onClick={(e)=>{redirectTo('/dashboard')}}>Dashboard</NavItem>
+      <NavItem icon={FiTrendingUp} onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</NavItem>      
+      <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
+    
     </Box>
   );
 };
@@ -243,13 +264,13 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 </Box>
               </HStack>
             </MenuButton>
-            <MenuList
+             <MenuList
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem>My Transactions</MenuItem>
-              <MenuItem>New Transaction</MenuItem>
+              <MenuItem onClick={(e)=>{redirectTo('/dashboard')}}>My Transactions</MenuItem>
+              <MenuItem onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</MenuItem>
               <MenuDivider />
-              <MenuItem>Logout</MenuItem>
+              <MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -271,10 +292,11 @@ const MobileNav = ({ onOpen, ...rest }) => {
 
 
 function NewTransfer() {
+  const toastedBread = useToast()
   const handleInputChange = (newValue) => {
     const inputValue = newValue.replace(/\W/g, '');
     // setState({ inputValue });
-    // return inputValue;
+    return inputValue;
   };
 
   const [inputFrom, setInputFrom] = useState(0);
@@ -282,6 +304,8 @@ function NewTransfer() {
   const [rate, setRate] = useState(0);
   const [currencyFrom, setCurrencyFrom] = useState("USD");
   const [currencyTo, setCurrencyTo] = useState("EUR");
+
+  const [allUsers, setAllUsers] = useState([])
 
   const handleChangeFrom = (event) => {
     const { value } = event.target;
@@ -310,7 +334,61 @@ function NewTransfer() {
     setCurrencyTo(currencyFrom);
   };
 
+
+
+
+  //payload submit transaction payload and validation
+
+  const transactionPayload = {
+    firstname:"",
+    lastname:"",
+    amount:0.00,
+    rate:1,
+    senderid:4,
+    receipientId:"",
+    formCurrency:"USD",
+    toCurrency:"USD",
+    targetAmount:0.00
+
+  };
+
+  const [submitData, setSubmitData] = useState(transactionPayload)
+
+  const handleSelectedUser = () => {
+    const userInputHtml = document.getElementById("wizards")
+    
+    const userInputCopy =  userInputHtml.value.toLowerCase();
+    const foundUser = allUsers.find(user =>{
+       const testData = user.firstname + " "+ user.lastname
+       if(testData.toLowerCase()===userInputCopy){
+         return userInputHtml.value
+       }else{
+        return ""
+       }
+    })
+    console.log(foundUser)
+    if(!foundUser || foundUser.length<=0){
+      userInputHtml.value =""
+       toastedBread({
+        title: 'An error occurred.',
+        status:"error",
+        description: "User dont exist. please select a user from the dropdown",
+        duration: 9000,
+        isClosable: true,
+      })
+    }else{
+      //set state of the field
+       const userInfo = userInputHtml.value.split("");  
+      setSubmitData({
+       ...submitData,
+       firstname: userInfo[0],
+       lastname: userInfo[1]
+      })
+    }
+  }
+
   useEffect(() => {
+
     const fetchConversionRates = async () => {
       const result = await fetch(
         `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
@@ -319,10 +397,24 @@ function NewTransfer() {
       if (result.ok) {
         const rates = await result.json();
         setRate(rates.conversion_rate);
+        setSubmitData({
+          ...submitData,
+          rate:rates.conversion_rate
+        })
       }
     };
     fetchConversionRates();
   }, [currencyFrom, currencyTo]);
+
+
+  useEffect(() => {
+    const findUsers = async () => {
+      const result = await searchUser()
+      console.log(result.data);
+      setAllUsers([...result.data.data]) 
+    };
+    findUsers();
+  }, []);
 
   return (
     <Flex
@@ -343,12 +435,29 @@ function NewTransfer() {
             <FormControl id="email">
               <FormLabel>Find User</FormLabel>
                 <div>
-                  <AsyncSelect
+                  {/*<AsyncSelect
                     name="form-field-name"
                     value="one"
                     loadOptions={searchUser}
-                    searchUser onInputChange={handleInputChange}
-                  />
+                    onInputChange={handleInputChange}
+                  />*/}
+
+                  <label for="states">Find users full name</label>
+                  <Input onBlur={() => handleSelectedUser()} type="text" id="wizards" name="wizards" list="users-list" />
+                  <datalist id="users-list">
+
+                     { 
+                       allUsers.length > 0 ?  allUsers.map(user => {
+                          return (
+                           <option>{user.firstname + " "+ user.lastname }</option>
+                            )
+                       })
+                       : (<RequestLoader/>)
+                     }
+
+
+                   
+                  </datalist>
                 </div>
             </FormControl>
 

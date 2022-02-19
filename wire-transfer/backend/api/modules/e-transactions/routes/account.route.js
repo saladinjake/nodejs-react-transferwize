@@ -47,4 +47,7 @@ router
     PermissionMiddleware.strictAccountPermission,
     AccountContoller.getAUserAccounts);
 
+
+
+
 export default router;

@@ -20,7 +20,7 @@ const csrfSafeMethod = (method) => {
 };
 /*enrollment api*/
 export const loginUser = async (details) => {
-  let request = axios.post("auth/login", details);
+  let request = axios.post("auth/signin", details);
   return request.then((response) => {
     if (response.status === 200) {
       return response && response;
@@ -40,13 +40,11 @@ export const registerUser = async (details) => {
 
 
 
-export const searchUser = (input) => {
-
-  let request = axios.get(`search/users?q=${input}`);
+export const searchUser = () => {
+  let request = axios.get(`search`);
   return request.then((response) => {
     if (response.status === 200) {
       return response && response;
     }
   });
-   
 }
