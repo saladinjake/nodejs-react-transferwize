@@ -387,20 +387,24 @@ function NewTransfer() {
     }
   }
 
-  // useEffect(() => {
+  useEffect(() => {
 
-  //   // const fetchConversionRates = async () => {
-  //   //   const result = await fetch(
-  //   //     `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
-  //   //   );
-  //   //   console.log(result);
-  //   //   if (result.ok) {
-  //   //     const rates = await result.json();
-  //   //     setRate(rates.conversion_rate);
-  //   //   }
-  //   // };
-  //   // fetchConversionRates();
-  // }, [currencyFrom, currencyTo]);
+    const fetchConversionRates = async () => {
+      const result = await fetch(
+        `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
+      );
+      console.log(result);
+      if (result.ok) {
+        const rates = await result.json();
+        setRate(rates.conversion_rate);
+        setSubmitData({
+          ...submitData,
+          rate:rates.conversion_rate
+        })
+      }
+    };
+    fetchConversionRates();
+  }, [currencyFrom, currencyTo]);
 
 
   useEffect(() => {
