@@ -47,7 +47,7 @@ import { myTransactions, getWalletAccounts, creditLedgerAccount, debitLedgerAcco
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
-
+import RequestLoader from "./RequestLoader"
 
 const SIMBA_COMPANY_ID = 4;
 const BONUS_AMOUNT = 1000.00;

@@ -12,7 +12,7 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount( accountNumber,senderId, amount,receipientId,formCurrency="USD",toCurrency='USD')  {
+  static async debitAccount( accountNumber,senderId, amount, exchangeAmount, rate, receipientId,formCurrency="USD",toCurrency='USD')  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
       //console.log(account)
@@ -23,7 +23,7 @@ class TransactionService {
         if (account.balance >= amount) {
           const user = await User.findUserById(Number(account.owner));
 
-          const transaction = await Transaction.debit(account,senderId, amount,receipientId,formCurrency,toCurrency);
+          const transaction = await Transaction.debit(account,senderId, amount,exchangeAmount, rate, receipientId,formCurrency,toCurrency);
 
           const mailData = {
             subject: 'A transaction occured on your account',
@@ -41,6 +41,7 @@ class TransactionService {
             transactionId: transaction.id,
             accountNumber: Number(transaction.accountnumber),
             amount,
+            exchangeAmount, rate,
             cashier: transaction.cashier,
             transactionType: transaction.transactiontype,
             accountBalance: transaction.newbalance,
@@ -61,7 +62,7 @@ class TransactionService {
 
 
 
-  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount, receipientId/*reciever email*/, formCurrency="USD",toCurrency='USD') {
+  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount,exchangeAmount, rate, receipientId/*reciever email*/, formCurrency="USD",toCurrency='USD') {
     try {
 
        const account = await Account.findByAccountNumber(Number(accountNumber));
@@ -75,7 +76,7 @@ class TransactionService {
      
       if (Array.isArray(recieverAccount) ){
        
-         const transaction = await Transaction.credit(recieverAccount[0], senderId, amount, receipientId,formCurrency,toCurrency);
+         const transaction = await Transaction.credit(recieverAccount[0], senderId, amount,exchangeAmount, rate, receipientId,formCurrency,toCurrency);
         
         const mailData = {
           subject: 'A transaction occured on your account',
@@ -93,6 +94,7 @@ class TransactionService {
           transactionId: transaction.id,
           accountNumber: Number(transaction.accountnumber),
           amount,
+          exchangeAmount, rate,
           cashier: transaction.cashier,
           transactionType: transaction.transactiontype,
           accountBalance: transaction.newbalance,

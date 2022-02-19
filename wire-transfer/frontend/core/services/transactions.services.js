@@ -41,3 +41,16 @@ export const getAllBalanceEquivalent = async (ledgerDetail) => {
     }
   });
 }
+
+export const sendMoneyOverseas = async (creditLedgerDetail,debitLedgerDetail) =>{
+  const creditorAccount = await getWalletAccounts(creditLedgerDetail.receipientId)
+  creditLedgerDetail.accountNumber = creditorAccount.data.data[0].accountNumber
+  console.log(creditorAccount)
+
+  const debitorAccount = await getWalletAccounts(debitLedgerDetail.receipientId)
+  // debitLedgerDetail.accountNumber = debitorAccount.data.data[0].accountNumber
+  
+   //await creditLedgerAccount(creditLedgerDetail)
+  
+   //await debitLedgerAccount(debitLedgerDetail)
+}

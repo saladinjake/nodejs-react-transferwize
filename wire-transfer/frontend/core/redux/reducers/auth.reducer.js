@@ -28,28 +28,29 @@ export default (state = initialState, action) => {
       //console.log(action.payload.user)
       if(action.payload.data.data.hasOwnProperty("id") ){
         //more security check befor grants are allowed
-        //all this should be encrypted so its not just plain
-      if (typeof window !== "undefined") {
+            //all this should be encrypted so its not just plain
+          if (typeof window !== "undefined") {
 
-        let userPayLoad = {
-          email: action.payload.data.data.email,
-          firstName: action.payload.data.data.firstName,
-          id: action.payload.data.data.id,
-          isAdmin: action.payload.data.data.isAdmin,
-          lastName: action.payload.data.data.lastName,
-          token:action.payload.data.data.token,
-          type: action.payload.data.data.type,
-        };
+            let userPayLoad = {
+              email: action.payload.data.data.email,
+              firstName: action.payload.data.data.firstName,
+              id: action.payload.data.data.id,
+              isAdmin: action.payload.data.data.isAdmin,
+              lastName: action.payload.data.data.lastName,
+              token:action.payload.data.data.token,
+              type: action.payload.data.data.type,
+              isAuthenticated:true,
+            };
 
-        localStorage.setItem("access_token", action.payload.data.data.token);
-        localStorage.setItem("user", JSON.stringify(userPayLoad));
-        
+            localStorage.setItem("access_token", action.payload.data.data.token);
+            localStorage.setItem("user", JSON.stringify(userPayLoad));
+            
 
-        localStorage.setItem(
-          "user_roles",
-          JSON.stringify(action.payload.data.data.isAdmin)
-        );
-      }
+            localStorage.setItem(
+              "user_roles",
+              JSON.stringify(action.payload.data.data.isAdmin)
+            );
+          }
        //toast.success("Login Successful");
       }else{
        toast.error("Login Credentials not found");
@@ -58,7 +59,7 @@ export default (state = initialState, action) => {
          localStorage.clear()
        }
       }
-      // set the lms token to cookies
+     
       return {
         ...state,
         loading: false,

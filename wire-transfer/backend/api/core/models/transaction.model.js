@@ -1,6 +1,6 @@
 import Model from './db/index.db';
 export default class Transaction extends Model {
-  async credit(account, cashierId, amount,  receipient, formCurrency='USD', toCurrency='USD') {
+  async credit(account, cashierId, amount,exchangeAmount, rate,  receipient, formCurrency='USD', toCurrency='USD') {
    
     try {
 
@@ -12,11 +12,12 @@ export default class Transaction extends Model {
          const newBalanceEuros = 0.00;
 
           console.log(account, cashierId,amount,receipient)
-          const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13', [
+          const { rows } = await this.insert('accountNumber, senderId, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15', [
           Number(userAccount.accountnumber),
           cashierId, // the user debited  automatically
           'credit',
           amount,
+          exchangeAmount, rate,
           userAccount.balance,
           newBalance,
          
@@ -41,7 +42,7 @@ export default class Transaction extends Model {
     }
   }
 
-  async debit(account, senderId, amount,  receipientId,formCurrency='USD', toCurrency='USD') {
+  async debit(account, senderId, amount,exchangeAmount, rate,  receipientId,formCurrency='USD', toCurrency='USD') {
     const userAccount = account;
     const newBalance = parseFloat(userAccount.balance) - amount;
     const oldBalanceNaira = 0.00; 
@@ -50,11 +51,12 @@ export default class Transaction extends Model {
      const    newBalanceEuros = 0.00;
      
     try {
-      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13', [
+      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15', [
         Number(account.accountnumber),
         senderId, // // the user sending the money
         'debit',
         amount,
+        exchangeAmount, rate,
         userAccount.balance,
         newBalance,
         oldBalanceNaira,
@@ -79,7 +81,7 @@ export default class Transaction extends Model {
     try {
       
       const { rows } = await this.selectWhere(
-        'id, created_at, updated_at transactiontype, accountNumber, senderId, receipientId, amount, oldBalance, newBalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros, formCurrency,toCurrency',
+        'id, created_at, updated_at transactiontype, accountNumber, senderId, receipientId, amount,exchangeAmount, rate, oldBalance, newBalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros, formCurrency,toCurrency',
         'accountNumber=$1',
         [accountNumber],
       );
@@ -93,7 +95,7 @@ export default class Transaction extends Model {
   async getTransactionById(id) {
     try {
       const { rows } = await this.selectWithJoin(
-        'trans.id, trans.created_at, transactiontype, trans.updated_at trans.transactiontype, trans.accountNumber, trans.senderId, trans.receipientId, trans.amount, trans.oldBalance, trans.newBalance, trans.oldBalanceNaira, trans.newBalanceNaira, trans.oldBalanceEuros, trans.newBalanceEuros, trans.formCurrency,trans.toCurrency',
+        'trans.id, trans.created_at, transactiontype, trans.updated_at trans.transactiontype, trans.accountNumber, trans.senderId, trans.receipientId, trans.amount, trans.exchangeAmount, trans.rate, trans.oldBalance, trans.newBalance, trans.oldBalanceNaira, trans.newBalanceNaira, trans.oldBalanceEuros, trans.newBalanceEuros, trans.formCurrency,trans.toCurrency',
         'trans.id=$1',
         [id],
       );
