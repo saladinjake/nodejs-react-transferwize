@@ -1,6 +1,8 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
 import { login, logOut, setPrevPath } from "../core/redux/actions/auth.action";
 
+import { myTransactions } from "../core/services/transactions.services"
+
 import Currency from 'react-currency-icons'
 import {
   IconButton,
@@ -44,7 +46,7 @@ import Tradeoffs from "../core/views/components/Tradeoffs"
 
 import { FcLock } from 'react-icons/fc';
 import PropTypes from "prop-types";
-
+import { connect } from "react-redux";
 
 
 const handleLogout = async () => {
@@ -66,13 +68,6 @@ const handleLogout = async () => {
       }
     }, 1000);
   }
-const LinkItems = [
-  { name: 'dashboard', icon: FiHome , clickHandler: redirectTo, route:"dashboard" },
-  { name: 'New Transaction', icon: FiTrendingUp, clickHandler: redirectTo, route:"newtransaction" },
-  
-  { name: 'Logout', icon: FiStar, clickHandler: handleLogout, route:""  },
-  
-];
 
 
 
@@ -106,10 +101,8 @@ export default function Dashboard({
       <Box  ml={{ base: 0, md: 60 }} p="4">
         {children}
          <ActionComponent/>
-        <AccountBalanceView/>
-       
-
-        <Tradeoffs/>
+        
+         <Tradeoffs/>
          
       </Box>
 
@@ -132,59 +125,6 @@ export default function Dashboard({
 
 
 
-
-const CardBalance = ({ title, text, icon }) => {
-  return (
-    <Stack  bg="#fff" boxShadow="lg" m="4" borderRadius="sm">
-      <Flex
-        w={16}
-        h={16}
-        align={'center'}
-        justify={'center'}
-        color={'white'}
-        rounded={'full'}
-        bg={'gray.100'}
-        mb={1}
-        padding="10px"
-        >
-        {icon}
-      </Flex>
-      <Text padding="10px" fontWeight={600}>{title}</Text>
-      <Text padding="10px" color={'gray.600'}>{text}</Text>
-    </Stack>
-  );
-};
-
-function AccountBalanceView() {
-  return (
-    <Box p={4}>
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
-        <CardBalance
-          icon={ <Currency code="USD" size="small" />}
-          title={'Lifetime Support'}
-          text={
-            '1000'
-          }
-        />
-        <CardBalance
-          icon={<Currency code="EUR" size="small" />}
-          title={'Unlimited Donations'}
-          text={
-            '0'
-          }
-        />
-        <CardBalance
-          icon={<Currency code="NGN" size="small" />}
-          title={'Instant Delivery'}
-          text={
-            '0'
-          }
-        />
-      </SimpleGrid>
-    </Box>
-  );
-}
-
 function ActionComponent() {
   return (
     <Stack  p="4" boxShadow="lg" m="4" borderRadius="sm">
@@ -200,7 +140,7 @@ function ActionComponent() {
           Transaction History
         </Text>
         <Stack direction={{ base: 'column', md: 'row' }}>
-          <Button variant="outline" colorScheme="green">
+          <Button onClick={()=>{redirectTo("/newtransaction")}} variant="outline" colorScheme="green">
             Send Money
           </Button>
      
@@ -232,14 +172,17 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon} onClick={()=>{link.clickHandler()}}>
-          {link.name}
-        </NavItem>
-      ))}
+      
+        <NavItem icon={FiHome} onClick={(e)=>{redirectTo('/dashboard')}}>Dashboard</NavItem>
+              <NavItem icon={FiTrendingUp} onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</NavItem>
+              
+              <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
+            
+    
     </Box>
   );
 };
+
 
 const NavItem = ({ icon, children, ...rest }) => {
   return (

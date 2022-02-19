@@ -12,7 +12,7 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount( accountNumber,senderId, amount,receipientId)  {
+  static async debitAccount( accountNumber,senderId, amount,receipientId,formCurrency="USD",toCurrency='USD')  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
       //console.log(account)
@@ -23,7 +23,7 @@ class TransactionService {
         if (account.balance >= amount) {
           const user = await User.findUserById(Number(account.owner));
 
-          const transaction = await Transaction.debit(account,senderId, amount,receipientId);
+          const transaction = await Transaction.debit(account,senderId, amount,receipientId,formCurrency,toCurrency);
 
           const mailData = {
             subject: 'A transaction occured on your account',
@@ -44,6 +44,10 @@ class TransactionService {
             cashier: transaction.cashier,
             transactionType: transaction.transactiontype,
             accountBalance: transaction.newbalance,
+            formCurrency: transaction.formCurrency,
+            toCurrency: transaction.toCurrency,
+            balanceNaira: transaction.newbalanceNaira,
+            balanceEuros: transaction.newBalanceEuros
           };
         }
         throw new Error('account balance is not sufficient');
@@ -57,7 +61,7 @@ class TransactionService {
 
 
 
-  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount, receipientId/*reciever email*/) {
+  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount, receipientId/*reciever email*/, formCurrency="USD",toCurrency='USD') {
     try {
 
        const account = await Account.findByAccountNumber(Number(accountNumber));
@@ -71,7 +75,7 @@ class TransactionService {
      
       if (Array.isArray(recieverAccount) ){
        
-         const transaction = await Transaction.credit(recieverAccount[0], senderId, amount, receipientId);
+         const transaction = await Transaction.credit(recieverAccount[0], senderId, amount, receipientId,formCurrency,toCurrency);
         
         const mailData = {
           subject: 'A transaction occured on your account',
@@ -92,6 +96,8 @@ class TransactionService {
           cashier: transaction.cashier,
           transactionType: transaction.transactiontype,
           accountBalance: transaction.newbalance,
+          formCurrency: transaction.formCurrency,
+          toCurrency: transaction.toCurrency
         };
       }
         throw new Error('account number doesn\'t exist');

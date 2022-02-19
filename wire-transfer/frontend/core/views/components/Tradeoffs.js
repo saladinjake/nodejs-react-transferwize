@@ -54,9 +54,36 @@ const BONUS_AMOUNT = 1000.00;
 const SIMBA_ACCOUNT_NUMBER = 2225137327
 
 
+
+
+const CardBalance = ({ title, text, icon }) => {
+  return (
+    <Stack  bg="#fff" boxShadow="lg" m="4" borderRadius="sm">
+      <Flex
+        w={16}
+        h={16}
+        align={'center'}
+       justify={'center'} justifyContent={'center'}
+        color={'white'}
+        rounded={'full'}
+        bg={'gray.100'}
+        mb={1}
+        padding="1px"
+        ml="20px"
+        mt="20px"
+        >
+        {icon}
+      </Flex>
+      <Text justify={'center'} justifyContent={'center'} padding="20px" fontWeight={600}>{title}</Text>
+      <Text justify={'center'} justifyContent={'center'} padding="20px" color={'gray.600'}>{text}</Text>
+    </Stack>
+  );
+};
+
 const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>{
    const [transactions, setTransactions] = useState([])
    const toastedBread = useToast()
+   const [lastTrnx ,setLastTransaction] = useState({})
    useEffect(async()=>{
    
       try{
@@ -90,6 +117,7 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
             await creditLedgerAccount(creditorLedgerDetail)
             const responseLedger = await myTransactions(userAccount.accountNumber)
             setTransactions([...responseLedger?.data?.data])
+            
           }
           
          }else{
@@ -116,9 +144,40 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
      
    },[])
 
-  
+    const lastTransaction = transactions[transactions.length -1]  
+            console.log(lastTransaction)
+ 
   return (
     <Stack bg="#fff" p="4" boxShadow="lg" m="4" borderRadius="sm">
+
+
+              <Box p={4}>
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
+        <CardBalance
+          icon={ <Currency code="USD" size="small" />}
+          title={'Current Balance in dollars'}
+          text={
+           lastTransaction?.newBalance
+          }
+        />
+        <CardBalance
+          icon={<Currency code="EUR" size="small" />}
+          title={'current accont bal in naira'}
+          text={
+            lastTransaction?.newbalancenaira
+          }
+        />
+        <CardBalance
+          icon={<Currency code="NGN" size="small" />}
+          title={'current account bal i euros'}
+          text={
+           lastTransaction?.newbalanceeuros
+          }
+        />
+      </SimpleGrid>
+    </Box>
+
+
       <Stack direction="row" alignItems="center">
         <Text fontWeight="semibold">Your Transaction Date</Text>
         <FcLock />
@@ -130,28 +189,26 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
       <Stack
         direction={{ base: 'column', md: 'row' }}
         justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
           FROM
         </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'6xl'}>
+        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'400px'}>
           TO
         </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
           AMOUNT
         </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
          CURRENCY
         </Text>
 
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
           CURRENCY
         </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
          CREATED AT
         </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-         UPDATED AT
-        </Text>
+        
         <Stack direction={{ base: 'column', md: 'row' }}>
           
           <Button colorScheme="green">  Successful</Button>
@@ -163,30 +220,29 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
         justifyContent="space-between">
         {
           transactions.map(transaction => {
+            console.log(transaction)
              return(
              <>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-                  SIMBA
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
+                  {transaction?.senderid}
                 </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'6xl'}>
-                  JUWAVICTOR 
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
+                  {transaction?.receipientid}
                 </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-                  2000
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'400px'}>
+                  {transaction?.amount}
                 </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-                 $
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
+                 {transaction.formcurrency}
                 </Text>
 
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-                  CURRENCY
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
+                  {transaction?.tocurrency}
                 </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-                 CREATED AT
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
+                 {transaction?.createdon}
                 </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
-                 UPDATED AT
-                </Text>
+                
                 <Stack direction={{ base: 'column', md: 'row' }}>
                   
                   

@@ -33,18 +33,8 @@ import {
 } from "react-router-dom"
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { login, logOut, setPrevPath } from "../../core/redux/actions/auth.action";
 
-import { 
-  loginUser,
-  registerUser,
-
-} from "../../core/services/auth.services";
-import { BASE_URL } from "../../core/config/api_config/constants";
-
-
-
-const Navigation = ({ auth: {isAuthenticated, user , prevPath }, login, logOut, setPrevPath  }) =>{
+const Navigation = () =>{
   const { isOpen, onToggle } = useDisclosure();
 
   const handleLogout = async () => {
@@ -125,19 +115,6 @@ const Navigation = ({ auth: {isAuthenticated, user , prevPath }, login, logOut, 
 }
 
 
-NavBar.propTypes = {
-  auth: PropTypes.object.isRequired,
-  login: PropTypes.func.isRequired,
-  logOut: PropTypes.func.isRequired,
-  setPrevPath: PropTypes.func.isRequired,
-  
-};
-
-
-
-const mapStateToProps = (state) => ({
-  auth: state.auth,
-});
 
 
 
@@ -299,8 +276,4 @@ const NAV_ITEMS = [
 ];
 
 
-export default connect(mapStateToProps, {
-  login,
-  setPrevPath,
-  logOut,
-})(Navigation);
+export default Navigation;

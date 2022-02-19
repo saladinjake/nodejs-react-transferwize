@@ -39,3 +39,15 @@ export const debitLedgerAccount = async (ledgerDetail) => {
     }
   });
 }
+
+
+
+
+export const getAllBalanceEquivalent = async (ledgerDetail) => {
+	let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/equibalance`, ledgerDetail);
+  return request.then((response) => {
+    if (response.status === 200) {
+      return response && response;
+    }
+  });
+}
