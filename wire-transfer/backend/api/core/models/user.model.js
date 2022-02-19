@@ -39,6 +39,8 @@ class User extends Model {
       throw error;
     }
   }
+
+  
 }
 
 export default User;

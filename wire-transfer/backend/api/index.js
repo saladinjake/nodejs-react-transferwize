@@ -11,6 +11,7 @@ import configJson from './core/config/config.ini';
 import authRoutes from './modules/auth/routes/user.route';
 import accountRoutes from './modules/e-transactions/routes/account.route';
 import transactionRoutes from './modules/e-transactions/routes/transaction.route';
+import searchRoutes from './modules/auth/routes/search.route'
 /*express configurations*/
 import pool from "./core/models/db/connection.db"
 
@@ -33,10 +34,14 @@ app.post('/test', (req, res) => {
 app.use(`/api/v1/auth`, authRoutes);
 app.use(`${API_VERSION_CONTROLLER}`, accountRoutes);
 app.use(`${API_VERSION_CONTROLLER}`, transactionRoutes);
+app.use('/api/v1/search', searchRoutes);
 /*routes and midddlewares*/
 app.get('/', (req, res) => {
   res.send('App server is running');
 });
+
+
+
 app.use((err, req, res, next) => {
   if (!err) return next();
   return res.status(500).send('Alexa your fintech AI just  broke!');

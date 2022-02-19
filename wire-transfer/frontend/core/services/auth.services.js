@@ -40,13 +40,11 @@ export const registerUser = async (details) => {
 
 
 
-export const searchUser = (input) => {
-
-  let request = axios.get(`search/users?q=${input}`);
+export const searchUser = () => {
+  let request = axios.get(`search`);
   return request.then((response) => {
     if (response.status === 200) {
       return response && response;
     }
   });
-   
 }

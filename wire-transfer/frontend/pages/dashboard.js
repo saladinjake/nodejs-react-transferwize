@@ -1,8 +1,6 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
 import { login, logOut, setPrevPath } from "../core/redux/actions/auth.action";
-
 import { myTransactions } from "../core/services/transactions.services"
-
 import Currency from 'react-currency-icons'
 import {
   IconButton,
@@ -43,25 +41,21 @@ import {
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import Tradeoffs from "../core/views/components/Tradeoffs"
-
 import { FcLock } from 'react-icons/fc';
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-
+import RequestLoader from "../core/views/components/RequestLoader"
 const handleLogout = async () => {
-  console.log("called")
     await logOut();
     setTimeout(() => {
       if(typeof window!==undefined){
          window.location.href="/login"
       }
-     
     }, 2000);
   };
 
   const redirectTo = (url) =>{
-      
     setTimeout(() => {
        if(typeof window!==undefined){
         window.location.href=url
@@ -101,18 +95,9 @@ export default function Dashboard({
       <Box  ml={{ base: 0, md: 60 }} p="4">
         {children}
          <ActionComponent/>
-        
          <Tradeoffs/>
-         
       </Box>
-
-
-      
     </Box>
-
-
-   
-
       </>
   );
 }
@@ -130,9 +115,7 @@ function ActionComponent() {
     <Stack  p="4" boxShadow="lg" m="4" borderRadius="sm">
       <Stack direction="row" alignItems="center">
         <Text fontWeight="semibold">All Transactions</Text>
-        
       </Stack>
-
       <Stack
         direction={{ base: 'column', md: 'row' }}
         justifyContent="space-between">
@@ -141,9 +124,8 @@ function ActionComponent() {
         </Text>
         <Stack direction={{ base: 'column', md: 'row' }}>
           <Button onClick={()=>{redirectTo("/newtransaction")}} variant="outline" colorScheme="green">
-            Send Money
+            Create a new transaction
           </Button>
-     
         </Stack>
       </Stack>
     </Stack>
@@ -172,13 +154,9 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-      
-        <NavItem icon={FiHome} onClick={(e)=>{redirectTo('/dashboard')}}>Dashboard</NavItem>
-              <NavItem icon={FiTrendingUp} onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</NavItem>
-              
-              <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
-            
-    
+      <NavItem icon={FiHome} onClick={(e)=>{redirectTo('/dashboard')}}>Dashboard</NavItem>
+      <NavItem icon={FiTrendingUp} onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</NavItem>      
+      <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
     </Box>
   );
 };

@@ -79,6 +79,9 @@ class Model {
   logJSON(data) {
     return this.logger(JSON.stringify(data, null, '\t'));
   }
+
+   
+   
 }
 
 export default Model;
