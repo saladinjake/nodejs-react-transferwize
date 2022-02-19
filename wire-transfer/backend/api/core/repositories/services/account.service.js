@@ -141,7 +141,7 @@ class AccountService {
            });
         }else if(accounts.length<= 0 && user && "id" in user){
            //user exists but no account so create user account
-           await AccountService.createAccount(user.id, "savings", 1000.00);
+           await AccountService.createAccount(user.id, "savings", 0.00);
 
            const accounts = await Account.findAccountByOwner(user.id);
 

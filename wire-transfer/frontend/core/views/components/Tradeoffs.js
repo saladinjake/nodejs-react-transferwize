@@ -43,7 +43,7 @@ import { ReactText } from 'react';
 
 
 import { FcLock } from 'react-icons/fc';
-import { myTransactions, getWalletAccounts, creditLedgerAccount } from "../../services/transactions.services"
+import { myTransactions, getWalletAccounts, creditLedgerAccount, debitLedgerAccount } from "../../services/transactions.services"
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
@@ -71,6 +71,7 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
           const userAccount = walletAccountDetails.data.data[0]
           const res = await myTransactions(userAccount.accountNumber)
           // console.log(res)
+          setTransactions([...res?.data?.data])
           //if first timer then ledger the free gift account bonus given to a signed up user
           if(res?.data?.data?.length <=0){
             let debitorLedgerDetail = {
@@ -80,7 +81,7 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
               receipientId:userEmail
             };
             let creditorLedgerDetail ={
-              accountNumber :savingsAccount.accountNumber, // THE CREDITING USER ACCOUT
+              accountNumber :userAccount.accountNumber, // THE CREDITING USER ACCOUT
               senderId: SIMBA_COMPANY_ID, 
               amount:BONUS_AMOUNT,
               receipientId:userEmail
@@ -95,7 +96,7 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
             toastedBread({
             title: 'An error occurred.',
             description: "No user account/transactions were found", //error.message,
-            status: 'success',
+            status: 'error',
             duration: 9000,
             isClosable: true,
           })
@@ -106,7 +107,7 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
         toastedBread({
             title: 'An error occurred.',
             description: error?.message || error, //error.message,
-            status: 'success',
+            status: 'error',
             duration: 9000,
             isClosable: true,
           })

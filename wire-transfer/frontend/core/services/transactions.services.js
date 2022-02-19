@@ -20,7 +20,7 @@ export const getWalletAccounts = async (emailId) => {
 };
 
 export const creditLedgerAccount = async (ledgerDetail) => {
- let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/credit`);
+ let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/credit`, ledgerDetail);
   
   return request.then((response) => {
     if (response.status === 200) {
@@ -32,7 +32,7 @@ export const creditLedgerAccount = async (ledgerDetail) => {
 
 
 export const debitLedgerAccount = async (ledgerDetail) => {
-	let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/debit`);
+	let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/debit`, ledgerDetail);
   return request.then((response) => {
     if (response.status === 200) {
       return response && response;
