@@ -8,8 +8,6 @@ export const myTransactions = async (accountNumber) => {
     }
   });
 };
-
-
 export const getWalletAccounts = async (emailId) => {
   let request = axios.get(`user/${emailId}/accounts`);
   return request.then((response) => {
@@ -18,19 +16,14 @@ export const getWalletAccounts = async (emailId) => {
     }
   });
 };
-
 export const creditLedgerAccount = async (ledgerDetail) => {
- let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/credit`, ledgerDetail);
-  
+ let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/credit`, ledgerDetail);  
   return request.then((response) => {
     if (response.status === 200) {
       return response && response;
     }
   });
 }
-
-
-
 export const debitLedgerAccount = async (ledgerDetail) => {
 	let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/debit`, ledgerDetail);
   return request.then((response) => {
@@ -39,9 +32,6 @@ export const debitLedgerAccount = async (ledgerDetail) => {
     }
   });
 }
-
-
-
 
 export const getAllBalanceEquivalent = async (ledgerDetail) => {
 	let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/equibalance`, ledgerDetail);
