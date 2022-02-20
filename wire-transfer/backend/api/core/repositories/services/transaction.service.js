@@ -2,7 +2,8 @@ import TransactionModel from '../../models/transaction.model';
 import AccountModel from '../../models/account.model';
 import UserModel from '../../models/user.model';
 import mailer from '../../helpers/mailer';
-
+import dotenv from "dotenv"
+dotenv.config()
 
 const Account = new AccountModel('accounts');
 const Transaction = new TransactionModel('transactions');
@@ -12,7 +13,7 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount( accountNumber,senderId, amount, exchangeAmount, rate, receipientId,formCurrency="USD",toCurrency='USD')  {
+  static async debitAccount( accountNumber,senderId, amount, exchangeAmount, rate, receipientId,formCurrency,toCurrency)  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
       //console.log(account)
@@ -25,9 +26,7 @@ class TransactionService {
 
           const transaction = await Transaction.debit(
             account,senderId, amount,exchangeAmount, rate,
-             receipientId,formCurrency,toCurrency
-
-              
+             receipientId,formCurrency,toCurrency      
              );
 
           const mailData = {
@@ -47,13 +46,13 @@ class TransactionService {
             accountNumber: Number(transaction.accountnumber),
             amount,
             exchangeAmount, rate,
-            cashier: transaction.cashier,
+            cashier: transaction.senderid,
             transactionType: transaction.transactiontype,
             accountBalance: transaction.newbalance,
-            formCurrency: transaction.formCurrency,
-            toCurrency: transaction.toCurrency,
-            balanceNaira: transaction.newbalanceNaira,
-            balanceEuros: transaction.newBalanceEuros
+            formCurrency: transaction.formcurrency,
+            toCurrency: transaction.tocurrency,
+            balanceNaira: transaction.newbalancenaira,
+            balanceEuros: transaction.newbalanceeuros
           };
         }
         throw new Error('account balance is not sufficient');
@@ -67,7 +66,7 @@ class TransactionService {
 
 
 
-  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount,exchangeAmount, rate, receipientId/*reciever email*/, formCurrency="USD",toCurrency='USD') {
+  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount,exchangeAmount, rate, receipientId/*reciever email*/, formCurrency,toCurrency) {
     try {
 
        const account = await Account.findByAccountNumber(Number(accountNumber));
@@ -96,15 +95,17 @@ class TransactionService {
         await mailer(mailData);
 
         return {
-          transactionId: transaction.id,
-          accountNumber: Number(transaction.accountnumber),
-          amount,
-          exchangeAmount, rate,
-          cashier: transaction.cashier,
-          transactionType: transaction.transactiontype,
-          accountBalance: transaction.newbalance,
-          formCurrency: transaction.formCurrency,
-          toCurrency: transaction.toCurrency
+            transactionId: transaction.id,
+            accountNumber: Number(transaction.accountnumber),
+            amount,
+            exchangeAmount, rate,
+            cashier: transaction.senderid,
+            transactionType: transaction.transactiontype,
+            accountBalance: transaction.newbalance,
+            formCurrency: transaction.formcurrency,
+            toCurrency: transaction.tocurrency,
+            balanceNaira: transaction.newbalancenaira,
+            balanceEuros: transaction.newbalanceeuros
         };
       }
         throw new Error('account number doesn\'t exist');

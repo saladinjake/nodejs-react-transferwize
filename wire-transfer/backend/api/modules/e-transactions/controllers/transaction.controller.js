@@ -8,18 +8,8 @@ class TransactionController {
  
   static async debitUserAccount(req, res) {
     let formCurrency = null; let toCurrency = null
-    const { amount , rate, exchangeAmount, receipientId } = req.body;
-    if(!req.body.sendingCurrency){
-       formCurrency='USD'
-    }else{
-      formCurrency = req.body.sendingCurrency
-    }
-
-    if(!req.body.receivingCurrency){
-       toCurrency='USD'
-    }else{
-      toCurrency = req.body.receivingCurrency
-    }
+    const { amount , rate, exchangeAmount, receipientId, sendingCurrency, receivingCurrency } = req.body;
+    
     const emailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
    if (!emailFilter.test(receipientId)) {
      
@@ -32,8 +22,8 @@ class TransactionController {
     
     try {    
         const transaction = await TransactionService.debitAccount( 
-          accountNumber,id, amount, exchangeAmount, rate,
-           receipientId,formCurrency,toCurrency
+          accountNumber,id, amount, req.body.exchangeAmount, req.body.rate,
+           receipientId,sendingCurrency, receivingCurrency
         );
         return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
     } catch (error) {
@@ -47,18 +37,8 @@ class TransactionController {
 
   static async creditUserAccount(req, res) {
    let formCurrency = null; let toCurrency = null
-   const { amount , rate, exchangeAmount, receipientId } = req.body;
-  if(!req.body.fromCurrency){
-       formCurrency='USD'
-    }else{
-      formCurrency = req.body.formCurrency
-    }
-
-    if(!req.body.toCurrency){
-       toCurrency='USD'
-    }else{
-      toCurrency = req.body.toCurrency
-    }
+    const { amount , rate, exchangeAmount, receipientId, sendingCurrency, receivingCurrency } = req.body;
+   
     const emailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
    if (!emailFilter.test(receipientId)) {
      
@@ -70,9 +50,11 @@ class TransactionController {
     const { accountNumber } = req.params;   // the same credited persons identity wallet 
     
     try {
+      let formCurrency = sendingCurrency;
+      let toCurrency = receivingCurrency;
       const transaction = await TransactionService.creditAccount(
-       accountNumber,id, amount,exchangeAmount, rate,
-        receipientId,formCurrency,toCurrency
+       accountNumber,id, amount,req.body.exchangeAmount, req.body.rate,
+        receipientId,formCurrency, toCurrency
       );
       console.log(transaction)
       return response.sendSuccess(res, 200, transaction, 'Transaction was successful');

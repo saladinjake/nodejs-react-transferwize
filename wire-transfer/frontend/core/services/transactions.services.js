@@ -47,24 +47,27 @@ export const sendMoneyOverseas = async (creditLedgerDetail,debitLedgerDetail) =>
    const presignedSignatureCredit = await creditLedgerAccount(creditLedgerDetail)
    console.log(presignedSignatureCredit)
    const presignedSignatureDebit = await debitLedgerAccount(debitLedgerDetail)
-    console.log(presignedSignatureDebit)
-    // if(presignedSignatureCredit ){ //if credit was successful
-    //   if(presignedSignatureDebit){ // if debit was successful
-
-    //   }else{
-        
-    //      //else reverse credit
-    //       toast.error("Transaction could not complete. Dont worry we will reverse any transaction that has been debited or credited with out properly derived state.")
-    //   }
+   console.log(presignedSignatureDebit)
+   if(presignedSignatureCredit.status==200 ){ //if credit was successful
+     if(presignedSignatureDebit.status==200){ // if debit was successful
+          return "OK"
+      }else{
+       
+         //else reverse credit
+           toast.error("Transaction could not complete. Dont worry we will reverse any transaction that has been debited or credited with out properly derived state.")
+           return 'FAILED'
+      }
       
-    // }else{
-    //    toast.error("Transaction could not be completed. Please contact your bank manager next year!!!") 
-    // }
+   }else{
+       toast.error("Transaction could not be completed. Please contact your bank manager next year!!!") 
+        return 'FAILED'
+    }
   }catch(error){
     // roll back transaction
     toast.error(error.message|| error)
     console.log(error)
      console.log("INOPERATIVE SWITCH OR ACCOUNT")
+      return 'FAILED'
  }
 }
 

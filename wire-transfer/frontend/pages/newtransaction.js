@@ -69,6 +69,8 @@ import { useToast } from '@chakra-ui/react'
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
+import { useRouter } from 'next/router';
+
 import { sendMoneyOverseas } from "../core/services/transactions.services" 
 
 const LinkItems = [
@@ -86,6 +88,7 @@ const handleLogout = async () => {
     setTimeout(() => {
       if(typeof window!==undefined){
          window.location.href="/login"
+
       }
     }, 2000);
   };
@@ -103,7 +106,7 @@ const handleLogout = async () => {
 
 
 const MobileNav = ({ onOpen, auth: {user  }, ...rest }) => {
-
+const router = useRouter();
     let isLoggedIn = false;
   const [id, setId] = useState("")
   const [email, setEmail] = useState("")
@@ -318,12 +321,13 @@ function NewTransfer({ auth: {  user , prevPath } }) {
     rate:1,
     senderid: id,
     receipientId: null,
-    sendingCurrency:"USD",
-    receivingCurrency:"USD",
+    sendingCurrency:currencyFrom,
+    receivingCurrency:currencyTo,
 
   };
 
   const [submitData, setSubmitData] = useState(transactionPayload)
+  const [isSubmitClick, setIsSubmitClicked] = useState(false)
 
   const getUserEmail = (searchName) =>{
     const firstName = searchName.split()[0]
@@ -401,6 +405,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
   }, []);
 
   const handleSubmitTransactionExchange = async () =>{
+    setIsSubmitClicked(true)
      const selectedUser = document.getElementById("wizards").value
     if(!selectedUser ){
       toastedBread({
@@ -410,13 +415,14 @@ function NewTransfer({ auth: {  user , prevPath } }) {
         duration: 9000,
         isClosable: true,
       })
+      setIsSubmitClicked(false)
       return false
     }
      const creditLedgerPayload = {
         name: document.getElementById("wizards").value,
         amount:inputFrom,
         exchangeAmount: inputTo,
-        rate:submitData.rate,
+        rate:rate,
         sendingCurrency:currencyFrom,
         receivingCurrency:currencyTo,
         senderId: id,
@@ -426,15 +432,15 @@ function NewTransfer({ auth: {  user , prevPath } }) {
         name: firstName + " " + lastName,
         amount:inputFrom,
         exchangeAmount: inputTo,
-        rate:submitData.rate,
+        rate:rate,
         sendingCurrency:currencyFrom,
         receivingCurrency:currencyTo, 
         senderId: handleSelectedUser().id,
         receipientId: email,
         
       };
-      //console.log(creditLedgerPayload)
-      //console.log(debitLedgerPayload)
+      console.log(creditLedgerPayload)
+      console.log(debitLedgerPayload)
       Object.keys(creditLedgerPayload).forEach(key =>{
          if(creditLedgerPayload[key]==""  || creditLedgerPayload[key]==undefined || creditLedgerPayload[key]==null ){
              toastedBread({
@@ -444,6 +450,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
               duration: 9000,
               isClosable: true,
             })
+             setIsSubmitClicked(false)
             return false
          }
 
@@ -456,6 +463,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
               duration: 9000,
               isClosable: true,
             })
+                setIsSubmitClicked(false)
             return false
            }
          }
@@ -470,6 +478,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
               duration: 9000,
               isClosable: true,
             })
+              setIsSubmitClicked(false)
             return false
          }
 
@@ -482,15 +491,41 @@ function NewTransfer({ auth: {  user , prevPath } }) {
               duration: 9000,
               isClosable: true,
             })
+                setIsSubmitClicked(false)
             return false
            }
          }
       })
 
-      const transactionSuccessful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
-      if(transactionSuccessful){
+      try{
+
+        const transactionSuccessful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
+      if(transactionSuccessful=="OK"){
         // toast yippikayeh M**F**KA!!!
+         setIsSubmitClicked(false)
+        toastedBread({
+              title: 'SUCCESSFUL',
+              status:"success",
+              description: "Transaction was successful",
+              duration: 9000,
+              isClosable: true,
+        })
       }
+
+      }catch(error){
+
+          toastedBread({
+              title: 'Error',
+              status:"error",
+              description: error.message|| error.toString(),
+              duration: 9000,
+              isClosable: true,
+        })    
+      }
+
+        setIsSubmitClicked(false)
+
+      
   }
 
 
@@ -511,6 +546,13 @@ function NewTransfer({ auth: {  user , prevPath } }) {
           boxShadow={'lg'}
           p={8}>
           <Stack >
+
+           <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
+              <FontAwesomeIcon icon={faDollarSign} size="2x" />
+            <h2> Exchange Currencies </h2>
+            <FontAwesomeIcon icon={faEuroSign} size="2x" />
+          </Flex>
+
             <FormControl id="email">
               <FormLabel>Receipient Name:</FormLabel>
                 
@@ -537,11 +579,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
 
 
             <div>
-      <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
-          <FontAwesomeIcon icon={faDollarSign} size="2x" />
-        <h2> Exchange Currencies </h2>
-        <FontAwesomeIcon icon={faEuroSign} size="2x" />
-      </Flex>
+     
 
       <Box p="20px">
        <Stack
@@ -620,12 +658,13 @@ function NewTransfer({ auth: {  user , prevPath } }) {
                 _hover={{
                   bg: 'blue.500',
                 }}
+                disabled={isSubmitClick ? true : false}
                 onClick={(e)=>{
                   e.preventDefault()
                   handleSubmitTransactionExchange(e)
                 }}
                 >
-               Transfer Money
+               Quick Transfer
               </Button>
             </Stack>
           </Stack>

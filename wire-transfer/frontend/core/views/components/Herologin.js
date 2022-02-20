@@ -13,6 +13,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 
 import * as Yup from "yup";
 // import * as toast from "react-hot-toast";
@@ -38,8 +39,9 @@ import RequestLoader from "../../views/components/RequestLoader"
   const [showLogin, setShowLogin] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
  const toastedBread = useToast()
+  const router = useRouter();
  if(isAuthenticated && user.hasOwnProperty("token")){
-   window.location.href="/dashboard"
+    router.push('/dashboard')
  }
   
   const handleRegisterDisplay = (e) =>{
@@ -88,9 +90,10 @@ import RequestLoader from "../../views/components/RequestLoader"
           //dispatch the redux action
           console.log(res)
           login(res);
-           if(typeof window!=undefined){
-            window.location.href="/dashboard"
-          }
+           router.push('/dashboard')
+          //  if(typeof window!=undefined){
+          //   window.location.href="/dashboard"
+          // }
         }catch(error){
           console.log(error)
 
