@@ -16,7 +16,8 @@ import {
   NumberInputField,
   NumberInputStepper,
   NumberIncrementStepper,
-  NumberDecrementStepper
+  NumberDecrementStepper,
+  Box
 } from "@chakra-ui/react";
 import {
   ArrowRightIcon,
@@ -45,15 +46,24 @@ function CustomTable({ columns, data }) {
     {
       columns,
       data,
-      initialState: { pageIndex: 2 }
+      initialState: { pageIndex: 0 }
     },
     usePagination
   );
 
+  data.forEach(transaction =>{
+    if(transaction.type ==="debit"){
+       transaction["cash_in_flow_debit"] = "- "+ transaction.amount
+    }else{
+      transaction["cash_in_flow_credit"] ='+ '+ transaction.amount
+    }
+  })
+
   
   return (
     <>
-      <Table {...getTableProps()}>
+       <Box overflowX="auto">
+      <Table bg="#fff"  {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup) => (
             <Tr {...headerGroup.getHeaderGroupProps()}>
@@ -70,7 +80,7 @@ function CustomTable({ columns, data }) {
               <Tr {...row.getRowProps()}>
                 {row.cells.map((cell) => {
                   return (
-                    <Td {...cell.getCellProps()}>{cell.render("Cell")}</Td>
+                    <Td width="100px" {...cell.getCellProps()}>{cell.render("Cell")}</Td>
                   );
                 })}
               </Tr>
@@ -78,6 +88,7 @@ function CustomTable({ columns, data }) {
           })}
         </Tbody>
       </Table>
+      </Box>
 
       <Flex justifyContent="space-between" m={4} alignItems="center">
         <Flex>
@@ -161,6 +172,7 @@ function CustomTable({ columns, data }) {
           </Tooltip>
         </Flex>
       </Flex>
+
     </>
   );
 }
@@ -181,12 +193,16 @@ function TableApplication({data}) {
             accessor: "receipientid"
           },
           {
-            Header: "amount",
-            accessor: "amount"
+            Header: "Debit Ledger",
+            accessor: "cash_in_flow_debit"
           },
           {
-            Header: "transactionType",
-            accessor: "transactionType"
+            Header: "Credit Ledger",
+            accessor: "cash_in_flow_credit"
+          },
+          {
+            Header: "Equivalent",
+            accessor: "exchangeamount"
           },
           {
             Header: "from currency",
@@ -195,7 +211,17 @@ function TableApplication({data}) {
           {
             Header: "to currency",
             accessor: "tocurrency"
-          }
+          },
+          {
+            Header: "rate",
+            accessor: "rate"
+          },
+          {
+            Header: "Transaction Type",
+            accessor: "type"
+          },
+          
+          
         ]
       }
     ],

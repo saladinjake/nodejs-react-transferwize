@@ -1,7 +1,7 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from "react";
 import { login, logOut, setPrevPath } from "../core/redux/actions/auth.action";
 
-
+import Link from "next/link"
 import Currency from 'react-currency-icons'
 import AsyncSelect from 'react-select/async';
 import axios      from 'axios'
@@ -15,7 +15,7 @@ import {
   VStack,
   Icon,
   useColorModeValue,
-  Link,
+
   Drawer,
   DrawerContent,
   Text,
@@ -101,6 +101,135 @@ const handleLogout = async () => {
 
 
 
+
+const MobileNav = ({ onOpen, auth: {user  }, ...rest }) => {
+
+    let isLoggedIn = false;
+  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
+  const [firstName, setFirstName ] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [token,setToken] = useState("")
+
+  useEffect(async()=>{
+      if(typeof window!=="undefined"){
+         
+        if(window.localStorage && window.localStorage.getItem("user")){
+          console.log(window.localStorage.getItem("user"))
+          user = JSON.parse(window.localStorage.getItem("user"))
+          setId(user.id)
+          setEmail(user.email)
+          setFirstName(user.firstName)
+          setLastName(user.lastName)
+          setIsAuthenticated(user.isAuthenticated)
+          setToken(user.token)
+          if (user.token && user.isAuthenticated) {
+             isLoggedIn = true;
+          }
+        }else{
+          await logOut()
+          setTimeout(()=>{window.location.href="/login"},2000)
+        }
+      }
+  },[user])
+
+
+  return (
+    <Flex
+      ml={{ base: 0, md: 60 }}
+      px={{ base: 4, md: 4 }}
+      height="20"
+      alignItems="center"
+      bg={useColorModeValue('white', 'gray.900')}
+      borderBottomWidth="1px"
+      borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
+      justifyContent={{ base: 'space-between', md: 'flex-end' }}
+      {...rest}>
+      <IconButton
+        display={{ base: 'flex', md: 'none' }}
+        onClick={onOpen}
+        variant="outline"
+        aria-label="open menu"
+        icon={<FiMenu />}
+      />
+
+      <Text
+        display={{ base: 'flex', md: 'none' }}
+        fontSize="2xl"
+        fontFamily="monospace"
+        fontWeight="bold">
+        TRANSFERWIZ
+      </Text>
+
+      <HStack spacing={{ base: '0', md: '6' }}>
+        <IconButton
+          size="lg"
+          variant="ghost"
+          aria-label="open menu"
+          icon={<FiBell />}
+        />
+        <Flex alignItems={'center'}>
+          <Menu>
+            <MenuButton
+              py={2}
+              transition="all 0.3s"
+              _focus={{ boxShadow: 'none' }}>
+              <HStack>
+                <Avatar
+                  size={'sm'}
+                  src={
+                    'https://avatars.githubusercontent.com/u/26296603?v=4'
+                  }
+                />
+                <VStack
+                  display={{ base: 'none', md: 'flex' }}
+                  alignItems="flex-start"
+                  spacing="1px"
+                  ml="2">
+                  <Text fontSize="md">{user?.firstName + " "+ user?.lastName }</Text>
+                  <Text fontSize="xs" color="gray.600">
+                   You are logged in
+                  </Text>
+                </VStack>
+                <Box display={{ base: 'none', md: 'flex' }}>
+                  <FiChevronDown />
+                </Box>
+              </HStack>
+            </MenuButton>
+             <MenuList
+              bg={useColorModeValue('white', 'gray.900')}
+              borderColor={useColorModeValue('gray.200', 'gray.700')}>
+              <Link href="/dashboard"><MenuItem onClick={(e)=>{redirectTo('/dashboard')}}>My Transactions</MenuItem></Link>
+               <Link href="/newtransaction"><MenuItem onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</MenuItem></Link>
+              <MenuDivider />
+               <Link href="#"><MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem></Link>
+            </MenuList>
+          </Menu>
+        </Flex>
+      </HStack>
+    </Flex>
+  );
+};
+
+
+
+MobileNav.propTypes = {
+  auth: PropTypes.object.isRequired,
+};
+
+
+
+const mapStateToProps3 = (state) => ({
+  auth: state.auth
+});
+
+const MobileNavigate = connect(mapStateToProps3, {
+  
+})(MobileNav);
+
+
+
 function NewTransfer({ auth: {  user , prevPath } }) {
   
  
@@ -122,9 +251,9 @@ function NewTransfer({ auth: {  user , prevPath } }) {
 
   useEffect(async()=>{
       if(typeof window!=="undefined"){
-          console.log(user)
+        //  console.log(user)
         if(window.localStorage && window.localStorage.getItem("user")){
-          console.log(window.localStorage.getItem("user"))
+         // console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
           setId(user.id)
           setEmail(user.email)
@@ -223,7 +352,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
         return ""
        }
     })
-    console.log(foundUser)
+   // console.log(foundUser)
     if(!foundUser || foundUser.length<=0){
       userInputHtml.value =""
        toastedBread({
@@ -248,7 +377,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
         //8c627c48be6db29a67c2b7cf
         `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
       );
-      console.log(result);
+      //console.log(result);
       if (result.ok) {
         const rates = await result.json();
         setRate(rates.conversion_rate);
@@ -265,7 +394,7 @@ function NewTransfer({ auth: {  user , prevPath } }) {
   useEffect(() => {
     const findUsers = async () => {
       const result = await searchUser()
-      console.log(result.data);
+      //console.log(result.data);
       setAllUsers([...result.data.data]) 
     };
     findUsers();
@@ -273,6 +402,16 @@ function NewTransfer({ auth: {  user , prevPath } }) {
 
   const handleSubmitTransactionExchange = async () =>{
      const selectedUser = document.getElementById("wizards").value
+    if(!selectedUser ){
+      toastedBread({
+        title: 'An error occurred.',
+        status:"error",
+        description: "Receipient User not selected. ",
+        duration: 9000,
+        isClosable: true,
+      })
+      return false
+    }
      const creditLedgerPayload = {
         name: document.getElementById("wizards").value,
         amount:inputFrom,
@@ -294,8 +433,8 @@ function NewTransfer({ auth: {  user , prevPath } }) {
         receipientId: email,
         
       };
-      console.log(creditLedgerPayload)
-      console.log(debitLedgerPayload)
+      //console.log(creditLedgerPayload)
+      //console.log(debitLedgerPayload)
       Object.keys(creditLedgerPayload).forEach(key =>{
          if(creditLedgerPayload[key]==""  || creditLedgerPayload[key]==undefined || creditLedgerPayload[key]==null ){
              toastedBread({
@@ -306,6 +445,19 @@ function NewTransfer({ auth: {  user , prevPath } }) {
               isClosable: true,
             })
             return false
+         }
+
+         if(key==="exchangeAmount" || key==="amount"){
+           if(debitLedgerPayload[key]<=0){
+               toastedBread({
+              title: 'An error occurred.',
+              status:"error",
+              description: "Enter an amount value greater than zero",
+              duration: 9000,
+              isClosable: true,
+            })
+            return false
+           }
          }
       })
 
@@ -320,9 +472,25 @@ function NewTransfer({ auth: {  user , prevPath } }) {
             })
             return false
          }
+
+         if(key==="exchangeAmount" || key==="amount"){
+           if(debitLedgerPayload[key]<=0){
+               toastedBread({
+              title: 'An error occurred.',
+              status:"error",
+              description: "Enter an amount value greater than zero",
+              duration: 9000,
+              isClosable: true,
+            })
+            return false
+           }
+         }
       })
 
       const transactionSuccessful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
+      if(transactionSuccessful){
+        // toast yippikayeh M**F**KA!!!
+      }
   }
 
 
@@ -344,16 +512,10 @@ function NewTransfer({ auth: {  user , prevPath } }) {
           p={8}>
           <Stack >
             <FormControl id="email">
-              <FormLabel>Find User</FormLabel>
+              <FormLabel>Receipient Name:</FormLabel>
+                
                 <div>
-                  {/*<AsyncSelect
-                    name="form-field-name"
-                    value="one"
-                    loadOptions={searchUser}
-                    onInputChange={handleInputChange}
-                  />*/}
-
-                  <label for="states">Find users full name</label>
+                  
                   <Input  type="text" id="wizards" name="wizards" list="users-list" />
                   <datalist id="users-list">
 
@@ -374,10 +536,10 @@ function NewTransfer({ auth: {  user , prevPath } }) {
 
 
 
-            <div className="App">
-      <Flex justifyContent="space-between">
+            <div>
+      <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
           <FontAwesomeIcon icon={faDollarSign} size="2x" />
-        <h2> TRANSFERWIZ </h2>
+        <h2> Exchange Currencies </h2>
         <FontAwesomeIcon icon={faEuroSign} size="2x" />
       </Flex>
 
@@ -509,7 +671,7 @@ const FTransaction = connect(mapStateToProps, {})(NewTransfer);
         </DrawerContent>
       </Drawer>
       {/* mobilenav */}
-      <MobileNav onOpen={onOpen} />
+      <MobileNavigate onOpen={onOpen} />
       <Box  ml={{ base: 0, md: 60 }} p="4">
         {children}
          <FTransaction/>
@@ -563,9 +725,9 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-       <NavItem icon={FiHome} onClick={(e)=>{redirectTo('/dashboard')}}>Dashboard</NavItem>
-      <NavItem icon={FiTrendingUp} onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</NavItem>      
-      <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
+      <Link href="/dashboard"><NavItem icon={FiHome} >Dashboard</NavItem></Link>
+      <Link href="/newtransaction"><NavItem icon={FiTrendingUp} >New Transaction</NavItem></Link>      
+      <Link href="#"><NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem></Link>
     
     </Box>
   );
@@ -602,84 +764,6 @@ const NavItem = ({ icon, children, ...rest }) => {
   );
 };
 
-
-const MobileNav = ({ onOpen, ...rest }) => {
-  return (
-    <Flex
-      ml={{ base: 0, md: 60 }}
-      px={{ base: 4, md: 4 }}
-      height="20"
-      alignItems="center"
-      bg={useColorModeValue('white', 'gray.900')}
-      borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
-      justifyContent={{ base: 'space-between', md: 'flex-end' }}
-      {...rest}>
-      <IconButton
-        display={{ base: 'flex', md: 'none' }}
-        onClick={onOpen}
-        variant="outline"
-        aria-label="open menu"
-        icon={<FiMenu />}
-      />
-
-      <Text
-        display={{ base: 'flex', md: 'none' }}
-        fontSize="2xl"
-        fontFamily="monospace"
-        fontWeight="bold">
-        TRANSFERWIZ
-      </Text>
-
-      <HStack spacing={{ base: '0', md: '6' }}>
-        <IconButton
-          size="lg"
-          variant="ghost"
-          aria-label="open menu"
-          icon={<FiBell />}
-        />
-        <Flex alignItems={'center'}>
-          <Menu>
-            <MenuButton
-              py={2}
-              transition="all 0.3s"
-              _focus={{ boxShadow: 'none' }}>
-              <HStack>
-                <Avatar
-                  size={'sm'}
-                  src={
-                    'https://avatars.githubusercontent.com/u/26296603?v=4'
-                  }
-                />
-                <VStack
-                  display={{ base: 'none', md: 'flex' }}
-                  alignItems="flex-start"
-                  spacing="1px"
-                  ml="2">
-                  <Text fontSize="sm">Hello world</Text>
-                  <Text fontSize="xs" color="gray.600">
-                   You are logged 
-                  </Text>
-                </VStack>
-                <Box display={{ base: 'none', md: 'flex' }}>
-                  <FiChevronDown />
-                </Box>
-              </HStack>
-            </MenuButton>
-             <MenuList
-              bg={useColorModeValue('white', 'gray.900')}
-              borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <MenuItem onClick={(e)=>{redirectTo('/dashboard')}}>My Transactions</MenuItem>
-              <MenuItem onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</MenuItem>
-              <MenuDivider />
-              <MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
-      </HStack>
-    </Flex>
-  );
-};
 
 
 

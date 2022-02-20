@@ -110,8 +110,8 @@ DROP TABLE IF EXISTS users CASCADE;
 
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('juwavictor@gmail.com','Saladin','Jake','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',true);
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('danielwallen@gmail.com','Daniel','Wallen','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',false);
-INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('test@gmail.com','Solomon','Grandy','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',false);
-INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('simba@gmail.com','Company','Boss','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','client',false);
+INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('test@gmail.com','Solomon','Grandy','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','client',false);
+INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('simba@gmail.com','Company','Boss','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',false);
 
 INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220107727,1,'savings','active',0.00,0.00,0.00);
 INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220107821,2,'savings','active',0.00,0.00,0.00);

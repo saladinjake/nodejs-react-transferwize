@@ -18,11 +18,15 @@ export default class Transaction extends Model {
          
 
          if(toCurrency=="EUR"){
-            newBalanceEuros = parseFloat(userAccount.balanceEuros)+ exchangeAmount
+           // base balance
+            newBalance =parseFloat(userAccount.balance) +  parseFloat(exchangeAmount)
+            newBalanceEuros = parseFloat(userAccount.balanceEuros)+  parseFloat(exchangeAmount)
          }else if(toCurrency=="NGN"){
-           newBalanceNaira = parseFloat(userAccount.balanceNaira)+ exchangeAmount
+           newBalance =parseFloat(userAccount.balance) +  parseFloat(exchangeAmount)
+           newBalanceNaira = parseFloat(userAccount.balanceNaira)+  parseFloat(exchangeAmount)
          }else{
-            newBalance =parseFloat(userAccount.balance) + exchangeAmount //or + anmount
+            //or + anmount
+            newBalance =parseFloat(userAccount.balance) +  parseFloat(exchangeAmount)
          }
 
           console.log(account, cashierId,amount,receipient)
@@ -58,17 +62,20 @@ export default class Transaction extends Model {
 
   async debit(account, senderId, amount,exchangeAmount, rate,  receipientId,formCurrency='USD', toCurrency='USD') {
     const userAccount = account;
-    let newBalance = parseFloat(userAccount.balance) - amount;
      let    newBalanceNaira = 0.00;  
      let    newBalanceEuros = 0.00;
+      let newBalance = 0.00;
 
-      if(toCurrency=="EUR"){
-            newBalanceEuros = parseFloat(userAccount.balanceEuros)- exchangeAmount
+     if(toCurrency=="EUR"){
+           // base balance
+            newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount)
+            newBalanceEuros = parseFloat(userAccount.balanceEuros)-  parseFloat(exchangeAmount)
          }else if(toCurrency=="NGN"){
-           newBalanceNaira = parseFloat(userAccount.balanceNaira)- exchangeAmount
+           newBalance =parseFloat(userAccount.balance) - parseFloat(exchangeAmount) 
+           newBalanceNaira = parseFloat(userAccount.balanceNaira)-  parseFloat(exchangeAmount)
          }else{
-            let newBalance = parseFloat(userAccount.balance) - exchangeAmount;
-    //or + anmount
+            //or + anmount
+            newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount) 
          }
      
     try {
@@ -114,7 +121,7 @@ export default class Transaction extends Model {
       //   [accountNumber,userId,userEmail],
       // );
 
-      const { rows } = await this.pool.query('SELECT * FROM transactions WHERE accountNumber=$1 OR senderId=$2  OR receipientId=$3',[accountNumber,userProfile.id,userProfile.email])
+      const { rows } = await this.pool.query('SELECT * FROM transactions WHERE accountNumber=$1 OR  receipientId=$2',[accountNumber,userProfile.email])
       console.log(rows)
       return rows;
     } catch (error) {
