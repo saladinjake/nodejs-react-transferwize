@@ -52,7 +52,8 @@
   },
   "scripts": {
     "start-dev": "nodemon --exec babel-node ./backend/api/index.js",
-    "start": "node dist/index.js",
+    "start": "nodemon dist/index.js",
+    "prestart":"npm install",
     "build-babel": "babel ./backend/api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
@@ -66,7 +67,7 @@
     "test": "mocha --require @babel/register ./backend/api/test/**.test.js --timeout 10000 --reporter min",
     "runtest-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./backend/api/test/**.test.js --timeout 20000 --watch --exit"
   },
-  
+
   "nyc": {
     "exclude": [
       "**/*.spec.js*",
