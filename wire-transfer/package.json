@@ -66,6 +66,7 @@
     "test": "mocha --require @babel/register ./backend/api/test/**.test.js --timeout 10000 --reporter min",
     "runtest-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./backend/api/test/**.test.js --timeout 20000 --watch --exit"
   },
+  
   "nyc": {
     "exclude": [
       "**/*.spec.js*",
