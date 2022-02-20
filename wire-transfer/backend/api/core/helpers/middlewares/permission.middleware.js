@@ -20,9 +20,11 @@ export default class PermissionMiddleware {
 
     try {
       const isMyAccount = await AccountService.isMyAccount(id, accountNumber);
-
-      if (!isMyAccount && type !== 'client') {
-          console.log(error)
+      console.log(id,type,isMyAccount)
+      //its automated it dont have to be your account to credit another account
+      if ( //!isMyAccount &&
+       (type !== 'client' || type !== 'staff')) {
+          
         return response.sendError(res, 403, 'Permission denied');
       }
       return next();

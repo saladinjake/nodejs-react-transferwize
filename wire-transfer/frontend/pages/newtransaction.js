@@ -65,6 +65,12 @@ import { searchUser } from "../core/services/auth.services"
 import currencies from "../core/services/currencylist.service.json";
 import RequestLoader from "../core/views/components/RequestLoader"
 import { useToast } from '@chakra-ui/react'
+
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+
+import { sendMoneyOverseas } from "../core/services/transactions.services" 
+
 const LinkItems = [
   { name: 'dashboard', icon: FiHome },
   { name: 'New Transaction', icon: FiTrendingUp },
@@ -93,9 +99,395 @@ const handleLogout = async () => {
   }
 
 
-export default function Dashboard({
+
+
+function NewTransfer({ auth: {  user , prevPath } }) {
+  
+ 
+  const toastedBread = useToast()
+  const handleInputChange = (newValue) => {
+    const inputValue = newValue.replace(/\W/g, '');
+    // setState({ inputValue });
+    return inputValue;
+  };
+
+  let isLoggedIn = false;
+  
+  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
+  const [firstName, setFirstName ] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [token,setToken] = useState("")
+
+  useEffect(async()=>{
+      if(typeof window!=="undefined"){
+          console.log(user)
+        if(window.localStorage && window.localStorage.getItem("user")){
+          console.log(window.localStorage.getItem("user"))
+          user = JSON.parse(window.localStorage.getItem("user"))
+          setId(user.id)
+          setEmail(user.email)
+          setFirstName(user.firstName)
+          setLastName(user.lastName)
+          setIsAuthenticated(user.isAuthenticated)
+          setToken(user.token)
+          if (user.token && user.isAuthenticated) {
+             isLoggedIn = true;
+          }
+        }else{
+          await logOut()
+          setTimeout(()=>{window.location.href="/login"},2000)
+        }
+      }
+  },[user])
+
+  const [inputFrom, setInputFrom] = useState(0);
+  const [inputTo, setInputTo] = useState(0);
+  const [rate, setRate] = useState(0);
+  const [currencyFrom, setCurrencyFrom] = useState("USD");
+  const [currencyTo, setCurrencyTo] = useState("EUR");
+
+  const [allUsers, setAllUsers] = useState([])
+
+  const handleChangeFrom = (event) => {
+    const { value } = event.target;
+    setInputFrom(value);
+    setInputTo(value * rate);
+  };
+
+  const handleChangeTo = (event) => {
+    const { value } = event.target;
+    setInputTo(value);
+    setInputFrom(value / rate);
+  };
+
+  const handleSelectFrom = (event) => {
+    const { value } = event.target;
+    setCurrencyFrom(value);
+  };
+
+  const handleSelectTo = (event) => {
+    const { value } = event.target;
+    setCurrencyTo(value);
+  };
+
+  const handleSwap = () => {
+    setCurrencyFrom(currencyTo);
+    setCurrencyTo(currencyFrom);
+  };
+
+
+
+
+  //payload submit transaction payload and validation
+
+  const transactionPayload = {
+    name:'',
+    sendingAmount:0.00,
+    receivingAmount: 0.00, 
+    rate:1,
+    senderid: id,
+    receipientId: null,
+    sendingCurrency:"USD",
+    receivingCurrency:"USD",
+
+  };
+
+  const [submitData, setSubmitData] = useState(transactionPayload)
+
+  const getUserEmail = (searchName) =>{
+    const firstName = searchName.split()[0]
+    const foundUser = allUsers.find(user =>{
+       const testData = user.firstname + " " + user.lastname
+       if(
+        testData.toLowerCase()===searchName.toLowerCase()
+          
+        ){
+         return user.email
+       }else{
+        return ""
+       }
+    })
+  }
+
+  const handleSelectedUser = () => {
+    const userInputHtml = document.getElementById("wizards")
+    const userInputCopy =  userInputHtml.value.toLowerCase();
+
+    const foundUser = allUsers.find(user =>{
+       const testData = user.firstname + " " + user.lastname 
+       if(testData.toLowerCase()===userInputCopy){
+        return user.email
+       }else{
+        return ""
+       }
+    })
+    console.log(foundUser)
+    if(!foundUser || foundUser.length<=0){
+      userInputHtml.value =""
+       toastedBread({
+        title: 'An error occurred.',
+        status:"error",
+        description: "User dont exist. please select a user from the dropdown",
+        duration: 9000,
+        isClosable: true,
+      })
+       return null
+    }else{
+      //set state of the field
+       return foundUser
+    }
+  }
+  
+
+  useEffect(() => {
+
+    const fetchConversionRates = async () => {
+      const result = await fetch(//
+        //8c627c48be6db29a67c2b7cf
+        `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
+      );
+      console.log(result);
+      if (result.ok) {
+        const rates = await result.json();
+        setRate(rates.conversion_rate);
+        setSubmitData({
+          ...submitData,
+          rate:rates.conversion_rate
+        })
+      }
+    };
+    fetchConversionRates();
+  }, [currencyFrom, currencyTo]);
+
+
+  useEffect(() => {
+    const findUsers = async () => {
+      const result = await searchUser()
+      console.log(result.data);
+      setAllUsers([...result.data.data]) 
+    };
+    findUsers();
+  }, []);
+
+  const handleSubmitTransactionExchange = async () =>{
+     const selectedUser = document.getElementById("wizards").value
+     const creditLedgerPayload = {
+        name: document.getElementById("wizards").value,
+        amount:inputFrom,
+        exchangeAmount: inputTo,
+        rate:submitData.rate,
+        sendingCurrency:currencyFrom,
+        receivingCurrency:currencyTo,
+        senderId: id,
+        receipientId: handleSelectedUser().email,
+      };
+      const debitLedgerPayload = {
+        name: firstName + " " + lastName,
+        amount:inputFrom,
+        exchangeAmount: inputTo,
+        rate:submitData.rate,
+        sendingCurrency:currencyFrom,
+        receivingCurrency:currencyTo, 
+        senderId: handleSelectedUser().id,
+        receipientId: email,
+        
+      };
+      console.log(creditLedgerPayload)
+      console.log(debitLedgerPayload)
+      Object.keys(creditLedgerPayload).forEach(key =>{
+         if(creditLedgerPayload[key]==""  || creditLedgerPayload[key]==undefined || creditLedgerPayload[key]==null ){
+             toastedBread({
+              title: 'An error occurred.',
+              status:"error",
+              description: "Transaction could not be processed. Ensure all fields are filled",
+              duration: 9000,
+              isClosable: true,
+            })
+            return false
+         }
+      })
+
+      Object.keys(debitLedgerPayload).forEach(key =>{
+         if(debitLedgerPayload[key]==""  || debitLedgerPayload[key]==undefined || debitLedgerPayload[key]==null ){
+             toastedBread({
+              title: 'An error occurred.',
+              status:"error",
+              description: "Transaction could not be processed. Ensure all fields are filled",
+              duration: 9000,
+              isClosable: true,
+            })
+            return false
+         }
+      })
+
+      const transactionSuccessful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
+  }
+
+
+
+  return (
+    <Flex
+      minH={'100vh'}
+
+      
+      w="100%"
+      bg={useColorModeValue('gray.50', 'gray.800')}>
+      <Stack  w="100%" spacing={8} maxW={'lg'} >
+        
+        <Box
+
+          rounded={'lg'}
+          bg={useColorModeValue('white', 'gray.700')}
+          boxShadow={'lg'}
+          p={8}>
+          <Stack >
+            <FormControl id="email">
+              <FormLabel>Find User</FormLabel>
+                <div>
+                  {/*<AsyncSelect
+                    name="form-field-name"
+                    value="one"
+                    loadOptions={searchUser}
+                    onInputChange={handleInputChange}
+                  />*/}
+
+                  <label for="states">Find users full name</label>
+                  <Input  type="text" id="wizards" name="wizards" list="users-list" />
+                  <datalist id="users-list">
+
+                     { 
+                       allUsers.length > 0 ?  allUsers.map(user => {
+                          return (
+                           <option>{user.firstname + " "+ user.lastname }</option>
+                            )
+                       })
+                       : (<RequestLoader/>)
+                     }
+
+
+                   
+                  </datalist>
+                </div>
+            </FormControl>
+
+
+
+            <div className="App">
+      <Flex justifyContent="space-between">
+          <FontAwesomeIcon icon={faDollarSign} size="2x" />
+        <h2> TRANSFERWIZ </h2>
+        <FontAwesomeIcon icon={faEuroSign} size="2x" />
+      </Flex>
+
+      <Box p="20px">
+       <Stack
+                direction={{ base: 'column', sm: 'row' }}
+                align={'start'}
+                justify={'space-between'}>
+                <p>
+                 1 {currencyFrom} = {rate} {currencyTo}
+               </p>
+                <Button id="swap-icon">
+              <Text  
+                onClick={handleSwap}
+              >Swap</Text>
+            </Button> 
+              </Stack>   
+</Box>
+      <div id="container">
+        <div id="content-box">
+          <FormControl id="email">
+              <FormLabel>From Amount</FormLabel>
+            <Input
+              id="amountFrom"
+              type="number"
+              value={inputFrom}
+              onChange={handleChangeFrom}
+            />
+
+            </FormControl>
+ <FormControl id="email">
+              <FormLabel>To Amount</FormLabel>
+            <Input
+              id="amountTo"
+              type="number"
+              value={inputTo}
+              onChange={handleChangeTo}
+            />
+           </FormControl>
+
+             <br/>
+          <div id="selectors">
+          <FormLabel>From Currency</FormLabel>
+            <Select onChange={handleSelectFrom} value={currencyFrom}>
+              {Object.keys(currencies).map((currency, index) => (
+                <option value={currency} key={index}>
+                  {currency} - {currencies[currency].name}
+                </option>
+              ))}
+            </Select>
+
+
+               <br/>
+<FormLabel>To Currency</FormLabel>
+            <Select onChange={handleSelectTo} value={currencyTo}>
+              {Object.keys(currencies).map((currency, index) => {
+                return (
+                  <option value={currency} key={index}>
+                    {currency} - {currencies[currency].name}
+                  </option>
+                );
+              })}
+            </Select>
+
+
+           
+
+          </div>
+        </div>
+      </div>
+    </div>
+            
+            <Stack spacing={10}>
+              
+              <Button
+                bg={'blue.400'}
+                color={'white'}
+                _hover={{
+                  bg: 'blue.500',
+                }}
+                onClick={(e)=>{
+                  e.preventDefault()
+                  handleSubmitTransactionExchange(e)
+                }}
+                >
+               Transfer Money
+              </Button>
+            </Stack>
+          </Stack>
+        </Box>
+      </Stack>
+    </Flex>
+  );
+}
+
+
+NewTransfer.propTypes = {
+  auth: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  auth: state.auth
+});
+
+const FTransaction = connect(mapStateToProps, {})(NewTransfer);
+ 
+ const Dashboard = ({
+  auth: {isAuthenticated, token, user , prevPath },
   children,
-}) {
+}) =>{
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
@@ -120,7 +512,7 @@ export default function Dashboard({
       <MobileNav onOpen={onOpen} />
       <Box  ml={{ base: 0, md: 60 }} p="4">
         {children}
-         <NewTransfer/>
+         <FTransaction/>
       </Box>
 
 
@@ -140,6 +532,16 @@ export default function Dashboard({
 
 
 
+
+Dashboard.propTypes = {
+  auth: PropTypes.object.isRequired,
+};
+
+const mapStateToProps2 = (state) => ({
+  auth: state.auth
+});
+
+const FTransactionDashboard = connect(mapStateToProps2, {})(Dashboard);
 
 
 
@@ -285,274 +687,4 @@ const MobileNav = ({ onOpen, ...rest }) => {
 
 
 
-
-
-
-
-
-
-function NewTransfer() {
-  const toastedBread = useToast()
-  const handleInputChange = (newValue) => {
-    const inputValue = newValue.replace(/\W/g, '');
-    // setState({ inputValue });
-    return inputValue;
-  };
-
-  const [inputFrom, setInputFrom] = useState(0);
-  const [inputTo, setInputTo] = useState(0);
-  const [rate, setRate] = useState(0);
-  const [currencyFrom, setCurrencyFrom] = useState("USD");
-  const [currencyTo, setCurrencyTo] = useState("EUR");
-
-  const [allUsers, setAllUsers] = useState([])
-
-  const handleChangeFrom = (event) => {
-    const { value } = event.target;
-    setInputFrom(value);
-    setInputTo(value * rate);
-  };
-
-  const handleChangeTo = (event) => {
-    const { value } = event.target;
-    setInputTo(value);
-    setInputFrom(value / rate);
-  };
-
-  const handleSelectFrom = (event) => {
-    const { value } = event.target;
-    setCurrencyFrom(value);
-  };
-
-  const handleSelectTo = (event) => {
-    const { value } = event.target;
-    setCurrencyTo(value);
-  };
-
-  const handleSwap = () => {
-    setCurrencyFrom(currencyTo);
-    setCurrencyTo(currencyFrom);
-  };
-
-
-
-
-  //payload submit transaction payload and validation
-
-  const transactionPayload = {
-    firstname:"",
-    lastname:"",
-    amount:0.00,
-    rate:1,
-    senderid:4,
-    receipientId:"",
-    formCurrency:"USD",
-    toCurrency:"USD",
-    targetAmount:0.00
-
-  };
-
-  const [submitData, setSubmitData] = useState(transactionPayload)
-
-  const handleSelectedUser = () => {
-    const userInputHtml = document.getElementById("wizards")
-    
-    const userInputCopy =  userInputHtml.value.toLowerCase();
-    const foundUser = allUsers.find(user =>{
-       const testData = user.firstname + " "+ user.lastname
-       if(testData.toLowerCase()===userInputCopy){
-         return userInputHtml.value
-       }else{
-        return ""
-       }
-    })
-    console.log(foundUser)
-    if(!foundUser || foundUser.length<=0){
-      userInputHtml.value =""
-       toastedBread({
-        title: 'An error occurred.',
-        status:"error",
-        description: "User dont exist. please select a user from the dropdown",
-        duration: 9000,
-        isClosable: true,
-      })
-    }else{
-      //set state of the field
-       const userInfo = userInputHtml.value.split("");  
-      setSubmitData({
-       ...submitData,
-       firstname: userInfo[0],
-       lastname: userInfo[1]
-      })
-    }
-  }
-
-  useEffect(() => {
-
-    const fetchConversionRates = async () => {
-      const result = await fetch(
-        `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
-      );
-      console.log(result);
-      if (result.ok) {
-        const rates = await result.json();
-        setRate(rates.conversion_rate);
-        setSubmitData({
-          ...submitData,
-          rate:rates.conversion_rate
-        })
-      }
-    };
-    fetchConversionRates();
-  }, [currencyFrom, currencyTo]);
-
-
-  useEffect(() => {
-    const findUsers = async () => {
-      const result = await searchUser()
-      console.log(result.data);
-      setAllUsers([...result.data.data]) 
-    };
-    findUsers();
-  }, []);
-
-  return (
-    <Flex
-      minH={'100vh'}
-
-      
-      w="100%"
-      bg={useColorModeValue('gray.50', 'gray.800')}>
-      <Stack  w="100%" spacing={8} maxW={'lg'} >
-        
-        <Box
-
-          rounded={'lg'}
-          bg={useColorModeValue('white', 'gray.700')}
-          boxShadow={'lg'}
-          p={8}>
-          <Stack >
-            <FormControl id="email">
-              <FormLabel>Find User</FormLabel>
-                <div>
-                  {/*<AsyncSelect
-                    name="form-field-name"
-                    value="one"
-                    loadOptions={searchUser}
-                    onInputChange={handleInputChange}
-                  />*/}
-
-                  <label for="states">Find users full name</label>
-                  <Input onBlur={() => handleSelectedUser()} type="text" id="wizards" name="wizards" list="users-list" />
-                  <datalist id="users-list">
-
-                     { 
-                       allUsers.length > 0 ?  allUsers.map(user => {
-                          return (
-                           <option>{user.firstname + " "+ user.lastname }</option>
-                            )
-                       })
-                       : (<RequestLoader/>)
-                     }
-
-
-                   
-                  </datalist>
-                </div>
-            </FormControl>
-
-
-
-            <div className="App">
-      <Flex justifyContent="space-between">
-          <FontAwesomeIcon icon={faDollarSign} size="2x" />
-        <h2> TRANSFERWIZ </h2>
-        <FontAwesomeIcon icon={faEuroSign} size="2x" />
-      </Flex>
-
-      <Box p="20px">
-       <Stack
-                direction={{ base: 'column', sm: 'row' }}
-                align={'start'}
-                justify={'space-between'}>
-                <p>
-                 1 {currencyFrom} = {rate} {currencyTo}
-               </p>
-                <Button id="swap-icon">
-              <Text  
-                onClick={handleSwap}
-              >Swap</Text>
-            </Button> 
-              </Stack>   
-</Box>
-      <div id="container">
-        <div id="content-box">
-          <FormControl id="email">
-              <FormLabel>From Amount</FormLabel>
-            <Input
-              id="amountFrom"
-              type="number"
-              value={inputFrom}
-              onChange={handleChangeFrom}
-            />
-
-            </FormControl>
- <FormControl id="email">
-              <FormLabel>To Amount</FormLabel>
-            <Input
-              id="amountTo"
-              type="number"
-              value={inputTo}
-              onChange={handleChangeTo}
-            />
-           </FormControl>
-
-             <br/>
-          <div id="selectors">
-          <FormLabel>From Currency</FormLabel>
-            <Select onChange={handleSelectFrom} value={currencyFrom}>
-              {Object.keys(currencies).map((currency, index) => (
-                <option value={currency} key={index}>
-                  {currency} - {currencies[currency].name}
-                </option>
-              ))}
-            </Select>
-
-
-               <br/>
-<FormLabel>To Currency</FormLabel>
-            <Select onChange={handleSelectTo} value={currencyTo}>
-              {Object.keys(currencies).map((currency, index) => {
-                return (
-                  <option value={currency} key={index}>
-                    {currency} - {currencies[currency].name}
-                  </option>
-                );
-              })}
-            </Select>
-
-
-           
-
-          </div>
-        </div>
-      </div>
-    </div>
-            
-            <Stack spacing={10}>
-              
-              <Button
-                bg={'blue.400'}
-                color={'white'}
-                _hover={{
-                  bg: 'blue.500',
-                }}>
-               Transfer Money
-              </Button>
-            </Stack>
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
-  );
-}
+export default FTransactionDashboard 

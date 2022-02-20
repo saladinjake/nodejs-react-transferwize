@@ -44,7 +44,9 @@ export const loadInitialState = () =>{
   };
 
   return initialState
- }else{
+ }
+
+ else{
    return {
     isAuthenticated:  false,
     user:  null,
