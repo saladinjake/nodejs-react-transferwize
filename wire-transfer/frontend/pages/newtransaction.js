@@ -87,7 +87,7 @@ const handleLogout = async () => {
     await logOut();
     setTimeout(() => {
       if(typeof window!==undefined){
-        localStorage.clear()
+         localStorage.clear()
          window.location.href="/login"
 
       }
@@ -204,10 +204,10 @@ const router = useRouter();
              <MenuList
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}>
-              <Link href="/dashboard"><MenuItem onClick={(e)=>{redirectTo('/dashboard')}}>My Transactions</MenuItem></Link>
-               <Link href="/newtransaction"><MenuItem onClick={(e)=>{redirectTo('/newtransaction')}}>New Transaction</MenuItem></Link>
+              <Link href="/dashboard"><MenuItem>My Transactions</MenuItem></Link>
+               <Link href="/newtransaction"><MenuItem>New Transaction</MenuItem></Link>
               <MenuDivider />
-               <Link href="#"><MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem></Link>
+            <MenuItem onClick={(e)=>{handleLogout(e)}}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -251,7 +251,9 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   const [isAuthenticated,setIsAuthenticated] = useState(false)
   const [token,setToken] = useState("")
 
-  useEffect(async()=>{
+  useEffect(()=>{
+
+    const checkUser = async () => {
       if(typeof window!=="undefined"){
         //  console.log(user)
         if(window.localStorage && window.localStorage.getItem("user")){
@@ -271,7 +273,10 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
           setTimeout(()=>{window.location.href="/login"},2000)
         }
       }
-  },[user])
+    };
+    checkUser();
+      
+  },[])
 
   const [inputFrom, setInputFrom] = useState(0);
   const [inputTo, setInputTo] = useState(0);
@@ -765,7 +770,7 @@ const SidebarNavigationContent = ({ onClose, ...rest }) => {
       </Flex>
       <Link href="/dashboard"><NavItem icon={FiHome} >Dashboard</NavItem></Link>
       <Link href="/newtransaction"><NavItem icon={FiTrendingUp} >New Transaction</NavItem></Link>      
-      <Link href="#"><NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem></Link>
+      <NavItem icon={FiStar} onClick={(e)=>{handleLogout(e)}}>Logout</NavItem>
     
     </Box>
   );
