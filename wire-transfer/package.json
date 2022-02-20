@@ -51,9 +51,9 @@
     "should": "^13.2.3"
   },
   "scripts": {
-    "start-dev": "nodemon --exec babel-node ./api/index.js",
+    "start-dev": "nodemon --exec babel-node ./backend/api/index.js",
     "start": "node dist/index.js",
-    "build-babel": "babel ./api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
+    "build-babel": "babel ./backend/api --out-dir dist/ --copy-files --ignore ./node_modules,./coverage,./.babelrc,./package.json,./npm-debug.log,./.travis.yml,./.eslintrc.js,./UI,./README.md",
     "clean": "rm -rf dist && mkdir dist",
     "build": "npm run clean && npm run build-babel",
     "build-dev": "npm run build-babel",
@@ -62,9 +62,9 @@
     "runpretest": "npm run db-exec",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "test:old": "nyc --require @babel/register ---reporter=html --reporter=text mocha  --timeout 10000 ./api/test/**.test.js",
-    "test": "mocha --require @babel/register ./api/test/**.test.js --timeout 10000 --reporter min",
-    "runtest-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./api/test/**.test.js --timeout 20000 --watch --exit"
+    "test:old": "nyc --require @babel/register ---reporter=html --reporter=text mocha  --timeout 10000 ./backend/api/test/**.test.js",
+    "test": "mocha --require @babel/register ./backend/api/test/**.test.js --timeout 10000 --reporter min",
+    "runtest-dev": "nyc --require @babel/register ---reporter=html --reporter=text mocha ./backend/api/test/**.test.js --timeout 20000 --watch --exit"
   },
   "nyc": {
     "exclude": [
