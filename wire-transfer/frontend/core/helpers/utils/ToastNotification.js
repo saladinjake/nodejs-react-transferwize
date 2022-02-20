@@ -11,7 +11,7 @@ const Notifications = () => {
 
   return (
     <div
-      class="toast-note"
+      className="toast-note"
       onMouseEnter={startPause}
       onMouseLeave={endPause}
     >

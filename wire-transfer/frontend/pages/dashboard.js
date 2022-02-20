@@ -51,7 +51,9 @@ const handleLogout = async () => {
     await logOut();
     setTimeout(() => {
       if(typeof window!==undefined){
+         localStorage.clear()
          window.location.href="/login"
+
       }
     }, 2000);
   };
@@ -67,7 +69,7 @@ const handleLogout = async () => {
 
 
 
-const MobileNav = ({ onOpen, auth: {user  },  ...rest }) => {
+const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
 
   let isLoggedIn = false;
   const [id, setId] = useState("")

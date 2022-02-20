@@ -87,6 +87,7 @@ const handleLogout = async () => {
     await logOut();
     setTimeout(() => {
       if(typeof window!==undefined){
+        localStorage.clear()
          window.location.href="/login"
 
       }
@@ -233,9 +234,7 @@ const MobileNavigate = connect(mapStateToProps3, {
 
 
 
-function NewTransfer({ auth: {  user , prevPath } }) {
-  
- 
+function NewTransfer({ auth: {  user , prevPath },logout }) {
   const toastedBread = useToast()
   const handleInputChange = (newValue) => {
     const inputValue = newValue.replace(/\W/g, '');

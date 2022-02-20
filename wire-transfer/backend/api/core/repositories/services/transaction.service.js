@@ -33,10 +33,13 @@ class TransactionService {
             subject: 'A transaction occured on your account',
             text: 'A debit transaction occured on your TWISER account',
             to: user.email,
-            html: `<b>Amount: ${amount}<br/><br/>
+            html: `<div style="background:#f6f6f6;border:2px solid #eee;box-shadow: 5px 10px #888888;padding:10px; width:500px;height:300px;background:#fff;color:#000;font-size:17px;margin:0px auto;justify-content:center">
+            <h3>Hi ${user.firstname+ " " + user.lastname}</h3><br/>
+              <h4>A debit transaction occured on your TWISER account</h4>
+             <b>Amount: ${amount}<br/><br/>
               Transaction type: debit<br/><br/>
               Account Balance: ${transaction.newbalance}<br/><br/>
-              Visit <a href='https://transferwise-apitest.herokuapp.com/'>TWISER App</a> today</b>`,
+              Visit <a href='https://transferwise-apitest.herokuapp.com/'>TWISER App</a> today</b></div>`,
           };
 
           await mailer(mailData);
@@ -86,10 +89,12 @@ class TransactionService {
           subject: 'A transaction occured on your account',
           text: 'A credit transaction occured on your TWISER account',
           to: recieverDetail.email,
-          html: `<b>Amount: ${amount}<br/><br/>
+          html: `<div style="background:#f6f6f6;border:2px solid #eee;box-shadow: 5px 10px #888888;padding:10px; width:500px;height:300px;background:#fff;color:#000;font-size:17px;margin:0px auto;justify-content:center">
+           <h3>Hi ${recieverAccount.firstname+ " " + recieverAccount.lastname}</h3><br/>
+           <b>Amount: ${amount}<br/><br/>
             Transaction type: credit<br/><br/>
             Account Balance: ${transaction.newbalance}<br/><br/>
-            Visit <a href='https://transferwise-apitest.com/'>TWISER App</a> today</b>`,
+            Visit <a href='https://transferwise-apitest.com/'>TWISER App</a> today</b></div>`,
         };
 
         await mailer(mailData);
