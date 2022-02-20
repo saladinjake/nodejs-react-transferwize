@@ -186,13 +186,25 @@ const prevalidate = (setSubmitting)=>{
        setLoading(true);
       try {
         
-        await registerUser(values);
+        const response = await registerUser(values);
+        console.log(response.data)
        // toast.success("We have sent a verification mail to your email.");
-        
+        // switch (response.code) {
+        //     case 201:
+        //      console.log(response);
+               
+        //       break;
+        //     case 400:
+        //     case 401:
+        //       console.log(response);
+        //       break;
+        //     default:
+        //       break;
+        //   }
 
 
        toastedBread({
-            title: 'An error occurred.',
+            title: 'Successful',
             description: "Sign up was successful", //error.message,
             status: 'success',
             duration: 9000,
@@ -208,11 +220,12 @@ const prevalidate = (setSubmitting)=>{
         }, 2000);
         setSubmitting(false);
       } catch (err) {
+         // console.log(err.data)
         
-        
+        // console.log(err)
        toastedBread({
             title: 'An error occurred.',
-            description: err?.data?.message, //error.message,
+            description: err?.message,
             status: 'error',
             duration: 9000,
             isClosable: true,
