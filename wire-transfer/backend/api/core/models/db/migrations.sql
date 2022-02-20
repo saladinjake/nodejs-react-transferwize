@@ -119,8 +119,6 @@ INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira,
 INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2225137327,4,'savings','active',0.00,0.00,0.00);
 
 
-
-
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros,receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,1100000.00,1000000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,1000000.00,900000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,900000.00,800000.00,0.00,0.00,0.00,0.00,'test@gmail.com');
