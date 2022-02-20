@@ -4,44 +4,41 @@ import UserModel from "./user.model"
 const User = new UserModel("users")
 const Account = new AccountModel("accounts")
 export default class Transaction extends Model {
-  async credit(account, cashierId, amount,exchangeAmount, rate,  receipient, formCurrency='USD', toCurrency='USD') {
-   
+  async credit(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency) {
+  // console.log(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency)
     try {
         
          const userAccount = account;
          let newBalance = 0.00;
          let newBalanceEuros = 0.00;
           let newBalanceNaira = 0.00;
-
-         const oldBalanceNaira = 0.00;
-         const oldBalanceEuros = 0.00;
-         
-
+        
          if(toCurrency=="EUR"){
            // base balance
-            newBalance =parseFloat(userAccount.balance) +  parseFloat(exchangeAmount)
-            newBalanceEuros = parseFloat(userAccount.balanceEuros)+  parseFloat(exchangeAmount)
+            newBalance =parseFloat(userAccount.balance) +  exchangeAmount
+            newBalanceEuros = parseFloat(userAccount.balanceeuros)+  exchangeAmount
          }else if(toCurrency=="NGN"){
-           newBalance =parseFloat(userAccount.balance) +  parseFloat(exchangeAmount)
-           newBalanceNaira = parseFloat(userAccount.balanceNaira)+  parseFloat(exchangeAmount)
+           newBalance =parseFloat(userAccount.balance) +  exchangeAmount
+           newBalanceNaira = parseFloat(userAccount.balancenaira)+  exchangeAmount
          }else{
             //or + anmount
-            newBalance =parseFloat(userAccount.balance) +  parseFloat(exchangeAmount)
+            newBalance =parseFloat(userAccount.balance) +  exchangeAmount
          }
 
-          console.log(account, cashierId,amount,receipient)
+
+           // console.log(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency)
           const { rows } = await this.insert('accountNumber, senderId, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15', [
           Number(userAccount.accountnumber),
-          cashierId, // the user debited  automatically
+          senderId, // the user debited  automatically
           'credit',
           amount,
           exchangeAmount, rate,
           userAccount.balance,
           newBalance,
          
-        userAccount.balanceNaira,
+        userAccount.balancenaira,
         newBalanceNaira,
-        userAccount.balanceEuros,
+        userAccount.balanceeuros,
         newBalanceEuros ,
           receipient, // the reciever of the money
           formCurrency,
@@ -53,7 +50,6 @@ export default class Transaction extends Model {
        * To do perform deebit on the other users bank account
       */
          return rows[0];
-       
       
     } catch (error) {
       throw error;
@@ -69,16 +65,17 @@ export default class Transaction extends Model {
      if(toCurrency=="EUR"){
            // base balance
             newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount)
-            newBalanceEuros = parseFloat(userAccount.balanceEuros)-  parseFloat(exchangeAmount)
+            newBalanceEuros = parseFloat(userAccount.balanceeuros)-  parseFloat(exchangeAmount)
          }else if(toCurrency=="NGN"){
            newBalance =parseFloat(userAccount.balance) - parseFloat(exchangeAmount) 
-           newBalanceNaira = parseFloat(userAccount.balanceNaira)-  parseFloat(exchangeAmount)
+           newBalanceNaira = parseFloat(userAccount.balancenaira)-  parseFloat(exchangeAmount)
          }else{
             //or + anmount
             newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount) 
          }
      
     try {
+
       const { rows } = await this.insert('accountNumber, senderId, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15', [
         Number(account.accountnumber),
         senderId, // // the user sending the money
@@ -87,9 +84,9 @@ export default class Transaction extends Model {
         exchangeAmount, rate,
         userAccount.balance,
         newBalance,
-         userAccount.balanceNaira,
+         userAccount.balancenaira,
         newBalanceNaira,
-         userAccount.balanceEuros,
+         userAccount.balanceeuros,
         newBalanceEuros ,
          receipientId,
          formCurrency,
@@ -100,6 +97,7 @@ export default class Transaction extends Model {
        * To do perform credit on the other users bank account
       */
       return rows[0];
+      //return []
     } catch (error) {
       throw error;
     }

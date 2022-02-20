@@ -128,7 +128,7 @@ INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exch
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220107727,1,'credit',100000.00,100000.00,1.00,0.00,100000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220107727,1,'credit',200000.00,200000.00,1.00,100000.00,300000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
 INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220107821,2,'credit',100000.00,100000.00,1.00,300000.00,400000.00,0.00,0.00,0.00,0.00,'danielwallen@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2225137327,3,'credit',100000.00,100000.00,1.00,0.00,100000.00,0.00,0.00,0.00,0.00,'test@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2225137327,4,'credit',100000.00,100000.00,1.00,0.00,100000.00,0.00,0.00,0.00,0.00,'test@gmail.com');
 
 
 

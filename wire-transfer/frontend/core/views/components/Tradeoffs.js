@@ -49,6 +49,7 @@ import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
 import RequestLoader from "./RequestLoader"
 import  TransactionTables from "./TransactionTables"
+import { useRouter } from "next/router"
 const SIMBA_COMPANY_ID = 4;
 const BONUS_AMOUNT = 1000.00;
 const SIMBA_ACCOUNT_NUMBER = 2225137327
@@ -85,6 +86,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
    const [transactions, setTransactions] = useState([])
    const toastedBread = useToast()
    const [lastTrnx ,setLastTransaction] = useState({})
+   const router = useRouter()
 
 
 
@@ -127,16 +129,62 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
          }
          /*This checks if user exists and if user has account if not it creates the existing user account and set the balance to 1000 USD*/
          const userEmail = user?.email;
+         console.log(userEmail)
          const walletAccountDetails = await getWalletAccounts(userEmail);
         // console.log(walletAccountDetails.data.data)
          if('data' in walletAccountDetails.data &&  Array.isArray(walletAccountDetails?.data?.data) ){
            const existingAccount =  walletAccountDetails.data.data[0];
+           console.log(walletAccountDetails.data.data[0])
            if('accountNumber' in existingAccount ){
              console.log("true")
               const myTransactionLedgers = await myTransactions(existingAccount.accountNumber)
               console.log(myTransactionLedgers)
               setTransactions([...myTransactionLedgers?.data?.data])
               console.log(transactions)
+
+              //if first timer then 
+              //ledger into the user account 
+              //the free gift account bonus of 1000.00 USD given to a signed up user
+              //THATS ALOT OF BONUS
+              if(myTransactionLedgers?.data?.data.length <=0){
+                let debitorLedgerDetail = {
+                  accountNumber: SIMBA_ACCOUNT_NUMBER,
+                  amount:BONUS_AMOUNT,
+                  exchangeAmount: 1000.00,
+                  rate:1.00,
+                  sendingCurrency:"USD",
+                  receivingCurrency:"USD",
+                  senderId: SIMBA_COMPANY_ID,
+                  receipientId: userEmail
+                };
+                let creditorLedgerDetail ={
+                  accountNumber :existingAccount.accountNumber, // THE CREDITING USER ACCOUT
+                  amount:BONUS_AMOUNT,
+                  rate:1.00,
+                  exchangeAmount: 1000.00,
+                  sendingCurrency:"USD",
+                  receivingCurrency:"USD",
+                  senderId: SIMBA_COMPANY_ID,
+                  receipientId: userEmail
+                }
+                await debitLedgerAccount(debitorLedgerDetail)
+                await creditLedgerAccount(creditorLedgerDetail)
+                const responseLedger = await myTransactions(existingAccount.accountNumber)
+                setTransactions([...responseLedger?.data?.data])
+
+                toastedBread({
+                  title: 'CONGRATULATIONS FIRSTIMERS',
+                  description: "Your wallet account has bee credited with 1000.00 USD. Please wait while transaction is completed.", //error.message,
+                  status: 'success',
+                  duration: 9000,
+                  isClosable: true,
+                })
+
+                setTimeout(()=>{
+                  router.push("/login")
+                },2000)
+                
+              }
          
            }else{
              // new user has no account so automatically create one for user signed up
@@ -157,42 +205,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           })
 
          }
-         // if('data' in walletAccountDetails?.data && Array.isArray(walletAccountDetails?.data?.data)){
-         //  const userAccount = walletAccountDetails.data.data[0]
-         //  const res = await myTransactions(userAccount.accountNumber)
-         //  console.log(res)
-         //  setTransactions([...res?.data?.data])
-         //  console.log(transactions)
-          //if first timer then ledger the free gift account bonus given to a signed up user
-         //  if(res?.data?.data?.length <=0){
-         //    let debitorLedgerDetail = {
-         //      accountNumber: SIMBA_ACCOUNT_NUMBER, // THE CREDITING USER ACCOUT
-         //      senderId: SIMBA_COMPANY_ID, 
-         //      amount:BONUS_AMOUNT, // this will be deducted
-         //      receipientId:userEmail
-         //    };
-         //    let creditorLedgerDetail ={
-         //      accountNumber :userAccount.accountNumber, // THE CREDITING USER ACCOUT
-         //      senderId: SIMBA_COMPANY_ID, 
-         //      amount:BONUS_AMOUNT,
-         //      receipientId:userEmail
-         //    }
-         //    await debitLedgerAccount(debitorLedgerDetail)
-         //    await creditLedgerAccount(creditorLedgerDetail)
-         //    const responseLedger = await myTransactions(userAccount.accountNumber)
-         //    setTransactions([...responseLedger?.data?.data])
-            
-         //  }
-          
-         // }else{
-         //    toastedBread({
-         //    title: 'An error occurred.',
-         //    description: "No user account/transactions were found", //error.message,
-         //    status: 'error',
-         //    duration: 9000,
-         //    isClosable: true,
-         //  })
-         // }
+         
          
       }catch(error){
         

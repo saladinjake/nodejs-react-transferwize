@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Flex,
   Box,
@@ -13,6 +13,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 
 import * as Yup from "yup";
 // import * as toast from "react-hot-toast";
@@ -34,13 +35,49 @@ import {
 import { BASE_URL } from "../../config/api_config/constants";
 import RequestLoader from "../../views/components/RequestLoader"
 
- const LoginSignUp = ({ auth: {isAuthenticated, user , prevPath }, login, logOut, setPrevPath }) => {
+ const LoginSignUp = ({ auth: { user }, login, logOut, setPrevPath }) => {
   const [showLogin, setShowLogin] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
  const toastedBread = useToast()
- if(isAuthenticated && user.hasOwnProperty("token")){
-   window.location.href="/dashboard"
- }
+  const router = useRouter();
+
+
+
+  let isLoggedIn = false;
+  
+  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
+  const [firstName, setFirstName ] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [token,setToken] = useState("")
+
+  useEffect(async()=>{
+      if(typeof window!=="undefined"){
+        //  console.log(user)
+        if(window.localStorage && window.localStorage.getItem("user")){
+         // console.log(window.localStorage.getItem("user"))
+          user = JSON.parse(window.localStorage.getItem("user"))
+          setId(user.id)
+          setEmail(user.email)
+          setFirstName(user.firstName)
+          setLastName(user.lastName)
+          setIsAuthenticated(user.isAuthenticated)
+          setToken(user.token)
+          if (user.token && user.isAuthenticated) {
+             isLoggedIn = true;
+             router.push("/dashboard")
+          }
+        }else{
+          // await logOut()
+          
+        }
+
+
+        
+      }
+  },[user])
+
   
   const handleRegisterDisplay = (e) =>{
     e.preventDefault()
@@ -88,9 +125,10 @@ import RequestLoader from "../../views/components/RequestLoader"
           //dispatch the redux action
           console.log(res)
           login(res);
-           if(typeof window!=undefined){
-            window.location.href="/dashboard"
-          }
+           router.push('/dashboard')
+          //  if(typeof window!=undefined){
+          //   window.location.href="/dashboard"
+          // }
         }catch(error){
           console.log(error)
 
@@ -134,72 +172,7 @@ import RequestLoader from "../../views/components/RequestLoader"
   //register
 
 const prevalidate = (setSubmitting)=>{
-    let validated = false;
-    let gmail_regex =/[a-zA-Z0-9]\.[a-zA-Z0-9]@gmail\.com/
-    let email_regex =/^(?:(?!.*?[.]{2})[a-zA-Z0-9](?:[a-zA-Z0-9.!%-]{1,64}|)|\"[a-zA-Z0-9.!% -]{1,64}\")@[a-zA-Z0-9][a-zA-Z0-9.-](.[a-z]{2,}|.[0-9]{1,})$/
-    let passwordRegex = new RegExp("^(?=.*[A-Za-z])(?=.*[0-9])(?=.{8,})");
-    const initial = {
-        email: document.getElementById("emailuser").value,
-        password: document.getElementById("passworduser").value,
-        firstName: document.getElementById("lastnameuser").value,
-        lastName: document.getElementById("lastnameuser").value,
-        confirmPassword: document.getElementById("cpassword").value,
-      }
-      let showErrorOnce = false
-
-      console.log(initial)
-
-      Object.keys(initial).forEach(keys=>{
-        console.log(keys)
-         if(initial[keys].length<=0){
-           showErrorOnce =true 
-           if(showErrorOnce){
-             showErrorOnce=false
-             
-
-             toastedBread({
-                  title: 'An error occurred.',
-                  description: "Please fill out the blank fields", //error.message,
-                  status: 'error',
-                  duration: 9000,
-                  isClosable: true,
-                })
-             setSubmitting(false);
-              setLoading(false);
-             return false
-           }
-          
-         }
-         
-
-         //check password match
-         if(keys=="password"){
-            
-
-
-           if(!initial[keys].match(passwordRegex)){
-               showErrorOnce =true 
-               if(showErrorOnce){
-                 showErrorOnce=false
-                 // toast.error("Please use a strong password . Password should contain One capital letter, and atleast a minimum of 8 alphanumeric digits and other symbols ")
-                 
-
-                  toastedBread({
-                  title: 'An error occurred.',
-                  description: "Please use a strong password . Password should contain One capital letter, and atleast a minimum of 8 alphanumeric digits and other symbols ", //error.message,
-                  status: 'error',
-                  duration: 9000,
-                  isClosable: true,
-                })
-
-                 setSubmitting(false);
-                 setLoading(false);
-                 return false
-               }
-           }
-         }
-      })
-
+    /*removed validations here*/
       return true
   }
 
@@ -317,6 +290,7 @@ const prevalidate = (setSubmitting)=>{
                             </span>
                
             </FormControl>
+            <br/>
             <Stack spacing={10}>
               <Stack
                 direction={{ base: 'column', sm: 'row' }}
@@ -455,6 +429,7 @@ const prevalidate = (setSubmitting)=>{
                                 touched.confirmPassword &&
                                 errors.confirmPassword}
             </FormControl>
+            <br/>
             <Stack spacing={10}>
               <Stack
                 direction={{ base: 'column', sm: 'row' }}

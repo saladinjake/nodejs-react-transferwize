@@ -2,7 +2,8 @@ import TransactionModel from '../../models/transaction.model';
 import AccountModel from '../../models/account.model';
 import UserModel from '../../models/user.model';
 import mailer from '../../helpers/mailer';
-
+import dotenv from "dotenv"
+dotenv.config()
 
 const Account = new AccountModel('accounts');
 const Transaction = new TransactionModel('transactions');
@@ -12,7 +13,7 @@ const User = new UserModel('users');
 /** service that allows cashier perform transaction of user's account */
 class TransactionService {
   
-  static async debitAccount( accountNumber,senderId, amount, exchangeAmount, rate, receipientId,formCurrency="USD",toCurrency='USD')  {
+  static async debitAccount( accountNumber,senderId, amount, exchangeAmount, rate, receipientId,formCurrency,toCurrency)  {
     try {
       const account = await Account.findByAccountNumber(Number(accountNumber));
       //console.log(account)
@@ -25,19 +26,20 @@ class TransactionService {
 
           const transaction = await Transaction.debit(
             account,senderId, amount,exchangeAmount, rate,
-             receipientId,formCurrency,toCurrency
-
-              
+             receipientId,formCurrency,toCurrency      
              );
 
           const mailData = {
             subject: 'A transaction occured on your account',
             text: 'A debit transaction occured on your TWISER account',
             to: user.email,
-            html: `<b>Amount: ${amount}<br/><br/>
+            html: `<div style="background:#f6f6f6;border:2px solid #eee;box-shadow: 5px 10px #888888;padding:10px; width:500px;height:300px;background:#fff;color:#000;font-size:17px;margin:0px auto;justify-content:center">
+            <h3>Hi ${user.firstname+ " " + user.lastname}</h3><br/>
+              <h4>A debit transaction occured on your TWISER account</h4>
+             <b>Amount: ${amount}<br/><br/>
               Transaction type: debit<br/><br/>
               Account Balance: ${transaction.newbalance}<br/><br/>
-              Visit <a href='https://transferwise-apitest.herokuapp.com/'>TWISER App</a> today</b>`,
+              Visit <a href='https://transferwise-apitest.herokuapp.com/'>TWISER App</a> today</b></div>`,
           };
 
           await mailer(mailData);
@@ -47,13 +49,13 @@ class TransactionService {
             accountNumber: Number(transaction.accountnumber),
             amount,
             exchangeAmount, rate,
-            cashier: transaction.cashier,
+            cashier: transaction.senderid,
             transactionType: transaction.transactiontype,
             accountBalance: transaction.newbalance,
-            formCurrency: transaction.formCurrency,
-            toCurrency: transaction.toCurrency,
-            balanceNaira: transaction.newbalanceNaira,
-            balanceEuros: transaction.newBalanceEuros
+            formCurrency: transaction.formcurrency,
+            toCurrency: transaction.tocurrency,
+            balanceNaira: transaction.newbalancenaira,
+            balanceEuros: transaction.newbalanceeuros
           };
         }
         throw new Error('account balance is not sufficient');
@@ -67,7 +69,7 @@ class TransactionService {
 
 
 
-  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount,exchangeAmount, rate, receipientId/*reciever email*/, formCurrency="USD",toCurrency='USD') {
+  static async creditAccount( accountNumber/*creditor acc*/,senderId/*creditor id*/, amount,exchangeAmount, rate, receipientId/*reciever email*/, formCurrency,toCurrency) {
     try {
 
        const account = await Account.findByAccountNumber(Number(accountNumber));
@@ -87,24 +89,28 @@ class TransactionService {
           subject: 'A transaction occured on your account',
           text: 'A credit transaction occured on your TWISER account',
           to: recieverDetail.email,
-          html: `<b>Amount: ${amount}<br/><br/>
+          html: `<div style="background:#f6f6f6;border:2px solid #eee;box-shadow: 5px 10px #888888;padding:10px; width:500px;height:300px;background:#fff;color:#000;font-size:17px;margin:0px auto;justify-content:center">
+           <h3>Hi ${recieverAccount.firstname+ " " + recieverAccount.lastname}</h3><br/>
+           <b>Amount: ${amount}<br/><br/>
             Transaction type: credit<br/><br/>
             Account Balance: ${transaction.newbalance}<br/><br/>
-            Visit <a href='https://transferwise-apitest.com/'>TWISER App</a> today</b>`,
+            Visit <a href='https://transferwise-apitest.com/'>TWISER App</a> today</b></div>`,
         };
 
         await mailer(mailData);
 
         return {
-          transactionId: transaction.id,
-          accountNumber: Number(transaction.accountnumber),
-          amount,
-          exchangeAmount, rate,
-          cashier: transaction.cashier,
-          transactionType: transaction.transactiontype,
-          accountBalance: transaction.newbalance,
-          formCurrency: transaction.formCurrency,
-          toCurrency: transaction.toCurrency
+            transactionId: transaction.id,
+            accountNumber: Number(transaction.accountnumber),
+            amount,
+            exchangeAmount, rate,
+            cashier: transaction.senderid,
+            transactionType: transaction.transactiontype,
+            accountBalance: transaction.newbalance,
+            formCurrency: transaction.formcurrency,
+            toCurrency: transaction.tocurrency,
+            balanceNaira: transaction.newbalancenaira,
+            balanceEuros: transaction.newbalanceeuros
         };
       }
         throw new Error('account number doesn\'t exist');
