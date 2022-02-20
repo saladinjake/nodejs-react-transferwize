@@ -74,9 +74,9 @@ export default (state = initialState, action) => {
     case LOGOUT:
     if (typeof window !== "undefined") {
       
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("user_roles");
+      window.localStorage.removeItem("access_token");
+      window.localStorage.removeItem("user");
+      window.localStorage.removeItem("user_roles");
       window.location.href="/login"
     }
       return {

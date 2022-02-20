@@ -48,7 +48,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
 import RequestLoader from "./RequestLoader"
-
+import  TransactionTables from "./TransactionTables"
 const SIMBA_COMPANY_ID = 4;
 const BONUS_AMOUNT = 1000.00;
 const SIMBA_ACCOUNT_NUMBER = 2225137327
@@ -80,13 +80,13 @@ const CardBalance = ({ title, text, icon }) => {
   );
 };
 
-const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>{
+const  TransactionComponent = ({ auth: {user  } }) =>{
    const [transactions, setTransactions] = useState([])
    const toastedBread = useToast()
    const [lastTrnx ,setLastTransaction] = useState({})
 
 
-   
+
   let isLoggedIn = false;
   
   const [id, setId] = useState("")
@@ -131,7 +131,7 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
          if('data' in walletAccountDetails?.data && Array.isArray(walletAccountDetails?.data?.data)){
           const userAccount = walletAccountDetails.data.data[0]
           const res = await myTransactions(userAccount.accountNumber)
-          // console.log(res)
+          console.log(res)
           setTransactions([...res?.data?.data])
           //if first timer then ledger the free gift account bonus given to a signed up user
           if(res?.data?.data?.length <=0){
@@ -220,74 +220,10 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
 
 
       
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-          FROM
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'400px'}>
-          TO
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-          AMOUNT
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-         CURRENCY
-        </Text>
 
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-          CURRENCY
-        </Text>
-        <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-         CREATED AT
-        </Text>
-        
-        <Stack direction={{ base: 'column', md: 'row' }}>
-          
-          <Button colorScheme="green">  Successful</Button>
-        </Stack>
-      </Stack>
+      <TransactionTables data={transactions}/>
 
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-        {
-          transactions.map(transaction => {
-            console.log(transaction)
-             return(
-             <>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-                  {transaction?.senderid}
-                </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-                  {transaction?.receipientid}
-                </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'400px'}>
-                  {transaction?.amount}
-                </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-                 {transaction.formcurrency}
-                </Text>
-
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-                  {transaction?.tocurrency}
-                </Text>
-                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'200px'}>
-                 {transaction?.createdon}
-                </Text>
-                
-                <Stack direction={{ base: 'column', md: 'row' }}>
-                  
-                  
-                </Stack>
-             </>
-
-             )
-          })
-        }
-        
-      </Stack>
+      
     </Stack>
   );
 }
