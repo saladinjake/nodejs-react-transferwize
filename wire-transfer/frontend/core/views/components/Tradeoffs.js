@@ -71,11 +71,12 @@ const CardBalance = ({ title, text, icon }) => {
         padding="1px"
         ml="20px"
         mt="20px"
+
         >
         {icon}
       </Flex>
       <Text justify={'center'} justifyContent={'center'} padding="20px" fontWeight={600}>{title}</Text>
-      <Text justify={'center'} justifyContent={'center'} padding="20px" color={'gray.600'}>{text}</Text>
+      <Text justify={'center'} justifyContent={'center'} padding="20px" fontWeight={600} color={'green'}>{text}</Text>
     </Stack>
   );
 };
@@ -98,9 +99,9 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 
   useEffect(async()=>{
       if(typeof window!=="undefined"){
-          console.log(user)
+        
         if(window.localStorage && window.localStorage.getItem("user")){
-          console.log(window.localStorage.getItem("user"))
+         // console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
           setId(user.id)
           setEmail(user.email)
@@ -127,34 +128,26 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
          /*This checks if user exists and if user has account if not it creates the existing user account and set the balance to 1000 USD*/
          const userEmail = user?.email;
          const walletAccountDetails = await getWalletAccounts(userEmail);
-         // console.log(walletAccountDetails)
-         if('data' in walletAccountDetails?.data && Array.isArray(walletAccountDetails?.data?.data)){
-          const userAccount = walletAccountDetails.data.data[0]
-          const res = await myTransactions(userAccount.accountNumber)
-          console.log(res)
-          setTransactions([...res?.data?.data])
-          //if first timer then ledger the free gift account bonus given to a signed up user
-          if(res?.data?.data?.length <=0){
-            let debitorLedgerDetail = {
-              accountNumber: SIMBA_ACCOUNT_NUMBER, // THE CREDITING USER ACCOUT
-              senderId: SIMBA_COMPANY_ID, 
-              amount:BONUS_AMOUNT, // this will be deducted
-              receipientId:userEmail
-            };
-            let creditorLedgerDetail ={
-              accountNumber :userAccount.accountNumber, // THE CREDITING USER ACCOUT
-              senderId: SIMBA_COMPANY_ID, 
-              amount:BONUS_AMOUNT,
-              receipientId:userEmail
-            }
-            await debitLedgerAccount(debitorLedgerDetail)
-            await creditLedgerAccount(creditorLedgerDetail)
-            const responseLedger = await myTransactions(userAccount.accountNumber)
-            setTransactions([...responseLedger?.data?.data])
-            
-          }
-          
+        // console.log(walletAccountDetails.data.data)
+         if('data' in walletAccountDetails.data &&  Array.isArray(walletAccountDetails?.data?.data) ){
+           const existingAccount =  walletAccountDetails.data.data[0];
+           if('accountNumber' in existingAccount ){
+             console.log("true")
+              const myTransactionLedgers = await myTransactions(existingAccount.accountNumber)
+              console.log(myTransactionLedgers)
+              setTransactions([...myTransactionLedgers?.data?.data])
+              console.log(transactions)
+         
+           }else{
+             // new user has no account so automatically create one for user signed up
+              console.log("false")
+
+
+
+           }
+           
          }else{
+           //app accessed in error
             toastedBread({
             title: 'An error occurred.',
             description: "No user account/transactions were found", //error.message,
@@ -162,7 +155,44 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
             duration: 9000,
             isClosable: true,
           })
+
          }
+         // if('data' in walletAccountDetails?.data && Array.isArray(walletAccountDetails?.data?.data)){
+         //  const userAccount = walletAccountDetails.data.data[0]
+         //  const res = await myTransactions(userAccount.accountNumber)
+         //  console.log(res)
+         //  setTransactions([...res?.data?.data])
+         //  console.log(transactions)
+          //if first timer then ledger the free gift account bonus given to a signed up user
+         //  if(res?.data?.data?.length <=0){
+         //    let debitorLedgerDetail = {
+         //      accountNumber: SIMBA_ACCOUNT_NUMBER, // THE CREDITING USER ACCOUT
+         //      senderId: SIMBA_COMPANY_ID, 
+         //      amount:BONUS_AMOUNT, // this will be deducted
+         //      receipientId:userEmail
+         //    };
+         //    let creditorLedgerDetail ={
+         //      accountNumber :userAccount.accountNumber, // THE CREDITING USER ACCOUT
+         //      senderId: SIMBA_COMPANY_ID, 
+         //      amount:BONUS_AMOUNT,
+         //      receipientId:userEmail
+         //    }
+         //    await debitLedgerAccount(debitorLedgerDetail)
+         //    await creditLedgerAccount(creditorLedgerDetail)
+         //    const responseLedger = await myTransactions(userAccount.accountNumber)
+         //    setTransactions([...responseLedger?.data?.data])
+            
+         //  }
+          
+         // }else{
+         //    toastedBread({
+         //    title: 'An error occurred.',
+         //    description: "No user account/transactions were found", //error.message,
+         //    status: 'error',
+         //    duration: 9000,
+         //    isClosable: true,
+         //  })
+         // }
          
       }catch(error){
         
@@ -179,31 +209,32 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
    },[])
 
     const lastTransaction = transactions[transactions.length -1]  
-            console.log(lastTransaction)
+    //console.log(lastTransaction)
  
   return (
-    <Stack bg="#fff" p="4" boxShadow="lg" m="4" borderRadius="sm">
+    <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
 
 
-              <Box p={4}>
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
+              <Box p={4} >
+      <SimpleGrid  bg="#fff" columns={{ base: 1, md: 3 }} spacing={10}>
         <CardBalance
           icon={ <Currency code="USD" size="small" />}
-          title={'Current Balance in dollars'}
+          title={'Balance in Dollars'}
           text={
            lastTransaction?.newBalance
           }
         />
         <CardBalance
           icon={<Currency code="EUR" size="small" />}
-          title={'current accont bal in naira'}
+          title={'Balance in Naira'}
+
           text={
             lastTransaction?.newbalancenaira
           }
         />
         <CardBalance
           icon={<Currency code="NGN" size="small" />}
-          title={'current account bal i euros'}
+          title={'Balance in Euros'}
           text={
            lastTransaction?.newbalanceeuros
           }
@@ -212,8 +243,8 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
     </Box>
 
 
-      <Stack direction="row" alignItems="center">
-        <Text fontWeight="semibold">Your Transaction Date</Text>
+      <Stack bg="#fff" direction="row" padding="20px" alignItems="center">
+        <Text fontWeight="semibold">Your Transaction </Text>
         <FcLock />
       </Stack>
 

@@ -23,7 +23,12 @@ class TransactionService {
         if (account.balance >= amount) {
           const user = await User.findUserById(Number(account.owner));
 
-          const transaction = await Transaction.debit(account,senderId, amount,exchangeAmount, rate, receipientId,formCurrency,toCurrency);
+          const transaction = await Transaction.debit(
+            account,senderId, amount,exchangeAmount, rate,
+             receipientId,formCurrency,toCurrency
+
+              
+             );
 
           const mailData = {
             subject: 'A transaction occured on your account',

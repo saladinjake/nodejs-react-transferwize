@@ -31,7 +31,10 @@ class TransactionController {
     const { accountNumber } = req.params;   // the same persons identity wallet 
     
     try {    
-        const transaction = await TransactionService.debitAccount( accountNumber,id, amount, exchangeAmount, rate, receipientId,formCurrency,toCurrency);
+        const transaction = await TransactionService.debitAccount( 
+          accountNumber,id, amount, exchangeAmount, rate,
+           receipientId,formCurrency,toCurrency
+        );
         return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
     } catch (error) {
       // console.log(error)
@@ -67,7 +70,10 @@ class TransactionController {
     const { accountNumber } = req.params;   // the same credited persons identity wallet 
     
     try {
-      const transaction = await TransactionService.creditAccount( accountNumber,id, amount,exchangeAmount, rate, receipientId,formCurrency,toCurrency);
+      const transaction = await TransactionService.creditAccount(
+       accountNumber,id, amount,exchangeAmount, rate,
+        receipientId,formCurrency,toCurrency
+      );
       console.log(transaction)
       return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
     } catch (error) {
