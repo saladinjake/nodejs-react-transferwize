@@ -4,6 +4,8 @@ const name = Joi.string().regex(/^\D+$/).required();
 const email = Joi.string().email().lowercase()
   .required();
 const password = Joi.string().min(7).required().strict();
+const currency = Joi.string().max(4) 
+const search =  Joi.string().regex(/^(\w)+(\s)+\w+$/).required();
 
 const createUserSchema = Joi.object({
   firstName: name,
@@ -33,8 +35,18 @@ const updateStatusSchema = Joi.object({
 const transactionSchema = Joi.object({
   amount: Joi.number().positive().precision(2).required(),
   receipientId:email,
+  sendingCurrency: currency, 
+  receivingCurrency: currency,
+  exchangeAmount:Joi.number().positive().allow(0).precision(2)
+    .default(0.00),
+  rate:Joi.number().positive().allow(0).precision(2)
+    .default(0.00),
 });
 
+
+const searchSchema = Joi.object({
+  
+});
 
 export default {
   '/signup': createUserSchema,

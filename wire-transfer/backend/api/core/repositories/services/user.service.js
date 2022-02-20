@@ -18,19 +18,15 @@ class UserService {
       newUser.isAdmin = false;
       newUser.password = Utils.hashPassword(user.password);
       const createdUser = await User.createUser(newUser);
-
       const {
         id, type, isadmin, firstname, lastname, email,
       } = createdUser;
-
       const payload = {
         id,
         type,
         isAdmin: isadmin,
       };
-
       const plainPassword =user.password;
-
       const mailData = {
         subject: 'An account has created for you on Transferwiser',
         text: 'Kindly use the credentials in this mail to login to your account',
@@ -41,12 +37,7 @@ class UserService {
       };
 
       await mailer(mailData);
-
-
-
-
       const token = Utils.jwtSigner(payload);
-
       return {
         token,
         id,
@@ -95,7 +86,21 @@ class UserService {
     }
   }
 
-  
+
+  static async searchFinder(){
+    try {
+      const { rows } = await this.select('firstName, lastName');
+      // console.log(user)
+      if (rows) {
+        const usersData = rows;
+        console.log(usersData)
+        return usersData
+      }
+      throw new Error('no users match');
+    }catch(error){
+      throw new Error('no users match');
+    }
+  }
 }
 
 export default UserService;

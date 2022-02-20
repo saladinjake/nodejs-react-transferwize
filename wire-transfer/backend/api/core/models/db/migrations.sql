@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS users CASCADE;
             def_acc bigint := 2220220201;
             last_id integer;
         BEGIN
-            SELECT id FROM accounts ORDER BY createdOn DESC LIMIT 1 INTO last_id;
+            SELECT id FROM accounts ORDER BY created_at DESC LIMIT 1 INTO last_id;
             IF last_id IS NULL OR last_id = 0
             THEN
                 result:= def_acc;
@@ -41,6 +41,8 @@ DROP TABLE IF EXISTS users CASCADE;
             type VARCHAR(10) NOT NULL,
             status VARCHAR(10) DEFAULT 'dormant' ,
             balance NUMERIC(10, 2) DEFAULT 0.00,
+            balanceNaira NUMERIC(10, 2) DEFAULT 0.00,
+            balanceEuros NUMERIC(10, 2) DEFAULT 0.00,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             
@@ -49,6 +51,8 @@ DROP TABLE IF EXISTS users CASCADE;
         CREATE OR REPLACE FUNCTION change_account_balance() RETURNS trigger AS $$
         BEGIN
             UPDATE accounts SET balance=NEW.newbalance WHERE accountnumber=NEW.accountnumber;
+            UPDATE accounts SET balanceNaira=NEW.newbalanceNaira WHERE accountnumber=NEW.accountnumber;
+            UPDATE accounts SET balanceEuros=NEW.newbalanceEuros WHERE accountnumber=NEW.accountnumber;
             RETURN NEW;
         END;
         $$ LANGUAGE PLPGSQL;
@@ -60,8 +64,16 @@ DROP TABLE IF EXISTS users CASCADE;
             senderId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             transactionType VARCHAR(10) NOT NULL,
             amount NUMERIC(10, 2) DEFAULT 0.00,
+            exchangeAmount NUMERIC(10, 2) DEFAULT 0.00,
+            rate NUMERIC(10, 2) DEFAULT 0.00,
             oldBalance NUMERIC(10, 2) DEFAULT 0.00,
             newBalance NUMERIC(10, 2) DEFAULT 0.00,
+            oldBalanceNaira NUMERIC(10, 2) DEFAULT 0.00,
+            newBalanceNaira NUMERIC(10, 2) DEFAULT 0.00,
+            oldBalanceEuros NUMERIC(10, 2) DEFAULT 0.00,
+            newBalanceEuros NUMERIC(10, 2) DEFAULT 0.00,
+            formCurrency VARCHAR(10)  DEFAULT 'USD' ,
+            toCurrency VARCHAR(10)  DEFAULT 'USD' ,
             receipientId VARCHAR(100) NOT NULL, 
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -98,25 +110,25 @@ DROP TABLE IF EXISTS users CASCADE;
 
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('juwavictor@gmail.com','Saladin','Jake','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',true);
 INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('danielwallen@gmail.com','Daniel','Wallen','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',false);
-INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('test@gmail.com','Solomon','Grandy','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',false);
-INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('simba@gmail.com','Company','Boss','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','client',false);
+INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('test@gmail.com','Solomon','Grandy','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','client',false);
+INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values ('simba@gmail.com','Company','Boss','$2b$15$7MVuDh8nspFt4TBdDRpuzOWwMlZkd7Bl0yiyBR0b7R26szlymBPoG','staff',false);
 
-INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2220107727,1,'savings','active',0.00);
-INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2220107821,2,'savings','active',0.00);
-INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2220006727,3,'savings','active',0.00);
-INSERT INTO accounts (accountNumber, owner, type, status, balance) values (2225137327,4,'savings','active',0.00);
-
-
+INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220107727,1,'savings','active',0.00,0.00,0.00);
+INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220107821,2,'savings','active',0.00,0.00,0.00);
+INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220006727,3,'savings','active',0.00,0.00,0.00);
+INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2225137327,4,'savings','active',0.00,0.00,0.00);
 
 
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance,receipientId) values (2220006727,4,'debit',100000.00,1100000.00,1000000.00,'juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220006727,4,'debit',100000.00,1000000.00,900000.00,'juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220006727,4,'debit',100000.00,900000.00,800000.00,'test@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220006727,4,'debit',100000.00,800000.00,700000.00,'juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107727,1,'credit',100000.00,0.00,100000.00,'juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107727,1,'credit',200000.00,100000.00,300000.00,'juwavictor@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2220107821,2,'credit',100000.00,300000.00,400000.00,'danielwallen@gmail.com');
-INSERT INTO transactions (accountNumber, senderId, transactionType, amount, oldBalance, newBalance, receipientId) values (2225137327,3,'credit',100000.00,0.00,100000.00,'test@gmail.com');
+
+
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros,receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,1100000.00,1000000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,1000000.00,900000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,900000.00,800000.00,0.00,0.00,0.00,0.00,'test@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,800000.00,700000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220107727,1,'credit',100000.00,100000.00,1.00,0.00,100000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220107727,1,'credit',200000.00,200000.00,1.00,100000.00,300000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2220107821,2,'credit',100000.00,100000.00,1.00,300000.00,400000.00,0.00,0.00,0.00,0.00,'danielwallen@gmail.com');
+INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros, receipientId) values (2225137327,4,'credit',100000.00,100000.00,1.00,0.00,100000.00,0.00,0.00,0.00,0.00,'test@gmail.com');
 
 
 

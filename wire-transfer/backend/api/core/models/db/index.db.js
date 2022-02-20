@@ -34,6 +34,8 @@ class Model {
     }
   }
 
+  
+
   async selectWithJoin(columns, selectors, values) {
     const queryString = `SELECT ${columns} FROM ${this.table} trans INNER JOIN accounts acc ON (trans.accountnumber = acc.accountnumber) WHERE ${selectors} `;
     try {
@@ -79,6 +81,9 @@ class Model {
   logJSON(data) {
     return this.logger(JSON.stringify(data, null, '\t'));
   }
+
+   
+   
 }
 
 export default Model;

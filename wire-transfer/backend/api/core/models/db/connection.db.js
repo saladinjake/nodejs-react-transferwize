@@ -61,7 +61,7 @@ if ( env === 'production') {
         console.log("connection established")
     })
 
-    // pool.query('SELECT * FROM accounts', function(error,query,release){
+    // pool.query('SELECT * FROM transactions WHERE senderid=$1  OR receipientid=$2',[4,"simba@gmail.com"], function(error,query,release){
     //    if(!error){
     //         console.log(query.rows)
     //    }

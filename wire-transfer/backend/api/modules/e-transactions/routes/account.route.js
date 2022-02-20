@@ -28,7 +28,7 @@ router
   .get('/accounts/:accountNumber',
     authMiddleware,
     validateParams,
-    PermissionMiddleware.strictAccountPermission,
+    // PermissionMiddleware.strictAccountPermission,
     AccountContoller.getAccount);
 
 
@@ -37,14 +37,17 @@ router
   .delete('/accounts/:accountNumber',
     authMiddleware,
     validateParams,
-      PermissionMiddleware.strictAccountPermission,
+      // PermissionMiddleware.strictAccountPermission,
     AccountContoller.deleteAccount);
 
 router
   .get('/user/:email/accounts',
     authMiddleware,
     validateParams,
-    PermissionMiddleware.strictAccountPermission,
+    // PermissionMiddleware.strictAccountPermission,
     AccountContoller.getAUserAccounts);
+
+
+
 
 export default router;
