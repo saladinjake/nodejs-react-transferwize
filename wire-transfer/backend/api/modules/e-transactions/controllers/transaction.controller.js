@@ -65,6 +65,7 @@ class TransactionController {
   {
     const  id = req.senderId || req?.token?.id; // the person receiving or who's ledger is credited the trasfer
     const { accountNumber } = req.params;   // the same credited persons identity wallet 
+    
     try {
       const transaction = await TransactionService.creditAccount( accountNumber,id, amount,exchangeAmount, rate, receipientId,formCurrency,toCurrency);
       console.log(transaction)
@@ -79,6 +80,9 @@ class TransactionController {
 
   static async getTransactions(req, res) {
     const { accountNumber } = req.params;
+     const  id = req?.token?.id; // the person receiving or who's ledger is credited the trasfer
+     const  {email } =  req?.token; // the person performing the trasfer
+      console.log(req.token)
     try {
       const data = await TransactionService.getAllTransactions(accountNumber);
       return response.sendSuccess(res, 200, data, 'Transactions was successfully fetched');
@@ -89,7 +93,10 @@ class TransactionController {
 
  
   static async getATransaction(req, res) {
-    const { transactionId } = req.params;
+     const { transactionId } = req.params;
+     // const  id = req.token.id; // the person receiving or who's ledger is credited the trasfer
+     // const  email  =  req.token.email; // the person performing the trasfer
+     //  console.log(req.token)
     try {
       const data = await TransactionService.getTransaction(transactionId);
       return response.sendSuccess(res, 200, data, 'Transaction was successfully fetched');

@@ -1,4 +1,8 @@
 import Model from './db/index.db';
+import AccountModel from "./account.model"
+import UserModel from "./user.model"
+const User = new UserModel("users")
+const Account = new AccountModel("accounts")
 export default class Transaction extends Model {
   async credit(account, cashierId, amount,exchangeAmount, rate,  receipient, formCurrency='USD', toCurrency='USD') {
    
@@ -96,13 +100,22 @@ export default class Transaction extends Model {
 
   async getTransactions(accountNumber) {
     try {
-      
-      const { rows } = await this.selectWhere(
-        'id, created_at, updated_at transactiontype, accountNumber, senderId, receipientId, amount,exchangeAmount, rate, oldBalance, newBalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros, formCurrency,toCurrency',
-        'accountNumber=$1',
-        [accountNumber],
-      );
 
+      
+     const accountOwner = await  Account.findByAccountNumber(accountNumber)
+     console.log(accountOwner)
+     const userId = accountOwner.owner;
+     const userProfile = await User.findUserById(userId);
+     console.log(userProfile)
+      
+      // const { rows } = await this.selectWhere(
+      //   'id, created_at, updated_at, transactiontype, accountNumber, senderId, receipientId, amount,exchangeAmount, rate, oldBalance, newBalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros, formCurrency,toCurrency',
+      //   'accountNumber=$1 '
+      //   [accountNumber,userId,userEmail],
+      // );
+
+      const { rows } = await this.pool.query('SELECT * FROM transactions WHERE accountNumber=$1 OR senderId=$2  OR receipientId=$3',[accountNumber,userProfile.id,userProfile.email])
+      console.log(rows)
       return rows;
     } catch (error) {
       throw error;
