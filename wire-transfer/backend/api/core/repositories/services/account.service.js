@@ -104,7 +104,7 @@ class AccountService {
   static async isMyAccount(id, accountNumber) {
     try {
       const foundAccount = await Account.findByAccountNumber(accountNumber);
-
+      console.log("account belongs to user id:"+ id)
       if (foundAccount) {
         if (Number(foundAccount.owner) !== Number(id)) {
           return false;

@@ -84,6 +84,40 @@ const  TransactionComponent = ({ auth: {isAuthenticated, user , prevPath } }) =>
    const [transactions, setTransactions] = useState([])
    const toastedBread = useToast()
    const [lastTrnx ,setLastTransaction] = useState({})
+
+
+   
+  let isLoggedIn = false;
+  
+  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
+  const [firstName, setFirstName ] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [token,setToken] = useState("")
+
+  useEffect(async()=>{
+      if(typeof window!=="undefined"){
+          console.log(user)
+        if(window.localStorage && window.localStorage.getItem("user")){
+          console.log(window.localStorage.getItem("user"))
+          user = JSON.parse(window.localStorage.getItem("user"))
+          setId(user.id)
+          setEmail(user.email)
+          setFirstName(user.firstName)
+          setLastName(user.lastName)
+          setIsAuthenticated(user.isAuthenticated)
+          setToken(user.token)
+          if (user.token && user.isAuthenticated) {
+             isLoggedIn = true;
+          }
+        }else{
+          await logOut()
+          setTimeout(()=>{window.location.href="/login"},2000)
+        }
+      }
+  },[user])
+
    useEffect(async()=>{
    
       try{

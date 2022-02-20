@@ -101,16 +101,9 @@ const handleLogout = async () => {
 
 
 
-
-
-
-
-
-
-
-function NewTransfer({ auth: {isAuthenticated, token, user , prevPath } }) {
-  console.log(isAuthenticated,token,user)
-  const { id, email, firstName, lastName } = user;
+function NewTransfer({ auth: {  user , prevPath } }) {
+  
+ 
   const toastedBread = useToast()
   const handleInputChange = (newValue) => {
     const inputValue = newValue.replace(/\W/g, '');
@@ -118,10 +111,36 @@ function NewTransfer({ auth: {isAuthenticated, token, user , prevPath } }) {
     return inputValue;
   };
 
-  // let isLoggedIn = false;
-  // if (user.token && user.isAuthenticated) {
-  //   isLoggedIn = true;
-  // }
+  let isLoggedIn = false;
+  
+  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
+  const [firstName, setFirstName ] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [token,setToken] = useState("")
+
+  useEffect(async()=>{
+      if(typeof window!=="undefined"){
+          console.log(user)
+        if(window.localStorage && window.localStorage.getItem("user")){
+          console.log(window.localStorage.getItem("user"))
+          user = JSON.parse(window.localStorage.getItem("user"))
+          setId(user.id)
+          setEmail(user.email)
+          setFirstName(user.firstName)
+          setLastName(user.lastName)
+          setIsAuthenticated(user.isAuthenticated)
+          setToken(user.token)
+          if (user.token && user.isAuthenticated) {
+             isLoggedIn = true;
+          }
+        }else{
+          await logOut()
+          setTimeout(()=>{window.location.href="/login"},2000)
+        }
+      }
+  },[user])
 
   const [inputFrom, setInputFrom] = useState(0);
   const [inputTo, setInputTo] = useState(0);
@@ -303,7 +322,7 @@ function NewTransfer({ auth: {isAuthenticated, token, user , prevPath } }) {
          }
       })
 
-      await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
+      const transactionSuccessful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
   }
 
 
@@ -464,10 +483,11 @@ const mapStateToProps = (state) => ({
 });
 
 const FTransaction = connect(mapStateToProps, {})(NewTransfer);
-
-export default function Dashboard({
+ 
+ const Dashboard = ({
+  auth: {isAuthenticated, token, user , prevPath },
   children,
-}) {
+}) =>{
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
@@ -512,6 +532,16 @@ export default function Dashboard({
 
 
 
+
+Dashboard.propTypes = {
+  auth: PropTypes.object.isRequired,
+};
+
+const mapStateToProps2 = (state) => ({
+  auth: state.auth
+});
+
+const FTransactionDashboard = connect(mapStateToProps2, {})(Dashboard);
 
 
 
@@ -656,3 +686,5 @@ const MobileNav = ({ onOpen, ...rest }) => {
 
 
 
+
+export default FTransactionDashboard 
