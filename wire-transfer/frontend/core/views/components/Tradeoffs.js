@@ -238,7 +238,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           }
         />
         <CardBalance
-          icon={<Currency code="EUR" size="small" />}
+          icon={<Currency code="NGN" size="small" />}
           title={'Balance in Naira'}
 
           text={
@@ -246,7 +246,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           }
         />
         <CardBalance
-          icon={<Currency code="NGN" size="small" />}
+          icon={<Currency code="EUR"  size="small" />}
           title={'Balance in Euros'}
           text={
            lastTransaction?.newbalanceeuros
