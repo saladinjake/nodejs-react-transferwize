@@ -15,6 +15,9 @@ import searchRoutes from './modules/auth/routes/search.route'
 /*express configurations*/
 import pool from "./core/models/db/connection.db"
 
+import swaggerUI from 'swagger-ui-express';
+import swaggerDocument from '../swagger.json';
+
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
@@ -25,6 +28,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+app.use('/transferwise/api/v1/documentations', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 app.use(cors());
 app.post('/test', (req, res) => {
