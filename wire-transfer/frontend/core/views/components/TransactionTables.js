@@ -67,8 +67,8 @@ function CustomTable({ columns, data }) {
         <Thead>
           {headerGroups.map((headerGroup) => (
             <Tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <Th {...column.getHeaderProps()}>{column.render("Header")}</Th>
+              {headerGroup.headers.map((column, index) => (
+                <Th key={Math.random(20)*10 + index} {...column.getHeaderProps()}>{column.render("Header")}</Th>
               ))}
             </Tr>
           ))}
@@ -78,9 +78,9 @@ function CustomTable({ columns, data }) {
             prepareRow(row);
             return (
               <Tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
+                {row.cells.map((cell,index) => {
                   return (
-                    <Td width="100px" {...cell.getCellProps()}>{cell.render("Cell")}</Td>
+                    <Td key={Math.random(20)*10 + index} width="100px" {...cell.getCellProps()}>{cell.render("Cell")}</Td>
                   );
                 })}
               </Tr>
