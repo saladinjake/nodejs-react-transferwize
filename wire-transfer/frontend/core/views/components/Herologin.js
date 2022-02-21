@@ -125,7 +125,7 @@ import RequestLoader from "../../views/components/RequestLoader"
           //dispatch the redux action
           console.log(res)
           login(res);
-           router.push('/dashboard')
+           // router.push('/dashboard')
           //  if(typeof window!=undefined){
           //   window.location.href="/dashboard"
           // }
@@ -156,7 +156,7 @@ import RequestLoader from "../../views/components/RequestLoader"
             })
           }
         
-            logOut();
+            // logOut();
             setSubmitting(false);
             setLoading(false);
         }

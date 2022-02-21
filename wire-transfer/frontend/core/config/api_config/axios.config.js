@@ -8,10 +8,10 @@
 *@usage:
 */
 import axios from "axios";
-let baseURL = 'http://localhost:3000/api/v1/'
-if(process.env.NODE_ENV=="production"){
- let baseURL =  process.env.API_END_POINT ? process.env.API_END_POINT : "http://localhost:3000/api/v1/";
-}
+let baseURL ='https://transferwise-apitest.herokuapp.com/api/v1/' // 'http://localhost:3000/api/v1/'
+// if(process.env.NODE_ENV=="production"){
+//  let baseURL =  process.env.API_END_POINT ? process.env.API_END_POINT : "http://localhost:3000/api/v1/";
+// }
 let token;
 axios.defaults.headers.common["Content-Type"] ="application/json";
 // axios.defaults.headers.common["Content-Type"] = "multipart/form-data";
