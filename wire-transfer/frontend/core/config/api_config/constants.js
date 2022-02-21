@@ -17,6 +17,7 @@ export const MICROSERVICE_FRONT1="https://transferwiz.vercel.app/"
 
 /*The issuing bonus amout company profile in the user account with a well funded account*/
 /*SIMBA MUST BE TOO GENEROUS TO GIVE 1000 USD ON SIGN UP*/
-export const SIMBA_COMPANY_ID = "simba@gmail.com";
+export const SIMBA_COMPANY_ID = 4;
+export const SIMBA_COMPANY_EMAIL ="simba@gmail.com"
 export const BONUS_AMOUNT = 1000.00;
 export const SIMBA_ACCOUNT_NUMBER = 2225137327

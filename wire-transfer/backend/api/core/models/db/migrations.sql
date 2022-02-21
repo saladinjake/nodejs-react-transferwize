@@ -39,7 +39,7 @@ DROP TABLE IF EXISTS users CASCADE;
             accountNumber BIGINT UNIQUE DEFAULT acc_generator(),
             owner INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             type VARCHAR(10) NOT NULL,
-            status VARCHAR(10) DEFAULT 'dormant' ,
+            status VARCHAR(20) DEFAULT 'dormant' ,
             balance NUMERIC(20, 2) DEFAULT 0.00,
             balanceNaira NUMERIC(20, 2) DEFAULT 0.00,
             balanceEuros NUMERIC(20, 2) DEFAULT 0.00,
@@ -61,11 +61,12 @@ DROP TABLE IF EXISTS users CASCADE;
         CREATE TABLE transactions(
             id SERIAL NOT NULL UNIQUE PRIMARY KEY,
             accountNumber BIGINT NOT NULL REFERENCES accounts(accountNumber) ON DELETE CASCADE,
-            senderId VARCHAR(200) NOT NULL REFERENCES users(email) ON DELETE CASCADE,
+            senderId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            senderEmail  VARCHAR(200)  DEFAULT '' ,
             transactionType VARCHAR(10) NOT NULL,
             amount NUMERIC(20, 2) DEFAULT 0.00,
             exchangeAmount NUMERIC(10, 2) DEFAULT 0.00,
-            rate NUMERIC(20, 2) DEFAULT 0.00,
+            rate NUMERIC(10, 2) DEFAULT 0.00,
             oldBalance NUMERIC(20, 2) DEFAULT 0.00,
             newBalance NUMERIC(20, 2) DEFAULT 0.00,
             oldBalanceNaira NUMERIC(20, 2) DEFAULT 0.00,
@@ -117,7 +118,7 @@ INSERT INTO users (email, firstName, lastName, password, type, isAdmin) values (
 INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220107727,1,'savings','active',0.00,0.00,0.00);
 INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220107821,2,'savings','active',0.00,0.00,0.00);
 INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2220006727,3,'savings','active',0.00,0.00,0.00);
-INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2225137327,4,'savings','active',300000000000.00,0.00,0.00);
+INSERT INTO accounts (accountNumber, owner, type, status, balance, balanceNaira, balanceEuros) values (2225137327,4,'savings','active',30000000000000.00,0.00,0.00);
 
 
 -- INSERT INTO transactions (accountNumber, senderId, transactionType, amount, exchangeAmount, rate, oldBalance, newBalance,oldBalanceNaira, newBalanceNaira, oldBalanceEuros,newBalanceEuros,receipientId) values (2220006727,4,'debit',100000.00,100000.00,1.00,1100000.00,1000000.00,0.00,0.00,0.00,0.00,'juwavictor@gmail.com');

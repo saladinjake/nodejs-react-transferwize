@@ -54,7 +54,8 @@ import { fetchConversionRates } from "../../services/transactions.services"
 
 import { 
   SIMBA_COMPANY_ID, BONUS_AMOUNT, 
-  SIMBA_ACCOUNT_NUMBER 
+  SIMBA_ACCOUNT_NUMBER,
+  SIMBA_COMPANY_EMAIL 
 } from "../../config/api_config/constants"
 
 
@@ -107,7 +108,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
         if(window.localStorage && window.localStorage.getItem("user")){
          // console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.email)
+          setId(user.id)
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -136,13 +137,17 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
         // console.log(walletAccountDetails.data.data)
          if('data' in walletAccountDetails.data &&  Array.isArray(walletAccountDetails?.data?.data) ){
            const existingAccount =  walletAccountDetails.data.data[0];
-           console.log(walletAccountDetails.data.data[0])
+           // document.getElementById("accountId").innerHTML = existingAccount?.accountNumber;
+             
+           // console.log(walletAccountDetails.data.data[0])
            if('accountNumber' in existingAccount ){
-             console.log("true")
+             // console.log("true")
+
               const myTransactionLedgers = await myTransactions(existingAccount.accountNumber)
-              console.log(myTransactionLedgers)
+
+              // console.log(myTransactionLedgers)
               setTransactions([...myTransactionLedgers?.data?.data])
-              console.log(transactions)
+              // console.log(transactions)
 
               //if first timer then 
               //ledger into the user account 
@@ -157,6 +162,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
                   sendingCurrency:"USD",
                   receivingCurrency:"USD",
                   senderId: SIMBA_COMPANY_ID,
+                  senderEmail:SIMBA_COMPANY_EMAIL,
                   receipientId: userEmail
                 };
                 let creditorLedgerDetail ={
@@ -167,6 +173,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
                   sendingCurrency:"USD",
                   receivingCurrency:"USD",
                   senderId: SIMBA_COMPANY_ID,
+                  senderEmail:SIMBA_COMPANY_EMAIL,
                   receipientId: userEmail
                 }
                 await debitLedgerAccount(debitorLedgerDetail)

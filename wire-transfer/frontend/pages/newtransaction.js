@@ -122,7 +122,7 @@ const router = useRouter();
         if(window.localStorage && window.localStorage.getItem("user")){
           console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.email)
+          setId(user.id)
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -259,7 +259,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         if(window.localStorage && window.localStorage.getItem("user")){
          // console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.email)
+          setId(user.id)
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -324,6 +324,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     receivingAmount: 0.00, 
     rate:1,
     senderid: id,
+    senderEmail: email,
     receipientId: null,
     sendingCurrency:currencyFrom,
     receivingCurrency:currencyTo,
@@ -419,7 +420,9 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         sendingCurrency:currencyFrom,
         receivingCurrency:currencyTo,
         senderId: id,
+        senderEmail:email,
         receipientId: handleSelectedUser().email,
+        accountNumber:""
       };
       const debitLedgerPayload = {
         name: firstName + " " + lastName,
@@ -428,8 +431,10 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         rate:rate,
         sendingCurrency:currencyFrom,
         receivingCurrency:currencyTo, 
-        senderId: handleSelectedUser().email,
+        senderId: id,
+        senderEmail:email,
         receipientId: email,
+        accountNumber:""
         
       };
       console.log(creditLedgerPayload)

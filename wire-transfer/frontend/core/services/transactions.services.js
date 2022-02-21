@@ -62,7 +62,7 @@ export const sendMoneyOverseas = async (creditLedgerDetail,debitLedgerDetail) =>
   try{
     const creditorAccount = await getWalletAccounts(creditLedgerDetail.receipientId)
     creditLedgerDetail.accountNumber = creditorAccount.data.data[0].accountNumber
-    const debitorAccount = await getWalletAccounts(debitLedgerDetail.receipientId)
+    const debitorAccount = await getWalletAccounts(debitLedgerDetail.senderEmail)
     debitLedgerDetail.accountNumber = debitorAccount.data.data[0].accountNumber
 
    // console.log( debitLedgerDetail,creditLedgerDetail)

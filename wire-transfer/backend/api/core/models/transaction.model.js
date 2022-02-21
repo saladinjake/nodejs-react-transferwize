@@ -4,7 +4,7 @@ import UserModel from "./user.model"
 const User = new UserModel("users")
 const Account = new AccountModel("accounts")
 export default class Transaction extends Model {
-  async credit(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency) {
+  async credit(account, senderId,senderEmail, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency) {
   // console.log(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency)
     try {
         //only update a new balance in a currency note if its target exchange
@@ -31,9 +31,10 @@ export default class Transaction extends Model {
 
 
            // console.log(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency)
-          const { rows } = await this.insert('accountNumber, senderId, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15', [
+          const { rows } = await this.insert('accountNumber, senderId, senderEmail, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16', [
           Number(userAccount.accountnumber),
           senderId, // the user debited  automatically
+          senderEmail,
           'credit',
           amount,
           exchangeAmount, rate,
@@ -60,7 +61,7 @@ export default class Transaction extends Model {
     }
   }
 
-  async debit(account, senderId, amount,exchangeAmount, rate,  receipientId,formCurrency='USD', toCurrency='USD') {
+  async debit(account, senderId, senderEmail, amount,exchangeAmount, rate,  receipientId,formCurrency='USD', toCurrency='USD') {
     const userAccount = account;
      let    newBalanceNaira = 0.00;  
      let    newBalanceEuros = 0.00;
@@ -76,9 +77,10 @@ export default class Transaction extends Model {
      
     try {
 
-      const { rows } = await this.insert('accountNumber, senderId, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15', [
+      const { rows } = await this.insert('accountNumber, senderId, senderEmail, transactionType, amount,exchangeAmount, rate, oldbalance, newbalance, oldBalanceNaira, newBalanceNaira, oldBalanceEuros, newBalanceEuros ,receipientId, formCurrency, toCurrency', '$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16', [
         Number(account.accountnumber),
         senderId, // // the user sending the money
+        senderEmail,
         'debit',
         amount,
         exchangeAmount, rate,
@@ -123,6 +125,7 @@ export default class Transaction extends Model {
       console.log(rows)
       return rows;
     } catch (error) {
+      console.log(error)
       throw error;
     }
   }
@@ -130,7 +133,7 @@ export default class Transaction extends Model {
   async getTransactionById(id) {
     try {
       const { rows } = await this.selectWithJoin(
-        'trans.id, trans.created_at, transactiontype, trans.updated_at trans.transactiontype, trans.accountNumber, trans.senderId, trans.receipientId, trans.amount, trans.exchangeAmount, trans.rate, trans.oldBalance, trans.newBalance, trans.oldBalanceNaira, trans.newBalanceNaira, trans.oldBalanceEuros, trans.newBalanceEuros, trans.formCurrency,trans.toCurrency',
+        'trans.id, trans.created_at, transactiontype, trans.updated_at trans.transactiontype, trans.accountNumber, trans.senderId,  trans.receipientId, trans.amount, trans.exchangeAmount, trans.rate, trans.oldBalance, trans.newBalance, trans.oldBalanceNaira, trans.newBalanceNaira, trans.oldBalanceEuros, trans.newBalanceEuros, trans.formCurrency,trans.toCurrency',
         'trans.id=$1',
         [id],
       );

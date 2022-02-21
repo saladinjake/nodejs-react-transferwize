@@ -78,7 +78,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
         if(window.localStorage && window.localStorage.getItem("user")){
           console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.email) // no longer id rather should uniquely identify user from the glance of the app
+          setId(user.id) // no longer id rather should uniquely identify user from the glance of the app
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -147,6 +147,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
                   alignItems="flex-start"
                   spacing="1px"
                   ml="2">
+                  <div id="accountId" ></div>
                   <Text fontSize="md">{user?.firstName + " "+ user?.lastName }</Text>
                   <Text fontSize="xs" color="gray.600">
                    You are logged in
