@@ -16,7 +16,7 @@ let pool = null
 if ( env === 'production') {
   //console.log( process.env.PG_DATABASE_HEROKU)
   pool = new Pool({ 
-      connectionString: `postgres://sxqxifycivjczb:ffa691b4cc9702002f7e148135d6e05455205f69a5d43012f8dc7cc8f0c95645@ec2-18-235-114-62.compute-1.amazonaws.com:5432/d3ufd2rj057hmf` ,
+      connectionString: process.env.DATABASE_URL  // `postgres://sxqxifycivjczb:ffa691b4cc9702002f7e148135d6e05455205f69a5d43012f8dc7cc8f0c95645@ec2-18-235-114-62.compute-1.amazonaws.com:5432/d3ufd2rj057hmf` ,
       ssl: {
           rejectUnauthorized: false,
       },
@@ -28,7 +28,8 @@ if ( env === 'production') {
       if (err) {
           return console.error('Error acquiring client', err.stack)
       }
-      // Do what you have to do with the pool client now
+      console.log("db connection established")
+      //Do what you have to do with the pool client now
   })
 
   //console.log(clients)
