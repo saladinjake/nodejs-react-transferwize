@@ -7,23 +7,27 @@ export default class Transaction extends Model {
   async credit(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency) {
   // console.log(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency)
     try {
-        
+        //only update a new balance in a currency note if its target exchange
          const userAccount = account;
          let newBalance = 0.00;
          let newBalanceEuros = 0.00;
-          let newBalanceNaira = 0.00;
-        
-         if(toCurrency=="EUR"){
-           // base balance
-            newBalance =parseFloat(userAccount.balance) +  exchangeAmount
-            newBalanceEuros = parseFloat(userAccount.balanceeuros)+  exchangeAmount
-         }else if(toCurrency=="NGN"){
-           newBalance =parseFloat(userAccount.balance) +  exchangeAmount
-           newBalanceNaira = parseFloat(userAccount.balancenaira)+  exchangeAmount
+         let newBalanceNaira = 0.00;
+         let targetRateApplied =1;
+         let desiredCurrencyVal =0.00; 
+
+         amount = amount // how much user have to convert
+         if(toCurrency=="NGN"){
+              //naira  account has to be divided by dollar  balance
+              newBalanceNaira = (parseFloat(userAccount.balancenaira))+ exchangeAmount 
+    
+         }else if(toCurrency=="EUR"){
+             //naira  account has to be divided by dollar  balance
+               newBalanceEuros = (parseFloat(userAccount.balanceeuros))+ exchangeAmount 
          }else{
-            //or + anmount
             newBalance =parseFloat(userAccount.balance) +  exchangeAmount
          }
+
+         
 
 
            // console.log(account, senderId, amount,exchangeAmount, rate,  receipient, formCurrency, toCurrency)
@@ -63,16 +67,12 @@ export default class Transaction extends Model {
       let newBalance = 0.00;
 
      if(toCurrency=="EUR"){
-           // base balance
-            newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount)
-            newBalanceEuros = parseFloat(userAccount.balanceeuros)-  parseFloat(exchangeAmount)
-         }else if(toCurrency=="NGN"){
-           newBalance =parseFloat(userAccount.balance) - parseFloat(exchangeAmount) 
-           newBalanceNaira = parseFloat(userAccount.balancenaira)-  parseFloat(exchangeAmount)
-         }else{
-            //or + anmount
-            newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount) 
-         }
+        newBalanceEuros = parseFloat(userAccount.balanceeuros)-  parseFloat(exchangeAmount)
+      }else if(toCurrency=="NGN"){
+        newBalanceNaira = parseFloat(userAccount.balancenaira)-  parseFloat(exchangeAmount)
+     }else{
+        newBalance =parseFloat(userAccount.balance) -  parseFloat(exchangeAmount) 
+     }
      
     try {
 

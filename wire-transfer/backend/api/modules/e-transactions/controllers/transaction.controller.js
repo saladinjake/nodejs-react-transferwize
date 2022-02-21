@@ -8,7 +8,7 @@ class TransactionController {
  
   static async debitUserAccount(req, res) {
     let formCurrency = null; let toCurrency = null
-    const { amount , rate, exchangeAmount, receipientId, sendingCurrency, receivingCurrency } = req.body;
+    const { amount , rate, senderId, exchangeAmount, receipientId, sendingCurrency, receivingCurrency } = req.body;
     
     const emailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
    if (!emailFilter.test(receipientId)) {
@@ -22,7 +22,7 @@ class TransactionController {
     
     try {    
         const transaction = await TransactionService.debitAccount( 
-          accountNumber,id, amount, req.body.exchangeAmount, req.body.rate,
+          accountNumber,senderId, amount, req.body.exchangeAmount, req.body.rate,
            receipientId,sendingCurrency, receivingCurrency
         );
         return response.sendSuccess(res, 200, transaction, 'Transaction was successful');
@@ -37,7 +37,7 @@ class TransactionController {
 
   static async creditUserAccount(req, res) {
    let formCurrency = null; let toCurrency = null
-    const { amount , rate, exchangeAmount, receipientId, sendingCurrency, receivingCurrency } = req.body;
+    const { amount ,senderId, rate, exchangeAmount, receipientId, sendingCurrency, receivingCurrency } = req.body;
    
     const emailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
    if (!emailFilter.test(receipientId)) {

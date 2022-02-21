@@ -16,6 +16,15 @@ export const getWalletAccounts = async (emailId) => {
     }
   });
 };
+
+export const getUserProfileById = async (Id) => {
+  let request = axios.get(`search/${Id}/users`);
+  return request.then((response) => {
+    if (response.status === 200) {
+      return response && response;
+    }
+  });
+};
 export const creditLedgerAccount = async (ledgerDetail) => {
  let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/credit`, ledgerDetail);  
   return request.then((response) => {
@@ -33,6 +42,19 @@ export const debitLedgerAccount = async (ledgerDetail) => {
   });
 }
 
+
+export const fetchConversionRates = async (currencyFrom,currencyTo) => {
+      const result = await fetch(//
+        //8c627c48be6db29a67c2b7cf
+        `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
+      );
+      //console.log(result);
+      if (result.ok) {
+        const rates = await result.json();
+        return rates.conversion_rate;
+        
+      }
+    };
 
 export const sendMoneyOverseas = async (creditLedgerDetail,debitLedgerDetail) =>{
    // console.log(creditLedgerDetail)

@@ -16,7 +16,7 @@ import searchRoutes from './modules/auth/routes/search.route'
 import pool from "./core/models/db/connection.db"
 
 import swaggerUI from 'swagger-ui-express';
-import swaggerDocument from '../swagger.json';
+import swaggerDocument from '../../swagger.json';
 
 dotenv.config();
 const app = express();

@@ -26,6 +26,9 @@ import {
   ChevronLeftIcon
 } from "@chakra-ui/icons";
 
+
+import { getUser } from "../../services/auth.services"
+
 function CustomTable({ columns, data }) {
   const {
     getTableProps,
@@ -51,8 +54,9 @@ function CustomTable({ columns, data }) {
     usePagination
   );
 
-  data.forEach(transaction =>{
+  data.forEach( async (transaction) =>{
     if(transaction.type ==="debit"){
+      transaction.senderid = 
        transaction["cash_in_flow_debit"] = "- "+ transaction.amount
     }else{
       transaction["cash_in_flow_credit"] ='+ '+ transaction.amount

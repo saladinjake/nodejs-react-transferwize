@@ -48,3 +48,15 @@ export const searchUser = () => {
     }
   });
 }
+
+
+
+
+export const getUser = (id) => {
+  let request = axios.get(`search/find/${id}/users`);
+  return request.then((response) => {
+    if (response.status === 200) {
+      return response && response;
+    }
+  });
+}

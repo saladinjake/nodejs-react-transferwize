@@ -71,7 +71,7 @@ import { connect } from "react-redux";
 
 import { useRouter } from 'next/router';
 
-import { sendMoneyOverseas } from "../core/services/transactions.services" 
+import { sendMoneyOverseas , fetchConversionRates } from "../core/services/transactions.services" 
 
 const LinkItems = [
   { name: 'dashboard', icon: FiHome },
@@ -122,7 +122,7 @@ const router = useRouter();
         if(window.localStorage && window.localStorage.getItem("user")){
           console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.id)
+          setId(user.email)
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -259,7 +259,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         if(window.localStorage && window.localStorage.getItem("user")){
          // console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.id)
+          setId(user.email)
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -379,23 +379,12 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   
 
   useEffect(() => {
-
-    const fetchConversionRates = async () => {
-      const result = await fetch(//
-        //8c627c48be6db29a67c2b7cf
-        `https://v6.exchangerate-api.com/v6/ed66962687fdf4b5a9afb6c6/pair/${currencyFrom}/${currencyTo}`
-      );
-      //console.log(result);
-      if (result.ok) {
-        const rates = await result.json();
-        setRate(rates.conversion_rate);
+    const tradingRates = fetchConversionRates(currencyFrom, currencyTo);
+    setRate(tradingRates);
         setSubmitData({
           ...submitData,
-          rate:rates.conversion_rate
+          rate:tradingRates
         })
-      }
-    };
-    fetchConversionRates();
   }, [currencyFrom, currencyTo]);
 
 
@@ -439,7 +428,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         rate:rate,
         sendingCurrency:currencyFrom,
         receivingCurrency:currencyTo, 
-        senderId: handleSelectedUser().id,
+        senderId: handleSelectedUser().email,
         receipientId: email,
         
       };

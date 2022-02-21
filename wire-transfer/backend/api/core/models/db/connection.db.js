@@ -59,7 +59,7 @@ if ( env === 'production') {
             return console.error('Error acquiring client', err.stack)
         }
         // Do what you have to do with the pool client now
-        console.log("connection established")
+        console.log("connection established locally..")
     })
 
     // pool.query('SELECT * FROM transactions WHERE senderid=$1  OR receipientid=$2',[4,"simba@gmail.com"], function(error,query,release){

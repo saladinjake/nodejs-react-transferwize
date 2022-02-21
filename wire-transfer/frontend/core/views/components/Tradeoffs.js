@@ -50,10 +50,9 @@ import { useToast } from '@chakra-ui/react'
 import RequestLoader from "./RequestLoader"
 import  TransactionTables from "./TransactionTables"
 import { useRouter } from "next/router"
-const SIMBA_COMPANY_ID = 4;
-const BONUS_AMOUNT = 1000.00;
-const SIMBA_ACCOUNT_NUMBER = 2225137327
+import { fetchConversionRates } from "../../services/transactions.services" 
 
+import { SIMBA_COMPANY_ID, BONUS_AMOUNT, SIMBA_ACCOUNT_NUMBER } from "../../config/constants"
 
 
 
@@ -105,7 +104,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
         if(window.localStorage && window.localStorage.getItem("user")){
          // console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.id)
+          setId(user.email)
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -223,7 +222,9 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 
     const lastTransaction = transactions[transactions.length -1]  
     //console.log(lastTransaction)
- 
+    fetchConversionRates('USD','EUR');
+    fetchConversionRates('USD','NGN');
+     
   return (
     <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
 
