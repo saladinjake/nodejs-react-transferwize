@@ -52,7 +52,10 @@ import  TransactionTables from "./TransactionTables"
 import { useRouter } from "next/router"
 import { fetchConversionRates } from "../../services/transactions.services" 
 
-import { SIMBA_COMPANY_ID, BONUS_AMOUNT, SIMBA_ACCOUNT_NUMBER } from "../../config/constants"
+import { 
+  SIMBA_COMPANY_ID, BONUS_AMOUNT, 
+  SIMBA_ACCOUNT_NUMBER 
+} from "../../config/api_config/constants"
 
 
 
