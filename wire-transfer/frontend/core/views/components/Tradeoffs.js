@@ -1,6 +1,5 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
 import { login, logOut, setPrevPath } from "../../redux/actions/auth.action";
-
 import Currency from 'react-currency-icons'
 import {
   IconButton,
@@ -43,7 +42,6 @@ import { ReactText } from 'react';
 
 
 import { FcLock } from 'react-icons/fc';
-
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
@@ -61,12 +59,13 @@ import {
   formatCurrency,
   truncate } from "../../helpers/utils/functions";
 // console.log( deriveForeignExchangeAccountBalance("USD","NGN",100))
- 
 import { 
   SIMBA_COMPANY_ID, BONUS_AMOUNT, 
   SIMBA_ACCOUNT_NUMBER,
   SIMBA_COMPANY_EMAIL 
 } from "../../config/api_config/constants"
+import { Loader, SomethingWentWrong } from "./Feedback"
+
 
 
 
@@ -113,6 +112,9 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
   const [token,setToken] = useState("")
   const [myWalletAccount, setMyWalletAccount] = useState({})
 
+  const [animateLoader, setAnimateLoader] = useState(false)
+ const [ifSomethingWentWrong,setIfSomethingWentWrong] = useState(false)
+
 
   useEffect(async()=>{
       if(typeof window!=="undefined"){
@@ -142,6 +144,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
   const recalculateAtomicBalance = (wallet) =>{
     if(wallet.accountNumber){
       
+          try{
 
             deriveForeignExchangeAccountBalance("USD",
               "NGN",
@@ -158,11 +161,16 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 
               SETNEWBALANCE(wallet.balance.toLocaleString())
               console.log(wallet.balance)
+
+          }catch(error){
+             setIfSomethingWentWrong(true)
+          }
+            
     }
   }
 
    useEffect(async()=>{
-   
+      setAnimateLoader(true)
       try{
       	if(!isAuthenticated){
          await logOut()
@@ -240,7 +248,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
              existingAccount =  walletAccountDetails.data.data[0];
         
              recalculateAtomicBalance(existingAccount)
-              
+               setAnimateLoader(false)
               }
            }else{
              // new user has no account so automatically create one for user signed up
@@ -257,10 +265,12 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           })
 
          }
+         setAnimateLoader(false)
          
          
       }catch(error){
-        
+         setAnimateLoader(false)
+          setIfSomethingWentWrong(true)
         toastedBread({
             title: 'An error occurred.',
             description: error?.message || error, //error.message,
@@ -301,7 +311,9 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 async function getData(BALANCE_USD) {
     let currencyFrom="USD";
     let currencyTo="EUR"
-    // using await means the resolved value of the Promise is returned!
+    try{
+
+      // using await means the resolved value of the Promise is returned!
     const responseEUR = await fetch( `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`).then(
       //(response) => response.json(),
     ); // .then still works when it makes sense!
@@ -317,10 +329,15 @@ async function getData(BALANCE_USD) {
           const rates2 = await responseEUR.json();
           return  {eur : rates.conversion_rate,ngn: rates2.conversion_rate   }      
     }
-}
-const Ballance = getData(availableUsersBalance)
+
+    }catch(error){
+       setIfSomethingWentWrong(true)
+    }
     
-    console.log(Ballance)
+}
+// const Ballance = getData(availableUsersBalance)
+    
+// console.log(Ballance)
      
   return (
     <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
@@ -328,28 +345,50 @@ const Ballance = getData(availableUsersBalance)
 
               <Box p={4} >
       <SimpleGrid  bg="#fff" columns={{ base: 1, md: 3 }} spacing={10}>
-        <CardBalance
-          icon={ <Currency code="USD" size="small" />}
-          title={'Balance in Dollars'}
-          text={
-          formatCurrency(NEWBALANCE || 0)
-          }
-        />
-        <CardBalance
-          icon={<Currency code="NGN" size="small" />}
-          title={'Balance in Naira'}
+        <>
+        
 
+
+        <>
+        {!animateLoader? (
+             <CardBalance
+          icon={<Currency code="USD"  size="small" />}
+          title={'Balance in NGN'}
           text={
-            formatCurrency(EQUIVALENT_BALANCE_IN_NGN|| 0)
+            
+            !animateLoader? formatCurrency(NEWBALANCE || 0) :( <Loader/>)
           }
         />
-        <CardBalance
+          ): (<Loader/>)}
+        </>
+        </>
+
+        <>
+        {!animateLoader? (
+             <CardBalance
+          icon={<Currency code="NGN"  size="small" />}
+          title={'Balance in NGN'}
+          text={
+            
+            !animateLoader? formatCurrency(EQUIVALENT_BALANCE_IN_NGN|| 0) :( <Loader/>)
+          }
+        />
+          ): (<Loader/>)}
+        </>
+
+        <>
+        {!animateLoader? (
+             <CardBalance
           icon={<Currency code="EUR"  size="small" />}
           title={'Balance in Euros'}
           text={
-            formatCurrency(EQUIVALENT_BALANCE_IN_EUR|| 0)
+            
+            !animateLoader? formatCurrency(EQUIVALENT_BALANCE_IN_EUR|| 0) :( <Loader/>)
           }
         />
+          ): (<Loader/>)}
+        </>
+        
       </SimpleGrid>
     </Box>
 
@@ -362,8 +401,9 @@ const Ballance = getData(availableUsersBalance)
 
 
       
-
-      <TransactionTables data={transactions}/>
+{!animateLoader? (<TransactionTables data={transactions}/>):
+  ifSomethingWentWrong ? (<SomethingWentWrong />) :(<Loader/>)}
+      
 
       
     </Stack>
