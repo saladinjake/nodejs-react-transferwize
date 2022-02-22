@@ -1,6 +1,5 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
 import { login, logOut, setPrevPath } from "../../redux/actions/auth.action";
-
 import Currency from 'react-currency-icons'
 import {
   IconButton,
@@ -43,7 +42,6 @@ import { ReactText } from 'react';
 
 
 import { FcLock } from 'react-icons/fc';
-
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
@@ -61,12 +59,13 @@ import {
   formatCurrency,
   truncate } from "../../helpers/utils/functions";
 // console.log( deriveForeignExchangeAccountBalance("USD","NGN",100))
- 
 import { 
   SIMBA_COMPANY_ID, BONUS_AMOUNT, 
   SIMBA_ACCOUNT_NUMBER,
   SIMBA_COMPANY_EMAIL 
 } from "../../config/api_config/constants"
+import { Loader, SomethingWentWrong } from "./Feedback"
+
 
 
 
@@ -112,6 +111,8 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
   const [isAuthenticated,setIsAuthenticated] = useState(false)
   const [token,setToken] = useState("")
   const [myWalletAccount, setMyWalletAccount] = useState({})
+
+  const [animateLoader, setAnimateLoader] = useState(false)
 
 
   useEffect(async()=>{
@@ -162,7 +163,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
   }
 
    useEffect(async()=>{
-   
+      setAnimateLoader(true)
       try{
       	if(!isAuthenticated){
          await logOut()
@@ -240,7 +241,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
              existingAccount =  walletAccountDetails.data.data[0];
         
              recalculateAtomicBalance(existingAccount)
-              
+               setAnimateLoader(false)
               }
            }else{
              // new user has no account so automatically create one for user signed up
@@ -257,10 +258,11 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           })
 
          }
+         setAnimateLoader(false)
          
          
       }catch(error){
-        
+         setAnimateLoader(false)
         toastedBread({
             title: 'An error occurred.',
             description: error?.message || error, //error.message,
@@ -328,28 +330,50 @@ const Ballance = getData(availableUsersBalance)
 
               <Box p={4} >
       <SimpleGrid  bg="#fff" columns={{ base: 1, md: 3 }} spacing={10}>
-        <CardBalance
-          icon={ <Currency code="USD" size="small" />}
-          title={'Balance in Dollars'}
-          text={
-          formatCurrency(NEWBALANCE || 0)
-          }
-        />
-        <CardBalance
-          icon={<Currency code="NGN" size="small" />}
-          title={'Balance in Naira'}
+        <>
+        
 
+
+        <>
+        {!animateLoader? (
+             <CardBalance
+          icon={<Currency code="USD"  size="small" />}
+          title={'Balance in NGN'}
           text={
-            formatCurrency(EQUIVALENT_BALANCE_IN_NGN|| 0)
+            
+            !animateLoader? formatCurrency(NEWBALANCE || 0) :( <Loader/>)
           }
         />
-        <CardBalance
+          ): (<Loader/>)}
+        </>
+        </>
+
+        <>
+        {!animateLoader? (
+             <CardBalance
+          icon={<Currency code="NGN"  size="small" />}
+          title={'Balance in NGN'}
+          text={
+            
+            !animateLoader? formatCurrency(EQUIVALENT_BALANCE_IN_NGN|| 0) :( <Loader/>)
+          }
+        />
+          ): (<Loader/>)}
+        </>
+
+        <>
+        {!animateLoader? (
+             <CardBalance
           icon={<Currency code="EUR"  size="small" />}
           title={'Balance in Euros'}
           text={
-            formatCurrency(EQUIVALENT_BALANCE_IN_EUR|| 0)
+            
+            !animateLoader? formatCurrency(EQUIVALENT_BALANCE_IN_EUR|| 0) :( <Loader/>)
           }
         />
+          ): (<Loader/>)}
+        </>
+        
       </SimpleGrid>
     </Box>
 
@@ -362,8 +386,8 @@ const Ballance = getData(availableUsersBalance)
 
 
       
-
-      <TransactionTables data={transactions}/>
+{!animateLoader? (<TransactionTables data={transactions}/>): (<Loader/>)}
+      
 
       
     </Stack>

@@ -27,7 +27,7 @@ const Layout = ({ SEO,children, ...props }) => {
 
   const network = useNetwork();
   const ready = usePageReady();
-
+ console.log(network.isOnline)
 
   useEffect(() => {
     network.displayToast();

@@ -78,6 +78,13 @@ import {
   userCannotProceedToPayment as FintechAIDecisionMakerBlockUserAction //check this out
 } from "../core/services/transactions.services" 
 
+import seoOptimization from "../core/helpers/utils/seoOptimizer";
+import Layout from "../core/views/components/Layouts"
+import { Loader, SomethingWentWrong } from "../core/views/components/Feedback"
+const pageSEO = seoOptimization(
+  "About",
+  "This is the shit in town.We power the web globally at simba. Hire us now"
+);
  const positions = [
     'top',
     'top-right',
@@ -282,9 +289,12 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   //logged in user bank wallet
   const [myWalletDetails,setMyWalletDetails] = useState({})
 
+    const [animateLoader, setAnimateLoader] = useState(false)
+
   useEffect(()=>{
 
     const checkUser = async () => {
+      setAnimateLoader(true)
       if(typeof window!=="undefined"){
         //  console.log(user)
         if(window.localStorage && window.localStorage.getItem("user")){
@@ -299,7 +309,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
           
           const loggedInUserWallet = await getWalletAccounts(user.email)
           setMyWalletDetails({...loggedInUserWallet.data.data[0]})
-
+             setAnimateLoader(false)
           console.log({...loggedInUserWallet.data.data[0]})
           if (user.token && user.isAuthenticated) {
              isLoggedIn = true;
@@ -309,6 +319,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
           setTimeout(()=>{window.location.href="/login"},2000)
         }
       }
+      setAnimateLoader(false)
     };
     checkUser();
       
@@ -650,10 +661,17 @@ if(!isNotSufficient){ // negation negation principle -x- =+
 
   return (
 
+
+<Layout SEO={pageSEO}>
+ <>
+ 
     <Stack
         direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
+        justifyContent="space-between"   >
       
+      
+ <>
+{!animateLoader ? (
     <Flex
       minH={'500px'} 
       w="100%"
@@ -798,17 +816,27 @@ if(!isNotSufficient){ // negation negation principle -x- =+
         </Box>
       </Stack>
     </Flex>
+):(<Loader/>)}
+</>
 
-
-
+{!animateLoader ? (
     <ReceipientProfiler selectedUser={{
       email:receipientInfo?.email,
       firstName:receipientInfo?.firstname,
       lastName:receipientInfo?.lastname,
       walletDetails:walletDetails
-    }} />
+    }} />) :(
+     <Loader/>
+    )}
 
     </Stack>
+
+
+ </>
+
+
+
+    </Layout>
   );
 }
 
@@ -849,9 +877,9 @@ const FTransaction = connect(mapStateToProps, {})(NewTransfer);
       </Drawer>
       {/* mobilenav */}
       <MobileNavigate onOpen={onOpen} />
-      <Box  ml={{ base: 0, md: 60 }} p="4">
+      <Box   ml={{ base: 0, md: 60 }} p="4">
         {children}
-      <Stack bg="#fff"  p="4" boxShadow="lg" m="4" borderRadius="sm">
+      <Stack bg="#fff" height={"550px"}  p="4" boxShadow="lg" m="4" borderRadius="sm">
          <FTransaction/>
          </Stack>
       </Box>

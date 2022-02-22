@@ -45,16 +45,15 @@ import Tradeoffs from "../core/views/components/Tradeoffs"
 import { FcLock } from 'react-icons/fc';
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-
 import RequestLoader from "../core/views/components/RequestLoader"
+import seoOptimization from "../core/helpers/utils/seoOptimizer";
 
-
-import seoOptimization from "../core/helpers/utils/seoOptimizer.js";
-
+import Layout from "../core/views/components/Layouts"
 const pageSEO = seoOptimization(
   "About",
   "This is the shit in town.We power the web globally at simba. Hire us now"
 );
+
 
 const handleLogout = async () => {
     await logOut();
@@ -105,6 +104,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
 
   
   return (
+   
     <Flex
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 4 }}
@@ -179,6 +179,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
         </Flex>
       </HStack>
     </Flex>
+
   );
 };
 
@@ -211,6 +212,7 @@ export default function Dashboard({
 
   return (
     <>
+     <Layout SEO={pageSEO}>
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarNavigationContent
         onClose={() => onClose}
@@ -236,6 +238,7 @@ export default function Dashboard({
          <Tradeoffs/>
       </Box>
     </Box>
+    </Layout>
       </>
   );
 }
