@@ -74,7 +74,8 @@ import { useRouter } from 'next/router';
 import { 
   sendMoneyOverseas, 
   getWalletAccounts,
-  deriveForeignExchangeAccountBalance
+  deriveForeignExchangeAccountBalance,
+  userCannotProceedToPayment as FintechAIDecisionMakerBlockUserAction //check this out
 } from "../core/services/transactions.services" 
 
 
@@ -85,6 +86,15 @@ const LinkItems = [
   { name: 'Logout', icon: FiStar },
   
 ];
+
+
+async function testAIDecision(){
+ console.log( await FintechAIDecisionMakerBlockUserAction({balance:1000},"EUR",40000)) //FALSE  
+ console.log( await FintechAIDecisionMakerBlockUserAction({ balance:1000},"NGN",400)) //TRUE
+
+}
+testAIDecision()
+
 
 
 

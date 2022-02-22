@@ -133,32 +133,73 @@ export const deriveForeignExchangeAccountBalance = async (FROM="USD",TO='USD',AM
   
   }
 
-const userCannotProceedToPayment = async (myWalletDetails, fromCurrency,AmountToSend) =>{
+
+/*
+*@usage await userCannotProceedToPayment({
+*  balance:4,000, //YOUR base balance in USD
+*  "EUR", // WHAT CURRENCY ARE WE TO TRANSFER TO USER
+*  50,000, //HOW MUCH TO SEND BUT WAIT!!!
+             HOW CAN YOU THEN SPEND EUR50,000 
+*        // WHEN U HAVE ONLY JUST USD4,000  
+*   // THIS IS WHY THIS AI IMPLEMENTATION WAS DONE FOR FINTECH SOLUTION
+}) 
+*@returns boolean
+*/
+export const userCannotProceedToPayment = async (myWalletDetails, fromCurrency,AmountToSend) =>{
+  //todo: validate wallet existence: we are dealing with money here
+  // no loose ends.. validate that the user is in our db
+
+
     /*this is an expensive function */
     /*it should only run if user is permitted*/
-    let disableTransaction = true;
-    const loggedInUsersWallet = myWalletDetails;
-    let accountBalance = loggedInUsersWallet.balance
-    const allowedTradingCurrencies = ["USD","NGN",'EUR'];
-    if(allowedTradingCurrencies.includes(toCurrency)){
-        let exchangeAccountBalance = keyValuePairBalance[fromCurrency]
-       if(exchangeAccountBalance > AmountToSend){
-          disableTransaction = false;
-          //you can transact
-          const keyValuePairBalance = {
-            "USD": await deriveForeignExchangeAccountBalance("USD","USD",accountBalance) ,
-            "EUR": await deriveForeignExchangeAccountBalance("USD","EUR",accountBalance),
-            "NGN": await deriveForeignExchangeAccountBalance("USD","NGN",accountBalance),
-          }
-          return disableTransaction
-       }else{
-        //you cant transact
-         return disableTransaction
-       }
-    }else{
-      //you cant transact
-      return disableTransaction
-    }
-    //AI DECISION MAKER RETURNS VALUE
-    return failing
+  let disableTransaction = true;
+  const loggedInUsersWallet = myWalletDetails;
+  let accountBalance = loggedInUsersWallet.balance // ALWAYS IN USD AS BASE CURRENCY
+  const allowedTradingCurrencies = ["USD","NGN",'EUR'];
+  const keyValuePairBalance = {
+          "USD":0.00  ,
+          "EUR":0.00 ,
+          "NGN":0.00 ,
   }
+  if(allowedTradingCurrencies.includes(fromCurrency)){
+    
+        //you can transact
+    //FIND ALL MY EQUI BALANCES
+    await deriveForeignExchangeAccountBalance(
+      "USD","USD",
+      accountBalance) // SAME AS MY OWN BASE BALANCE
+    .then(USD=> keyValuePairBalance["USD"]=USD)
+    await deriveForeignExchangeAccountBalance(
+      "USD","EUR",
+      accountBalance)//1000 USD =>839.00
+    .then(EUR=> keyValuePairBalance["EUR"]=EUR)
+    await deriveForeignExchangeAccountBalance(
+      "USD","NGN",
+      accountBalance) 
+      .then(NGN=> keyValuePairBalance["NGN"]=NGN)// SO SAD: 4,...,..000
+      //CODE SWEETNESS...
+  console.log(keyValuePairBalance)
+
+    // SINCE AMOUNT TO SEND CAN BE ANY CURRENCY WE CHECK IF OUR 
+    //BASE BALANCE CAN BE SUFFICIENT ENOUGH TO TRANSACT IF NOT JUST BAIL
+    //YOU CANT SPEND WHAT YOU DONT HAVE
+    //ITS A BANKING RULE OF LAW... MAYBE AM JUST SAYING!!!!
+    let exchangeAccountBalance = keyValuePairBalance[fromCurrency]
+     if(exchangeAccountBalance > AmountToSend){
+        disableTransaction = false;
+        //TURN ON THE LIGHTS SPARKS AND BLOW!!
+        return disableTransaction
+     }else{
+      //you can't transact so sorry man.. you dont have money
+      /// what did you do with the bonus given to you by simba
+      //just asking????...........
+       return disableTransaction
+     }
+  }else{
+    //you cant transact any other currency
+    //we roll with the big guys US DOLLSSSS....... AND POUNDSSSSSS..
+    return disableTransaction
+  }
+  //AI DECISION MAKER RETURNS VALUE
+ return failing
+}
