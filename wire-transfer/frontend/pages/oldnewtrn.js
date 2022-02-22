@@ -71,12 +71,7 @@ import { connect } from "react-redux";
 
 import { useRouter } from 'next/router';
 
-import { 
-  sendMoneyOverseas, 
-  getWalletAccounts,
-  deriveForeignExchangeAccountBalance
-} from "../core/services/transactions.services" 
-
+import { sendMoneyOverseas , fetchConversionRates } from "../core/services/transactions.services" 
 
 const LinkItems = [
   { name: 'dashboard', icon: FiHome },
@@ -133,7 +128,6 @@ const router = useRouter();
           setLastName(user.lastName)
           setIsAuthenticated(user.isAuthenticated)
           setToken(user.token)
-
           if (user.token && user.isAuthenticated) {
              isLoggedIn = true;
           }
@@ -256,11 +250,6 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   const [lastName, setLastName] = useState("")
   const [isAuthenticated,setIsAuthenticated] = useState(false)
   const [token,setToken] = useState("")
-  //receipient wallet
-  const [walletDetails,setWalletDetails] = useState({})
-  
-  //logged in user bank wallet
-  const [myWalletDetails,setMyWalletDetails] = useState({})
 
   useEffect(()=>{
 
@@ -276,11 +265,6 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
           setLastName(user.lastName)
           setIsAuthenticated(user.isAuthenticated)
           setToken(user.token)
-          
-          const loggedInUserWallet = await getWalletAccounts(user.email)
-          setMyWalletDetails({...loggedInUserWallet.data.data[0]})
-
-          console.log({...loggedInUserWallet.data.data[0]})
           if (user.token && user.isAuthenticated) {
              isLoggedIn = true;
           }
@@ -300,13 +284,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   const [currencyFrom, setCurrencyFrom] = useState("USD");
   const [currencyTo, setCurrencyTo] = useState("EUR");
 
-  const [allUsers, setAllUsers] = useState([]);
-  const [receipientInfo, setReceipientInfo] = useState({
-    firstName:"",
-    email:"",
-    lastName:"",
-    accountNumber:""
-  })
+  const [allUsers, setAllUsers] = useState([])
 
   const handleChangeFrom = (event) => {
     const { value } = event.target;
@@ -346,6 +324,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     receivingAmount: 0.00, 
     rate:1,
     senderid: id,
+    senderEmail: email,
     receipientId: null,
     sendingCurrency:currencyFrom,
     receivingCurrency:currencyTo,
@@ -370,41 +349,6 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     })
   }
 
-  useEffect(()=>{
-     
-      const getWalletReceipient = async () => {
-        try{
-           if(receipientInfo.email.length>4){
-            const walletAccount = await getWalletAccounts( receipientInfo.email)
-            setWalletDetails({...walletAccount.data.data[0]})
-    
-           }
-        }catch(err){
-          console.log(err)
-        }     
-     }
-     getWalletReceipient()
-   
-  },[])
-
-  const setUserProfile = () => {
-    const userInputHtml = document.getElementById("wizards")
-    const userInputCopy =  userInputHtml.value.toLowerCase();
-
-    const foundUser = allUsers.find(  (user) =>{
-       const testData = user.firstname + " " + user.lastname 
-       if(testData.toLowerCase()===userInputCopy){
-         setReceipientInfo(user)  
-        return user
-       }else{
-        
-        return false
-       }
-       return foundUser
-    })
-  }
-
-
   const handleSelectedUser = () => {
     const userInputHtml = document.getElementById("wizards")
     const userInputCopy =  userInputHtml.value.toLowerCase();
@@ -412,7 +356,6 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     const foundUser = allUsers.find(user =>{
        const testData = user.firstname + " " + user.lastname 
        if(testData.toLowerCase()===userInputCopy){
-
         return user.email
        }else{
         return ""
@@ -431,31 +374,18 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
        return null
     }else{
       //set state of the field
-      setReceipientInfo(foundUser)
        return foundUser
     }
   }
   
 
   useEffect(() => {
-
-    const fetchConversionRates = async () => {
-      const result = await fetch(
-        //8c627c48be6db29a67c2b7cf
-        //ed66962687fdf4b5a9afb6c6
-        `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`
-      );
-      //console.log(result);
-      if (result.ok) {
-        const rates = await result.json();
-        setRate(rates.conversion_rate);
+    const tradingRates = fetchConversionRates(currencyFrom, currencyTo);
+    setRate(tradingRates);
         setSubmitData({
           ...submitData,
-          rate:rates.conversion_rate
+          rate:tradingRates
         })
-      }
-    };
-    fetchConversionRates();
   }, [currencyFrom, currencyTo]);
 
 
@@ -463,25 +393,13 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     const findUsers = async () => {
       const result = await searchUser()
       //console.log(result.data);
-      //user should not send money  to him self
-      // let exclusiveUsers =[...result.data.data];
-      // exclusiveUsers = exclusiveUsers.filter(foundUser => {
-      //   const fullName = foundUser.firstName + " " + foundUser.lastName
-      //   return fullName != (user.firstName + " " + user.lastName)
-      // })
       setAllUsers([...result.data.data]) 
     };
     findUsers();
   }, []);
 
-
-  
   const handleSubmitTransactionExchange = async () =>{
     setIsSubmitClicked(true)
-
-
-    //only disturb the api if user wallet account is sufficient to do
-    //anyy transactions
      const selectedUser = document.getElementById("wizards").value
     if(!selectedUser ){
       toastedBread({
@@ -504,6 +422,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         senderId: id,
         senderEmail:email,
         receipientId: handleSelectedUser().email,
+        accountNumber:""
       };
       const debitLedgerPayload = {
         name: firstName + " " + lastName,
@@ -512,9 +431,10 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         rate:rate,
         sendingCurrency:currencyFrom,
         receivingCurrency:currencyTo, 
-        senderId: handleSelectedUser().id,
+        senderId: id,
         senderEmail:email,
         receipientId: email,
+        accountNumber:""
         
       };
       console.log(creditLedgerPayload)
@@ -575,33 +495,33 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
          }
       })
 
-    try{
+      try{
 
-      const successful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
-    if(successful=="OK"){
-      // toast yippikayeh M**F**KA!!!
-       setIsSubmitClicked(false)
-      toastedBread({
-            title: 'SUCCESSFUL',
-            status:"success",
-            description: "Transaction was successful",
-            duration: 9000,
-            isClosable: true,
-      })
-    }
-
-    }catch(error){
-
+        const transactionSuccessful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
+      if(transactionSuccessful=="OK"){
+        // toast yippikayeh M**F**KA!!!
+         setIsSubmitClicked(false)
         toastedBread({
-            title: 'Error',
-            status:"error",
-            description: error.message|| error.toString(),
-            duration: 9000,
-            isClosable: true,
-      })    
-    }
+              title: 'SUCCESSFUL',
+              status:"success",
+              description: "Transaction was successful",
+              duration: 9000,
+              isClosable: true,
+        })
+      }
 
-    setIsSubmitClicked(false)
+      }catch(error){
+
+          toastedBread({
+              title: 'Error',
+              status:"error",
+              description: error.message|| error.toString(),
+              duration: 9000,
+              isClosable: true,
+        })    
+      }
+
+        setIsSubmitClicked(false)
 
       
   }
@@ -609,13 +529,10 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
 
   return (
-
-    <Stack
-        direction={{ base: 'column', md: 'row' }}
-        justifyContent="space-between">
-      
     <Flex
-      minH={'500px'} 
+      minH={'100vh'}
+
+      
       w="100%"
       bg={useColorModeValue('gray.50', 'gray.800')}>
       <Stack  w="100%" spacing={8} maxW={'lg'} >
@@ -630,34 +547,16 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
            <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
               <FontAwesomeIcon icon={faDollarSign} size="2x" />
-            <h2>TRANSFERWIZ MONEY EXCHANGE </h2>
+            <h2> Exchange Currencies </h2>
             <FontAwesomeIcon icon={faEuroSign} size="2x" />
           </Flex>
-
-
-
-      <Box p="20px">
-       <Stack
-                direction={{ base: 'column', sm: 'row' }}
-                align={'start'}
-                justify={'space-between'}>
-                <p>
-                 1 {currencyFrom} = {rate} {currencyTo}
-               </p>
-                <Button id="swap-icon">
-              <Text  
-                onClick={handleSwap}
-              >Swap</Text>
-            </Button> 
-              </Stack>   
-     </Box>
 
             <FormControl id="email">
               <FormLabel>Receipient Name:</FormLabel>
                 
                 <div>
                   
-                  <Input onChange={setUserProfile}  type="text" id="wizards" name="wizards" list="users-list" />
+                  <Input  type="text" id="wizards" name="wizards" list="users-list" />
                   <datalist id="users-list">
 
                      { 
@@ -680,10 +579,24 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
             <div>
      
 
+      <Box p="20px">
+       <Stack
+                direction={{ base: 'column', sm: 'row' }}
+                align={'start'}
+                justify={'space-between'}>
+                <p>
+                 1 {currencyFrom} = {rate} {currencyTo}
+               </p>
+                <Button id="swap-icon">
+              <Text  
+                onClick={handleSwap}
+              >Swap</Text>
+            </Button> 
+              </Stack>   
+</Box>
       <div id="container">
         <div id="content-box">
-        <div className="calc-col-left">
-          <FormControl id="email" >
+          <FormControl id="email">
               <FormLabel>From Amount</FormLabel>
             <Input
               id="amountFrom"
@@ -693,21 +606,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
             />
 
             </FormControl>
-      </div>
-       
-<div className="calc-col-right">
-          <FormLabel>From Currency</FormLabel>
-            <Select onChange={handleSelectFrom} value={currencyFrom}>
-              {Object.keys(currencies).map((currency, index) => (
-                <option value={currency} key={index}>
-                  {currency} - {currencies[currency].name}
-                </option>
-              ))}
-            </Select>
-            </div>
-
-<div className="calc-col-left">
- <FormControl id="email" className="calc-col-left">
+ <FormControl id="email">
               <FormLabel>To Amount</FormLabel>
             <Input
               id="amountTo"
@@ -716,8 +615,20 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
               onChange={handleChangeTo}
             />
            </FormControl>
-</div>
-<div className="calc-col-right">
+
+             <br/>
+          <div id="selectors">
+          <FormLabel>From Currency</FormLabel>
+            <Select onChange={handleSelectFrom} value={currencyFrom}>
+              {Object.keys(currencies).map((currency, index) => (
+                <option value={currency} key={index}>
+                  {currency} - {currencies[currency].name}
+                </option>
+              ))}
+            </Select>
+
+
+               <br/>
 <FormLabel>To Currency</FormLabel>
             <Select onChange={handleSelectTo} value={currencyTo}>
               {Object.keys(currencies).map((currency, index) => {
@@ -729,10 +640,10 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
               })}
             </Select>
 
-</div>
+
            
 
-          
+          </div>
         </div>
       </div>
     </div>
@@ -758,17 +669,6 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
         </Box>
       </Stack>
     </Flex>
-
-
-
-    <ReceipientProfiler selectedUser={{
-      email:receipientInfo?.email,
-      firstName:receipientInfo?.firstname,
-      lastName:receipientInfo?.lastname,
-      walletDetails:walletDetails
-    }} />
-
-    </Stack>
   );
 }
 
@@ -811,87 +711,22 @@ const FTransaction = connect(mapStateToProps, {})(NewTransfer);
       <MobileNavigate onOpen={onOpen} />
       <Box  ml={{ base: 0, md: 60 }} p="4">
         {children}
-      <Stack bg="#fff"  p="4" boxShadow="lg" m="4" borderRadius="sm">
          <FTransaction/>
-         </Stack>
       </Box>
+
+
+      
     </Box>
+
+
+   
+
       </>
   );
 }
 
 
-const ReceipientProfiler  = ({selectedUser}) =>{
 
-  useEffect(()=>{
-    async function getAccontInfo(){
-      if(selectedUser.email.length>0){
-        
-      } 
-    }
-    getAccontInfo()
-  },[])
-  return(
-
-       <Flex
-       style={{display:selectedUser.email.length>0?"block":"none"}}
-      minH={'500px'} 
-      w="100%"
-      bg={useColorModeValue('gray.50', 'gray.800')}>
-      <Stack  w="100%" spacing={8} maxW={'lg'} >
-        
-        <Box
-
-          rounded={'lg'}
-          bg={useColorModeValue('white', 'gray.700')}
-          boxShadow={'lg'}
-          p={8}>
-          <Stack >
-
-           <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
-             <Avatar
-                  size={'sm'}
-                  src={
-                    'https://avatars.githubusercontent.com/u/26296603?v=4'
-                  }
-                /> 
-            <h2> Receipient Wallet Information</h2>
-          
-          </Flex>
-
-            <div>
-     
-
-      <div id="container" >
-        <div id="content-box">
-                 <Text>Confirmation Detail</Text>
-              <Text color="darkblue" fontSize="25px" p="10px">Account Number: {selectedUser.walletDetails.accountNumber} </Text>
-              <Text color="darkblue" fontSize="25px" p="10px">Wallet Type: {selectedUser.walletDetails.type} </Text>
-              
-              <hr/>
-              <Text fontSize="20px" p="10px">FullName:{ " "+  selectedUser.firstName+ " " +selectedUser.lastName}</Text>
-              <Text fontSize="20px" p="10px">Email:{  " "+ selectedUser.email}</Text>      
-              
-               <Text fontSize="20px" p="10px">
-               You are about to make a credit transaction to the receipient { " "+  selectedUser.firstName+ " " +selectedUser.lastName} .
-               Please confirm the information details are correct
-               </Text>      
-           
-
-           <Text>https://github.com/saladinjake/trasferwise-app <br/> POWERED BY SIMBA</Text>          
-        </div>
-      </div>
-    </div>
-            
-            <Stack spacing={10}>
-              
-            </Stack>
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
-  )
-} 
 
 
 

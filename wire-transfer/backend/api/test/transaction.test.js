@@ -327,7 +327,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('accountNumber must be an integer');
+          res.body.should.have.property('error')
           done();
         });
     });
@@ -393,7 +393,7 @@ describe('Test transaction related endpoints - Debit and Credit an account', () 
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('trasactionId must be an integer');
+          res.body.should.have.property('error')
           done();
         });
     });

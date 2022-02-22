@@ -37,6 +37,8 @@ const transactionSchema = Joi.object({
   receipientId:email,
   sendingCurrency: currency, 
   receivingCurrency: currency,
+  senderId: Joi.number().positive(),
+  senderEmail:email,
   exchangeAmount:Joi.number().positive().allow(0).precision(2)
     .default(0.00),
   rate:Joi.number().positive().allow(0).precision(2)
