@@ -43,15 +43,25 @@ import { ReactText } from 'react';
 
 
 import { FcLock } from 'react-icons/fc';
-import { myTransactions, getWalletAccounts, creditLedgerAccount, debitLedgerAccount } from "../../services/transactions.services"
+
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
 import RequestLoader from "./RequestLoader"
 import  TransactionTables from "./TransactionTables"
 import { useRouter } from "next/router"
-import { fetchConversionRates } from "../../services/transactions.services" 
+import { 
+  fetchConversionRates,
+  deriveForeignExchangeAccountBalance,
+  myTransactions, getWalletAccounts,
+  creditLedgerAccount, debitLedgerAccount
+} from "../../services/transactions.services" 
 
+import { 
+  formatCurrency,
+  truncate } from "../../helpers/utils/functions";
+// console.log( deriveForeignExchangeAccountBalance("USD","NGN",100))
+ 
 import { 
   SIMBA_COMPANY_ID, BONUS_AMOUNT, 
   SIMBA_ACCOUNT_NUMBER,
@@ -89,18 +99,20 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
    const [transactions, setTransactions] = useState([])
    const toastedBread = useToast()
    const [lastTrnx ,setLastTransaction] = useState({})
+   const [NEWBALANCE, SETNEWBALANCE] = useState(0);
+   const [EQUIVALENT_BALANCE_IN_NGN,setNGNBAL] = useState(0)
+   const [EQUIVALENT_BALANCE_IN_EUR, setEURBAL] = useState(0)
    const router = useRouter()
 
-
-
-  let isLoggedIn = false;
-  
+  let isLoggedIn = false;  
   const [id, setId] = useState("")
   const [email, setEmail] = useState("")
   const [firstName, setFirstName ] = useState("")
   const [lastName, setLastName] = useState("")
   const [isAuthenticated,setIsAuthenticated] = useState(false)
   const [token,setToken] = useState("")
+  const [myWalletAccount, setMyWalletAccount] = useState({})
+
 
   useEffect(async()=>{
       if(typeof window!=="undefined"){
@@ -124,6 +136,31 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
       }
   },[user])
 
+
+
+
+  const recalculateAtomicBalance = (wallet) =>{
+    if(wallet.accountNumber){
+      
+
+            deriveForeignExchangeAccountBalance("USD",
+              "NGN",
+              wallet.balance).then(balNGN =>{
+                setNGNBAL(balNGN.toLocaleString())
+                 console.log(balNGN)
+              })
+            deriveForeignExchangeAccountBalance(
+              "USD","EUR",
+              wallet.balance).then(balEUR=>{
+                console.log(balEUR)
+                setEURBAL(balEUR.toLocaleString())
+              })
+
+              SETNEWBALANCE(wallet.balance.toLocaleString())
+              console.log(wallet.balance)
+    }
+  }
+
    useEffect(async()=>{
    
       try{
@@ -133,18 +170,27 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
          /*This checks if user exists and if user has account if not it creates the existing user account and set the balance to 1000 USD*/
          const userEmail = user?.email;
          console.log(userEmail)
-         const walletAccountDetails = await getWalletAccounts(userEmail);
+         let walletAccountDetails = await getWalletAccounts(userEmail);
+       
+
+         let existingAccount =  walletAccountDetails.data.data[0];
+        
+          //for reocuring users only
+          recalculateAtomicBalance(existingAccount)    
+
         // console.log(walletAccountDetails.data.data)
+        //for fresh time users who need bonus topups of our generousity as simba
          if('data' in walletAccountDetails.data &&  Array.isArray(walletAccountDetails?.data?.data) ){
-           const existingAccount =  walletAccountDetails.data.data[0];
+           let existingAccount =  walletAccountDetails.data.data[0];
            // document.getElementById("accountId").innerHTML = existingAccount?.accountNumber;
+            
+             setMyWalletAccount({...walletAccountDetails.data.data[0]})
              
+            
            // console.log(walletAccountDetails.data.data[0])
            if('accountNumber' in existingAccount ){
              // console.log("true")
-
               const myTransactionLedgers = await myTransactions(existingAccount.accountNumber)
-
               // console.log(myTransactionLedgers)
               setTransactions([...myTransactionLedgers?.data?.data])
               // console.log(transactions)
@@ -180,29 +226,26 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
                 await creditLedgerAccount(creditorLedgerDetail)
                 const responseLedger = await myTransactions(existingAccount.accountNumber)
                 setTransactions([...responseLedger?.data?.data])
-
                 toastedBread({
                   title: 'CONGRATULATIONS FIRSTIMERS',
                   description: "Your wallet account has bee credited with 1000.00 USD. Please wait while transaction is completed.", //error.message,
                   status: 'success',
-                  duration: 9000,
+                  duration: 20000,
                   isClosable: true,
                 })
+                const tmpTrnx = [...responseLedger?.data?.data];
 
-                setTimeout(()=>{
-                  router.push("/login")
-                },2000)
-                
+
+             walletAccountDetails = await getWalletAccounts(userEmail);
+             existingAccount =  walletAccountDetails.data.data[0];
+        
+             recalculateAtomicBalance(existingAccount)
+              
               }
-         
            }else{
              // new user has no account so automatically create one for user signed up
               console.log("false")
-
-
-
            }
-           
          }else{
            //app accessed in error
             toastedBread({
@@ -230,10 +273,54 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
      
    },[])
 
-    const lastTransaction = transactions[transactions.length -1]  
+
+   const fetchConversionRates = async (currencyFrom,currencyTo) => {
+      const result = await fetch(
+        //8c627c48be6db29a67c2b7cf
+        //ed66962687fdf4b5a9afb6c6
+        `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`
+      );
+      //console.log(result);
+      if (result.ok) {
+        const rates = await result.json();
+        
+        return  rates.conversion_rate
+        
+      }
+    };
+   
+
+    
+    
     //console.log(lastTransaction)
-    fetchConversionRates('USD','EUR');
-    fetchConversionRates('USD','NGN');
+    const lastTransaction = transactions[transactions.length -1] ;
+    const availableUsersBalance =  lastTransaction?.newBalance
+    let bal = []
+
+
+async function getData(BALANCE_USD) {
+    let currencyFrom="USD";
+    let currencyTo="EUR"
+    // using await means the resolved value of the Promise is returned!
+    const responseEUR = await fetch( `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`).then(
+      //(response) => response.json(),
+    ); // .then still works when it makes sense!
+
+    currencyTo="NGN"
+    currencyFrom="USD"
+    const responseNGN = await fetch( `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`).then(
+      // (response) => response.json(),
+    ); // .then still works when it makes sense!
+
+   if (responseNGN.ok && responseEUR.ok) {
+          const rates = await responseNGN.json();
+          const rates2 = await responseEUR.json();
+          return  {eur : rates.conversion_rate,ngn: rates2.conversion_rate   }      
+    }
+}
+const Ballance = getData(availableUsersBalance)
+    
+    console.log(Ballance)
      
   return (
     <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
@@ -245,7 +332,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           icon={ <Currency code="USD" size="small" />}
           title={'Balance in Dollars'}
           text={
-           lastTransaction?.newBalance
+          formatCurrency(NEWBALANCE || 0)
           }
         />
         <CardBalance
@@ -253,14 +340,14 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           title={'Balance in Naira'}
 
           text={
-            lastTransaction?.newbalancenaira
+            formatCurrency(EQUIVALENT_BALANCE_IN_NGN|| 0)
           }
         />
         <CardBalance
           icon={<Currency code="EUR"  size="small" />}
           title={'Balance in Euros'}
           text={
-           lastTransaction?.newbalanceeuros
+            formatCurrency(EQUIVALENT_BALANCE_IN_EUR|| 0)
           }
         />
       </SimpleGrid>

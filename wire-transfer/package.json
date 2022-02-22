@@ -50,6 +50,7 @@
     "run-script-os": "^1.0.5",
     "should": "^13.2.3"
   },
+ 
   "scripts": {
     "start-dev": "nodemon --exec babel-node ./backend/api/index.js",
     "start": "nodemon dist/index.js",

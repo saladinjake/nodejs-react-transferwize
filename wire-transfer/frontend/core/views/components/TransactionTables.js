@@ -90,7 +90,7 @@ function CustomTable({ columns, data,  auth: {user  } }) {
   data.forEach( async (transaction) =>{
     let givenTradingAmount =null;
     if(transaction.type ==="debit"){
-       transaction.senderid = transaction.senderEmail;
+       transaction.senderid = transaction.senderemail;
        if(transaction.senderid== email ){
 
          
@@ -104,18 +104,38 @@ function CustomTable({ columns, data,  auth: {user  } }) {
          transaction.information = descriptionMessage;
 
        }else{
+         let date = new Date(transaction.createdOn);
+         date = date.getFullYear()+ "-"+ date.getMonth()+ "-"+ date.getDay()
                   const descriptionMessage = `
          Dear ${firstName+ " "+ lastName}, 
          Your wallet account was credit 
          with ${transaction.tocurrency}${transaction.exchangeamount}
          an equivalent of ${transaction.formcurrency}${transaction.amount}
-         ON THIS DAY ${transaction.createdon}. 
+         ON THIS DAY ${date}. 
          A payment was made from to ${transaction.senderemail}.`;
          transaction.information = descriptionMessage;
        }
-       transaction["cash_in_flow_debit"] = "- "+ transaction.amount
+       transaction["cash_in_flow_debit"] = `- ${transaction.formcurrency}` + transaction.amount
     }else{
-      transaction["cash_in_flow_credit"] ='+ '+ transaction.amount
+
+       //if transactiontype is credit by user
+          transaction.senderid = transaction.senderemail;
+       if(transaction.senderid== email ){
+
+         
+         const descriptionMessage = `
+         
+         This payment was paid to ${transaction.receipientid}.`;
+         transaction.information = descriptionMessage;
+
+       }else{
+        const descriptionMessage = ` 
+         This payment was made from to ${transaction.senderemail}.`;
+         transaction.information = descriptionMessage;
+       }
+
+
+      transaction["cash_in_flow_credit"] =`+ ${transaction.tocurrency} ` + transaction.exchangeamount
     }
   })
 
@@ -285,23 +305,28 @@ function TableApplication({data}) {
           {
             Header: "Debit Ledger",
             accessor: "cash_in_flow_debit",
-            maxWidth: 100,
-            minWidth: 100,
-             width: 150,
+            maxWidth: 200,
+            minWidth: 200,
+             width: 250,
+             background:"darkblue",
+             color:"#fff",
           },
           {
             Header: "Credit Ledger",
             accessor: "cash_in_flow_credit",
-            maxWidth: 100,
-            minWidth: 100,
-             width: 150,
+            maxWidth: 200,
+            minWidth: 200,
+             width: 250,
+             background:"green",
+             color:"#fff",
+
           },
           {
             Header: "Equivalent",
             accessor: "exchangeamount",
-            maxWidth: 100,
-            minWidth: 100,
-             width: 150,
+            maxWidth: 200,
+            minWidth: 200,
+             width: 250,
           },
           {
             Header: "from currency",

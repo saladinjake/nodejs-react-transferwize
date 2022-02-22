@@ -62,7 +62,7 @@ DROP TABLE IF EXISTS users CASCADE;
             id SERIAL NOT NULL UNIQUE PRIMARY KEY,
             accountNumber BIGINT NOT NULL REFERENCES accounts(accountNumber) ON DELETE CASCADE,
             senderId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            senderEmail  VARCHAR(200)  DEFAULT '' ,
+            senderEmail  VARCHAR(200) NOT NULL,
             transactionType VARCHAR(10) NOT NULL,
             amount NUMERIC(20, 2) DEFAULT 0.00,
             exchangeAmount NUMERIC(10, 2) DEFAULT 0.00,

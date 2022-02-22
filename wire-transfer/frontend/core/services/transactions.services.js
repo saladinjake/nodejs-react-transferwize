@@ -109,3 +109,56 @@ export const reverseMoneyTransfered = async (creditLedgerDetail,debitLedgerDetai
     console.log("INOPERATIVE SWITCH OR ACCOUNT")
   }
 }
+
+
+
+
+export const deriveForeignExchangeAccountBalance = async (FROM="USD",TO='USD',AMOUNT=1) =>{
+    let result =[]
+    
+      const currency_one = FROM;
+      const currency_two = TO;
+
+      
+      let request = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency_one}`)
+      
+      if (!request.ok) {
+           throw new Error(`HTTP error! status: ${response.status}`);
+      }
+     
+      let data = await request.json()
+      let rate = data.rates[currency_two];
+      return  (AMOUNT * rate).toFixed(2)
+  
+  
+  }
+
+const userCannotProceedToPayment = async (myWalletDetails, fromCurrency,AmountToSend) =>{
+    /*this is an expensive function */
+    /*it should only run if user is permitted*/
+    let disableTransaction = true;
+    const loggedInUsersWallet = myWalletDetails;
+    let accountBalance = loggedInUsersWallet.balance
+    const allowedTradingCurrencies = ["USD","NGN",'EUR'];
+    if(allowedTradingCurrencies.includes(toCurrency)){
+        let exchangeAccountBalance = keyValuePairBalance[fromCurrency]
+       if(exchangeAccountBalance > AmountToSend){
+          disableTransaction = false;
+          //you can transact
+          const keyValuePairBalance = {
+            "USD": await deriveForeignExchangeAccountBalance("USD","USD",accountBalance) ,
+            "EUR": await deriveForeignExchangeAccountBalance("USD","EUR",accountBalance),
+            "NGN": await deriveForeignExchangeAccountBalance("USD","NGN",accountBalance),
+          }
+          return disableTransaction
+       }else{
+        //you cant transact
+         return disableTransaction
+       }
+    }else{
+      //you cant transact
+      return disableTransaction
+    }
+    //AI DECISION MAKER RETURNS VALUE
+    return failing
+  }

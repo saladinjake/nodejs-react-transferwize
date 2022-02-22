@@ -75,6 +75,7 @@ class TransactionController {
       const data = await TransactionService.getAllTransactions(accountNumber);
       return response.sendSuccess(res, 200, data, 'Transactions was successfully fetched');
     } catch (error) {
+         console.log(error)
       return response.sendError(res, 400, error.message);
     }
   }
@@ -89,6 +90,7 @@ class TransactionController {
       const data = await TransactionService.getTransaction(transactionId);
       return response.sendSuccess(res, 200, data, 'Transaction was successfully fetched');
     } catch (error) {
+         console.log(error)
       return response.sendError(res, 400, error.message);
     }
   }

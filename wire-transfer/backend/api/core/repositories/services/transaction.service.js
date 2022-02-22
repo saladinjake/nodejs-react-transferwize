@@ -56,7 +56,8 @@ class TransactionService {
             formCurrency: transaction.formcurrency,
             toCurrency: transaction.tocurrency,
             balanceNaira: transaction.newbalancenaira,
-            balanceEuros: transaction.newbalanceeuros
+            balanceEuros: transaction.newbalanceeuros,
+            
           };
         }
         throw new Error('account balance is not sufficient');
