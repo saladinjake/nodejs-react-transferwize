@@ -78,6 +78,21 @@ import {
   userCannotProceedToPayment as FintechAIDecisionMakerBlockUserAction //check this out
 } from "../core/services/transactions.services" 
 
+ const positions = [
+    'top',
+    'top-right',
+    'top-left',
+    'bottom',
+    'bottom-right',
+    'bottom-left',
+  ]
+//usage
+// async function testAIDecision(){
+//  console.log( await FintechAIDecisionMakerBlockUserAction({balance:1000},"EUR",40000)) //FALSE  
+//  console.log( await FintechAIDecisionMakerBlockUserAction({ balance:1000},"NGN",400)) //TRUE
+
+// }
+// testAIDecision()
 
 const LinkItems = [
   { name: 'dashboard', icon: FiHome },
@@ -88,12 +103,6 @@ const LinkItems = [
 ];
 
 
-async function testAIDecision(){
- console.log( await FintechAIDecisionMakerBlockUserAction({balance:1000},"EUR",40000)) //FALSE  
- console.log( await FintechAIDecisionMakerBlockUserAction({ balance:1000},"NGN",400)) //TRUE
-
-}
-testAIDecision()
 
 
 
@@ -252,6 +261,7 @@ const MobileNavigate = connect(mapStateToProps3, {
 
 function NewTransfer({ auth: {  user , prevPath },logout }) {
   const toastedBread = useToast()
+
   const handleInputChange = (newValue) => {
     const inputValue = newValue.replace(/\W/g, '');
     // setState({ inputValue });
@@ -431,7 +441,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
    // console.log(foundUser)
     if(!foundUser || foundUser.length<=0){
       userInputHtml.value =""
-       toastedBread({
+       toastedBread({positions,
         title: 'An error occurred.',
         status:"error",
         description: "User dont exist. please select a user from the dropdown",
@@ -488,13 +498,25 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   
   const handleSubmitTransactionExchange = async () =>{
     setIsSubmitClicked(true)
-
-
-    //only disturb the api if user wallet account is sufficient to do
+    //only disturb the api 
+    //if user wallet account is sufficient to do
     //anyy transactions
+
+    //this is a complex and heavy transaction that is done one time if data is right
+
+    //usage
+// async function testAIDecision(){
+//  console.log( await FintechAIDecisionMakerBlockUserAction({balance:1000},"EUR",40000)) //FALSE  
+//  console.log( await FintechAIDecisionMakerBlockUserAction({ balance:1000},"NGN",400)) //TRUE
+
+// }
+// testAIDecision()
+//if and only if my account is sufficient
+const isNotSufficient = await FintechAIDecisionMakerBlockUserAction(myWalletDetails,currencyFrom,9000000000)
+if(!isNotSufficient){ // negation negation principle -x- =+
      const selectedUser = document.getElementById("wizards").value
     if(!selectedUser ){
-      toastedBread({
+      toastedBread({positions,
         title: 'An error occurred.',
         status:"error",
         description: "Receipient User not selected. ",
@@ -531,7 +553,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
       console.log(debitLedgerPayload)
       Object.keys(creditLedgerPayload).forEach(key =>{
          if(creditLedgerPayload[key]==""  || creditLedgerPayload[key]==undefined || creditLedgerPayload[key]==null ){
-             toastedBread({
+             toastedBread({positions,
               title: 'An error occurred.',
               status:"error",
               description: "Transaction could not be processed. Ensure all fields are filled",
@@ -544,7 +566,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
          if(key==="exchangeAmount" || key==="amount"){
            if(debitLedgerPayload[key]<=0){
-               toastedBread({
+               toastedBread({positions,
               title: 'An error occurred.',
               status:"error",
               description: "Enter an amount value greater than zero",
@@ -559,7 +581,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
       Object.keys(debitLedgerPayload).forEach(key =>{
          if(debitLedgerPayload[key]==""  || debitLedgerPayload[key]==undefined || debitLedgerPayload[key]==null ){
-             toastedBread({
+             toastedBread({positions,
               title: 'An error occurred.',
               status:"error",
               description: "Transaction could not be processed. Ensure all fields are filled",
@@ -572,7 +594,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
          if(key==="exchangeAmount" || key==="amount"){
            if(debitLedgerPayload[key]<=0){
-               toastedBread({
+               toastedBread({positions,
               title: 'An error occurred.',
               status:"error",
               description: "Enter an amount value greater than zero",
@@ -591,7 +613,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     if(successful=="OK"){
       // toast yippikayeh M**F**KA!!!
        setIsSubmitClicked(false)
-      toastedBread({
+      toastedBread({positions,
             title: 'SUCCESSFUL',
             status:"success",
             description: "Transaction was successful",
@@ -602,7 +624,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
     }catch(error){
 
-        toastedBread({
+        toastedBread({positions,
             title: 'Error',
             status:"error",
             description: error.message|| error.toString(),
@@ -612,7 +634,15 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     }
 
     setIsSubmitClicked(false)
-
+  }else{
+    toastedBread({positions,
+            title: 'Error',
+            status:"error",
+            description: `Your account balance is not sufficient for this transaction.To fund your wallet please wait for version 2`,
+            duration: 20000,
+            isClosable: true,
+      })
+  }
       
   }
 
@@ -639,9 +669,9 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
           <Stack >
 
            <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
-              <FontAwesomeIcon icon={faDollarSign} size="2x" />
+              
             <h2>TRANSFERWIZ MONEY EXCHANGE </h2>
-            <FontAwesomeIcon icon={faEuroSign} size="2x" />
+         
           </Flex>
 
 

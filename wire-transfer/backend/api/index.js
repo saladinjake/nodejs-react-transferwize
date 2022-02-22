@@ -6,8 +6,6 @@ import cors from 'cors';
 import bodyParser, { json, urlencoded } from 'body-parser';
 import debug from 'debug';
 import configJson from './core/config/config.ini';
-
-
 import authRoutes from './modules/auth/routes/user.route';
 import accountRoutes from './modules/e-transactions/routes/account.route';
 import transactionRoutes from './modules/e-transactions/routes/transaction.route';

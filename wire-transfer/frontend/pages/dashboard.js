@@ -47,6 +47,15 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import RequestLoader from "../core/views/components/RequestLoader"
+
+
+import seoOptimization from "../core/helpers/utils/seoOptimizer.js";
+
+const pageSEO = seoOptimization(
+  "About",
+  "This is the shit in town.We power the web globally at simba. Hire us now"
+);
+
 const handleLogout = async () => {
     await logOut();
     setTimeout(() => {
