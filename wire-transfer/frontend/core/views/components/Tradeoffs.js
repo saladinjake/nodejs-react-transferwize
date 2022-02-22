@@ -113,6 +113,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
   const [myWalletAccount, setMyWalletAccount] = useState({})
 
   const [animateLoader, setAnimateLoader] = useState(false)
+ const [ifSomethingWentWrong,setIfSomethingWentWrong] = useState(false)
 
 
   useEffect(async()=>{
@@ -143,6 +144,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
   const recalculateAtomicBalance = (wallet) =>{
     if(wallet.accountNumber){
       
+          try{
 
             deriveForeignExchangeAccountBalance("USD",
               "NGN",
@@ -159,6 +161,11 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 
               SETNEWBALANCE(wallet.balance.toLocaleString())
               console.log(wallet.balance)
+
+          }catch(error){
+             setIfSomethingWentWrong(true)
+          }
+            
     }
   }
 
@@ -263,6 +270,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
          
       }catch(error){
          setAnimateLoader(false)
+          setIfSomethingWentWrong(true)
         toastedBread({
             title: 'An error occurred.',
             description: error?.message || error, //error.message,
@@ -303,7 +311,9 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 async function getData(BALANCE_USD) {
     let currencyFrom="USD";
     let currencyTo="EUR"
-    // using await means the resolved value of the Promise is returned!
+    try{
+
+      // using await means the resolved value of the Promise is returned!
     const responseEUR = await fetch( `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`).then(
       //(response) => response.json(),
     ); // .then still works when it makes sense!
@@ -319,10 +329,15 @@ async function getData(BALANCE_USD) {
           const rates2 = await responseEUR.json();
           return  {eur : rates.conversion_rate,ngn: rates2.conversion_rate   }      
     }
-}
-const Ballance = getData(availableUsersBalance)
+
+    }catch(error){
+       setIfSomethingWentWrong(true)
+    }
     
-    console.log(Ballance)
+}
+// const Ballance = getData(availableUsersBalance)
+    
+// console.log(Ballance)
      
   return (
     <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
@@ -386,7 +401,8 @@ const Ballance = getData(availableUsersBalance)
 
 
       
-{!animateLoader? (<TransactionTables data={transactions}/>): (<Loader/>)}
+{!animateLoader? (<TransactionTables data={transactions}/>):
+  ifSomethingWentWrong ? (<SomethingWentWrong />) :(<Loader/>)}
       
 
       

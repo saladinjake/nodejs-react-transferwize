@@ -15,6 +15,7 @@ const Wrapper = ({ icon, text, children, ...rest }) => (
     textAlign="center"
     color="brand.secondary"
     {...rest}
+    margin="0px auto"
   >
     {icon}
     <Text type="lg-bold">{text}</Text>

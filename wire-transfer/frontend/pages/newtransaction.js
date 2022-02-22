@@ -290,6 +290,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
   const [myWalletDetails,setMyWalletDetails] = useState({})
 
     const [animateLoader, setAnimateLoader] = useState(false)
+    const [ifSomethingWentWrong,setIfSomethingWentWrong] = useState(false)
 
   useEffect(()=>{
 
@@ -309,7 +310,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
           
           const loggedInUserWallet = await getWalletAccounts(user.email)
           setMyWalletDetails({...loggedInUserWallet.data.data[0]})
-             setAnimateLoader(false)
+          setAnimateLoader(false)
           console.log({...loggedInUserWallet.data.data[0]})
           if (user.token && user.isAuthenticated) {
              isLoggedIn = true;
@@ -412,6 +413,7 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
            }
         }catch(err){
           console.log(err)
+          setIfSomethingWentWrong(true)
         }     
      }
      getWalletReceipient()
@@ -492,7 +494,8 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
   useEffect(() => {
     const findUsers = async () => {
-      const result = await searchUser()
+      try{
+        const result = await searchUser()
       //console.log(result.data);
       //user should not send money  to him self
       // let exclusiveUsers =[...result.data.data];
@@ -501,6 +504,12 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
       //   return fullName != (user.firstName + " " + user.lastName)
       // })
       setAllUsers([...result.data.data]) 
+
+      }catch(err){
+        setIfSomethingWentWrong(true)
+      }
+      
+      
     };
     findUsers();
   }, []);
@@ -523,6 +532,9 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 // }
 // testAIDecision()
 //if and only if my account is sufficient
+try{
+
+
 const isNotSufficient = await FintechAIDecisionMakerBlockUserAction(myWalletDetails,currencyFrom,9000000000)
 if(!isNotSufficient){ // negation negation principle -x- =+
      const selectedUser = document.getElementById("wizards").value
@@ -641,7 +653,8 @@ if(!isNotSufficient){ // negation negation principle -x- =+
             description: error.message|| error.toString(),
             duration: 9000,
             isClosable: true,
-      })    
+      })  
+      setIfSomethingWentWrong(true)  
     }
 
     setIsSubmitClicked(false)
@@ -654,7 +667,10 @@ if(!isNotSufficient){ // negation negation principle -x- =+
             isClosable: true,
       })
   }
-      
+  
+ }catch(err){
+   setIfSomethingWentWrong(true)
+ }     
   }
 
 
@@ -671,7 +687,7 @@ if(!isNotSufficient){ // negation negation principle -x- =+
       
       
  <>
-{!animateLoader ? (
+{!animateLoader ?  (
     <Flex
       minH={'500px'} 
       w="100%"
@@ -816,7 +832,7 @@ if(!isNotSufficient){ // negation negation principle -x- =+
         </Box>
       </Stack>
     </Flex>
-):(<Loader/>)}
+): ifSomethingWentWrong? (<SomethingWentWrong />): (<Loader/>)}
 </>
 
 {!animateLoader ? (
