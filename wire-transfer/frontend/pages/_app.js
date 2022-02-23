@@ -19,8 +19,6 @@ export default function App({ Component, pageProps }) {
           height={3}
           showOnShallow={true}
         />
-
-       
      {/*REDUX STATE ENHANCER*/}
     <Provisioner store={QReduxStore}>
         <ChakraProvider>

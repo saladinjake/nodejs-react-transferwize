@@ -18,9 +18,9 @@ class TransactionService {
       const account = await Account.findByAccountNumber(Number(accountNumber));
       //console.log(account)
       if (account) {
-        if (account.status === 'dormant') {
-          throw new Error('You can\'t perform a transaction on a dormant account');
-        }
+        // if (account.status === 'dormant') {
+        //   throw new Error('You can\'t perform a transaction on a dormant account');
+        // }
         if (account.balance >= amount) {
           const user = await User.findUserById(Number(account.owner));
 
