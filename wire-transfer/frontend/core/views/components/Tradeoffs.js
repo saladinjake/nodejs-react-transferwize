@@ -284,20 +284,20 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
    },[])
 
 
-   const fetchConversionRates = async (currencyFrom,currencyTo) => {
-      const result = await fetch(
-        //8c627c48be6db29a67c2b7cf
-        //ed66962687fdf4b5a9afb6c6
-        `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`
-      );
-      //console.log(result);
-      if (result.ok) {
-        const rates = await result.json();
+   // const fetchConversionRates = async (currencyFrom,currencyTo) => {
+   //    const result = await fetch(
+   //      //8c627c48be6db29a67c2b7cf
+   //      //ed66962687fdf4b5a9afb6c6
+   //      `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`
+   //    );
+   //    //console.log(result);
+   //    if (result.ok) {
+   //      const rates = await result.json();
         
-        return  rates.conversion_rate
+   //      return  rates.conversion_rate
         
-      }
-    };
+   //    }
+   //  };
    
 
     
@@ -308,36 +308,6 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
     let bal = []
 
 
-async function getData(BALANCE_USD) {
-    let currencyFrom="USD";
-    let currencyTo="EUR"
-    try{
-
-      // using await means the resolved value of the Promise is returned!
-    const responseEUR = await fetch( `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`).then(
-      //(response) => response.json(),
-    ); // .then still works when it makes sense!
-
-    currencyTo="NGN"
-    currencyFrom="USD"
-    const responseNGN = await fetch( `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`).then(
-      // (response) => response.json(),
-    ); // .then still works when it makes sense!
-
-   if (responseNGN.ok && responseEUR.ok) {
-          const rates = await responseNGN.json();
-          const rates2 = await responseEUR.json();
-          return  {eur : rates.conversion_rate,ngn: rates2.conversion_rate   }      
-    }
-
-    }catch(error){
-       setIfSomethingWentWrong(true)
-    }
-    
-}
-// const Ballance = getData(availableUsersBalance)
-    
-// console.log(Ballance)
      
   return (
     <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
@@ -353,7 +323,7 @@ async function getData(BALANCE_USD) {
         {!animateLoader? (
              <CardBalance
           icon={<Currency code="USD"  size="small" />}
-          title={'Balance in NGN'}
+          title={'Balance in USD'}
           text={
             
             !animateLoader? formatCurrency(NEWBALANCE || 0) :( <Loader/>)
