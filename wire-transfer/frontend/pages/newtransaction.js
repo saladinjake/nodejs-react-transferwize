@@ -266,6 +266,102 @@ const MobileNavigate = connect(mapStateToProps3, {
 
 
 
+
+
+const ReceipientProfiler  = ({selectedUser, auth: {  user , prevPath },logout }) =>{
+  const [receipientWalletDetails,setReceipientWalletDetails] = useState({})
+  useEffect(()=>{
+    async function getAccontInfo(){
+      if(selectedUser.email.length>0){
+
+
+          const ReceipientUserWallet = await getWalletAccounts(selectedUser.email)
+          setReceipientWalletDetails({...ReceipientUserWallet.data.data[0]})
+
+        
+      } 
+    }
+    getAccontInfo()
+  },[])
+
+
+
+
+  return(
+
+       <Flex
+       style={{display:selectedUser.email.length>0?"block":"none"}}
+      minH={'500px'} 
+      w="100%"
+      bg={useColorModeValue('gray.50', 'gray.800')}>
+      <Stack  w="100%" spacing={8} maxW={'lg'} >
+        
+        <Box
+
+          rounded={'lg'}
+          bg={useColorModeValue('white', 'gray.700')}
+          boxShadow={'lg'}
+          p={8}>
+          <Stack >
+
+           <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
+             <Avatar
+                  size={'sm'}
+                  src={
+                    'https://avatars.githubusercontent.com/u/26296603?v=4'
+                  }
+                /> 
+            <h2> Receipient Wallet Information</h2>
+          
+          </Flex>
+
+            <div>
+     
+
+      <div id="container" >
+        <div id="content-box">
+                 <Text>Confirmation Detail</Text>
+              {/*<Text color="darkblue" fontSize="25px" p="10px">Account Number: {receipientWalletDetails?.accountNumber} </Text>
+              <Text color="darkblue" fontSize="25px" p="10px">Wallet Type: {receipientWalletDetails?.type} </Text>
+              */}
+              <hr/>
+              <Text fontSize="20px" p="10px">FullName:{ " "+  selectedUser.firstName+ " " +selectedUser.lastName}</Text>
+              <Text fontSize="20px" p="10px">Email:{  " "+ selectedUser.email}</Text>      
+              
+               <Text fontSize="20px" p="10px">
+               You are about to make a credit transaction to the receipient { " "+  selectedUser.firstName+ " " +selectedUser.lastName} .
+               Please confirm the information details are correct
+               </Text>      
+           
+
+           <Text>https://github.com/saladinjake/trasferwise-app <br/> POWERED BY SIMBA</Text>          
+        </div>
+      </div>
+    </div>
+            
+            <Stack spacing={10}>
+              
+            </Stack>
+          </Stack>
+        </Box>
+      </Stack>
+    </Flex>
+  )
+} 
+
+
+
+ReceipientProfiler.propTypes = {
+  auth: PropTypes.object.isRequired,
+};
+
+const mapStateToProps4 = (state) => ({
+  auth: state.auth
+});
+
+const ReceipientProfilerBatch = connect(mapStateToProps4, {})(ReceipientProfiler);
+
+
 function NewTransfer({ auth: {  user , prevPath },logout }) {
   const toastedBread = useToast()
 
@@ -342,24 +438,59 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
   const handleChangeFrom = (event) => {
     const { value } = event.target;
-    setInputFrom(value);
-    setInputTo(value * rate);
+    if(value<0){ value= value * -1}
+     if(value!==null && (value <=0 || value >0 )){
+       setInputFrom(value);
+       setInputTo(value * rate);
+    }else{
+      //avoid division by zero or empty input so as not to disturb the api endpoint
+      //with invalid data
+      //dont waste api resouce they are expensive to be awaken
+      if(value<0){ value= value * -1}
+       //reset value
+       setInputFrom(value);
+       setInputTo(value * rate);
+
+    }
   };
 
   const handleChangeTo = (event) => {
+    
     const { value } = event.target;
-    setInputTo(value);
-    setInputFrom(value / rate);
+    if(value<0){ value= value * -1}
+    if(value!==null && (value >=0  )){
+      setInputTo(value);
+      setInputFrom(value / rate);
+    }else{
+      //avoid division by zero or empty input so as not to disturb the api endpoint
+      //with invalid data
+      //dont waste api resouce they are expensive to be awaken
+        if(value<0){ value= value * -1}
+
+       //reset value
+      setInputTo(value);
+      setInputFrom(value / rate);
+    }
+    
   };
 
-  const handleSelectFrom = (event) => {
+  const handleSelectFrom = async (event) => {
     const { value } = event.target;
     setCurrencyFrom(value);
+     await deriveForeignExchangeAccountBalance(value,currencyTo,inputFrom)
+     .then(exchangeAmt =>{
+        setInputTo(exchangeAmt)
+        // setRate(inputFrom*exchangeAmt)
+     })
+
   };
 
-  const handleSelectTo = (event) => {
+  const handleSelectTo = async (event) => {
     const { value } = event.target;
     setCurrencyTo(value);
+    await deriveForeignExchangeAccountBalance(currencyFrom,value,inputFrom)
+    .then(exchangeAmt => {setInputTo(exchangeAmt) ;   })
+
   };
 
   const handleSwap = () => {
@@ -472,24 +603,28 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
 
   useEffect(() => {
 
-    const fetchConversionRates = async () => {
-      const result = await fetch(
-        //8c627c48be6db29a67c2b7cf
-        //ed66962687fdf4b5a9afb6c6
-        `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`
-      );
-      //console.log(result);
-      if (result.ok) {
-        const rates = await result.json();
-        setRate(rates.conversion_rate);
+    const fetchConversionRates = async (FROM="USD",TO='USD',AMOUNT=1) => {
+      const currency_one = FROM;
+      const currency_two = TO;
+      let request = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency_one}`)
+      if (!request.ok) {
+           throw new Error(`HTTP error! status: ${request.status}`);
+           setIfSomethingWentWrong(true)
+      }
+      let data = await request.json()
+      let rate = data.rates[currency_two];
+      if (rate) {
+        setRate(rate);
         setSubmitData({
           ...submitData,
-          rate:rates.conversion_rate
+          rate:rate,
+          //inputTo:inputFrom*rate,
+      
         })
       }
     };
-    fetchConversionRates();
-  }, [currencyFrom, currencyTo]);
+    fetchConversionRates(currencyFrom,currencyTo,inputFrom);
+  }, [currencyFrom,currencyTo,inputFrom, inputTo]);
 
 
   useEffect(() => {
@@ -525,152 +660,175 @@ function NewTransfer({ auth: {  user , prevPath },logout }) {
     //this is a complex and heavy transaction that is done one time if data is right
 
     //usage
-// async function testAIDecision(){
-//  console.log( await FintechAIDecisionMakerBlockUserAction({balance:1000},"EUR",40000)) //FALSE  
-//  console.log( await FintechAIDecisionMakerBlockUserAction({ balance:1000},"NGN",400)) //TRUE
+    // async function testAIDecision(){
+    //  console.log( await FintechAIDecisionMakerBlockUserAction({balance:1000},"EUR",40000)) //FALSE  
+    //  console.log( await FintechAIDecisionMakerBlockUserAction({ balance:1000},"NGN",400)) //TRUE
 
-// }
-// testAIDecision()
-//if and only if my account is sufficient
-try{
+    // }
+    // testAIDecision()
+    //if and only if my account is sufficient
+   try{
 
-
-const isNotSufficient = await FintechAIDecisionMakerBlockUserAction(myWalletDetails,currencyFrom,9000000000)
-if(!isNotSufficient){ // negation negation principle -x- =+
-     const selectedUser = document.getElementById("wizards").value
-    if(!selectedUser ){
-      toastedBread({positions,
-        title: 'An error occurred.',
-        status:"error",
-        description: "Receipient User not selected. ",
-        duration: 9000,
-        isClosable: true,
-      })
-      setIsSubmitClicked(false)
-      return false
-    }
-     const creditLedgerPayload = {
-        name: document.getElementById("wizards").value,
-        amount:inputFrom,
-        exchangeAmount: inputTo,
-        rate:rate,
-        sendingCurrency:currencyFrom,
-        receivingCurrency:currencyTo,
-        senderId: id,
-        senderEmail:email,
-        receipientId: handleSelectedUser().email,
-      };
-      const debitLedgerPayload = {
-        name: firstName + " " + lastName,
-        amount:inputFrom,
-        exchangeAmount: inputTo,
-        rate:rate,
-        sendingCurrency:currencyFrom,
-        receivingCurrency:currencyTo, 
-        senderId: handleSelectedUser().id,
-        senderEmail:email,
-        receipientId: email,
-        
-      };
-      console.log(creditLedgerPayload)
-      console.log(debitLedgerPayload)
-      Object.keys(creditLedgerPayload).forEach(key =>{
-         if(creditLedgerPayload[key]==""  || creditLedgerPayload[key]==undefined || creditLedgerPayload[key]==null ){
-             toastedBread({positions,
+    const amountToSend = inputFrom
+    const isNotSufficient = await FintechAIDecisionMakerBlockUserAction(myWalletDetails,currencyFrom,amountToSend)
+    console.log(isNotSufficient)
+    if(!isNotSufficient.disableTransaction){ // negation negation principle -x- =+
+           const selectedUser = document.getElementById("wizards").value
+          if(!selectedUser ){
+            toastedBread({positions,
               title: 'An error occurred.',
               status:"error",
-              description: "Transaction could not be processed. Ensure all fields are filled",
+              description: "Receipient User not selected. ",
               duration: 9000,
               isClosable: true,
             })
+            setIsSubmitClicked(false)
+            return false
+          }
+
+         // const debitAccountBalanceEquivalence = isNotSufficient.resultingUserBalance[currencyFrom] 
+         
+
+         const debitAccountBalanceEquivalence = 
+            isNotSufficient.resultingUserBalance["USD"] 
+            // REMEMBER THE TRADE OFF..
+            //WE HAVE ONE DOLLAR ACCOUNT NOT MULTIPLE ACCOUNT IN DIFF COUNTRIES
+            //IF AM IN US, I JUST ONLY CARE ABOUT MY BALANCE IN US AND USE A CALCULATOR
+            //IF I MUST SEND SANDRA WINNY SOME MONEY IN FRANCE 
+            //SO SHE DONT BREAK UP WITH ME... 
+
+           const creditLedgerPayload = {
+              name: document.getElementById("wizards").value,
+              //amount: inputFrom,
+              //we are only concerened with base account which is in dollars
+              //all other account rate can change 
+
+              //the logic here is simple
+              //let the user trade in what ever currency
+              //we only keep track of our dollar and the rate in which the exchange was done
+              //then save to db which is multiplied during transaction history view
+              amount:  amountToSend,
+              // FOR RECORD PURPOSE LETS SAVE THE EQUIVALENT BALANCE IN TO CURRENCY
+              exchangeAmount: rate*amountToSend, //we keep record only in dollars
+              rate:rate,
+              sendingCurrency:currencyFrom,
+              receivingCurrency:currencyTo,
+              senderId: id,
+              senderEmail:email,
+              receipientId: handleSelectedUser().email,
+            };
+            const debitLedgerPayload = {
+              name: firstName + " " + lastName,
+               amount:  amountToSend,
+              exchangeAmount:rate*amountToSend,
+               rate:rate,
+              sendingCurrency:currencyFrom,
+              receivingCurrency:currencyTo, 
+              senderId: handleSelectedUser().id,
+              senderEmail:email,
+              receipientId: email,
+              
+            };
+            console.log(creditLedgerPayload)
+            console.log(debitLedgerPayload)
+            Object.keys(creditLedgerPayload).forEach(key =>{
+               if(creditLedgerPayload[key]==""  || creditLedgerPayload[key]==undefined || creditLedgerPayload[key]==null ){
+                   toastedBread({positions,
+                    title: 'An error occurred.',
+                    status:"error",
+                    description: "Transaction could not be processed. Ensure all fields are filled",
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                   setIsSubmitClicked(false)
+                  return false
+               }
+
+               if(key==="exchangeAmount" || key==="amount"){
+                 if(debitLedgerPayload[key]<=0){
+                     toastedBread({positions,
+                    title: 'An error occurred.',
+                    status:"error",
+                    description: "Enter an amount value greater than zero",
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                      setIsSubmitClicked(false)
+                  return false
+                 }
+               }
+            })
+
+            Object.keys(debitLedgerPayload).forEach(key =>{
+               if(debitLedgerPayload[key]==""  || debitLedgerPayload[key]==undefined || debitLedgerPayload[key]==null ){
+                   toastedBread({positions,
+                    title: 'An error occurred.',
+                    status:"error",
+                    description: "Transaction could not be processed. Ensure all fields are filled",
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                    setIsSubmitClicked(false)
+                  return false
+               }
+
+               if(key==="exchangeAmount" || key==="amount"){
+                 if(debitLedgerPayload[key]<=0){
+                     toastedBread({positions,
+                    title: 'An error occurred.',
+                    status:"error",
+                    description: "Enter an amount value greater than zero",
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                      setIsSubmitClicked(false)
+                  return false
+                 }
+               }
+            })
+
+          try{
+
+            const successful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
+          if(successful=="OK"){
+            // toast yippikayeh M**F**KA!!!
              setIsSubmitClicked(false)
-            return false
-         }
-
-         if(key==="exchangeAmount" || key==="amount"){
-           if(debitLedgerPayload[key]<=0){
-               toastedBread({positions,
-              title: 'An error occurred.',
-              status:"error",
-              description: "Enter an amount value greater than zero",
-              duration: 9000,
-              isClosable: true,
+            toastedBread({positions,
+                  title: 'SUCCESSFUL',
+                  status:"success",
+                  description: "Transaction was successful",
+                  duration: 9000,
+                  isClosable: true,
             })
-                setIsSubmitClicked(false)
-            return false
-           }
-         }
-      })
+          }
 
-      Object.keys(debitLedgerPayload).forEach(key =>{
-         if(debitLedgerPayload[key]==""  || debitLedgerPayload[key]==undefined || debitLedgerPayload[key]==null ){
-             toastedBread({positions,
-              title: 'An error occurred.',
-              status:"error",
-              description: "Transaction could not be processed. Ensure all fields are filled",
-              duration: 9000,
-              isClosable: true,
+          }catch(error){
+
+              toastedBread({positions,
+                  title: 'Error',
+                  status:"error",
+                  description: error.message|| error.toString(),
+                  duration: 9000,
+                  isClosable: true,
+            })  
+            setIfSomethingWentWrong(true)  
+          }
+
+          setIsSubmitClicked(false)
+        }else{
+          toastedBread({positions,
+                  title: 'Error',
+                  status:"error",
+                  description: `Your account balance is not sufficient for this transaction.To fund your wallet please wait for version 2`,
+                  duration: 20000,
+                  isClosable: true,
             })
-              setIsSubmitClicked(false)
-            return false
-         }
-
-         if(key==="exchangeAmount" || key==="amount"){
-           if(debitLedgerPayload[key]<=0){
-               toastedBread({positions,
-              title: 'An error occurred.',
-              status:"error",
-              description: "Enter an amount value greater than zero",
-              duration: 9000,
-              isClosable: true,
-            })
-                setIsSubmitClicked(false)
-            return false
-           }
-         }
-      })
-
-    try{
-
-      const successful = await sendMoneyOverseas(creditLedgerPayload,debitLedgerPayload)
-    if(successful=="OK"){
-      // toast yippikayeh M**F**KA!!!
-       setIsSubmitClicked(false)
-      toastedBread({positions,
-            title: 'SUCCESSFUL',
-            status:"success",
-            description: "Transaction was successful",
-            duration: 9000,
-            isClosable: true,
-      })
-    }
-
-    }catch(error){
-
-        toastedBread({positions,
-            title: 'Error',
-            status:"error",
-            description: error.message|| error.toString(),
-            duration: 9000,
-            isClosable: true,
-      })  
-      setIfSomethingWentWrong(true)  
-    }
-
-    setIsSubmitClicked(false)
-  }else{
-    toastedBread({positions,
-            title: 'Error',
-            status:"error",
-            description: `Your account balance is not sufficient for this transaction.To fund your wallet please wait for version 2`,
-            duration: 20000,
-            isClosable: true,
-      })
-  }
-  
- }catch(err){
-   setIfSomethingWentWrong(true)
- }     
+        }
+        
+       }catch(err){
+         setIfSomethingWentWrong(true)
+       }
+    setIsSubmitClicked(false)     
   }
 
 
@@ -756,7 +914,19 @@ if(!isNotSufficient){ // negation negation principle -x- =+
 
       <div id="container">
         <div id="content-box">
-        <div className="calc-col-left">
+        
+       
+<div className="calc-col-left">
+          <FormLabel>From Currency</FormLabel>
+            <Select onChange={handleSelectFrom} value={currencyFrom}>
+              {Object.keys(currencies).map((currency, index) => (
+                <option value={currency} key={index}>
+                  {currency} - {currencies[currency].name}
+                </option>
+              ))}
+            </Select>
+            </div>
+<div className="calc-col-right">
           <FormControl id="email" >
               <FormLabel>From Amount</FormLabel>
             <Input
@@ -768,30 +938,10 @@ if(!isNotSufficient){ // negation negation principle -x- =+
 
             </FormControl>
       </div>
-       
-<div className="calc-col-right">
-          <FormLabel>From Currency</FormLabel>
-            <Select onChange={handleSelectFrom} value={currencyFrom}>
-              {Object.keys(currencies).map((currency, index) => (
-                <option value={currency} key={index}>
-                  {currency} - {currencies[currency].name}
-                </option>
-              ))}
-            </Select>
-            </div>
+
+
 
 <div className="calc-col-left">
- <FormControl id="email" className="calc-col-left">
-              <FormLabel>To Amount</FormLabel>
-            <Input
-              id="amountTo"
-              type="number"
-              value={inputTo}
-              onChange={handleChangeTo}
-            />
-           </FormControl>
-</div>
-<div className="calc-col-right">
 <FormLabel>To Currency</FormLabel>
             <Select onChange={handleSelectTo} value={currencyTo}>
               {Object.keys(currencies).map((currency, index) => {
@@ -803,6 +953,18 @@ if(!isNotSufficient){ // negation negation principle -x- =+
               })}
             </Select>
 
+</div>
+
+<div className="calc-col-right">
+ <FormControl id="email" className="calc-col-left">
+              <FormLabel>To Amount</FormLabel>
+            <Input
+              id="amountTo"
+              type="number"
+              value={inputTo}
+              onChange={handleChangeTo}
+            />
+           </FormControl>
 </div>
            
 
@@ -832,11 +994,11 @@ if(!isNotSufficient){ // negation negation principle -x- =+
         </Box>
       </Stack>
     </Flex>
-): ifSomethingWentWrong? (<SomethingWentWrong />): (<Loader/>)}
+): ifSomethingWentWrong? (<SomethingWentWrong  />): (<Loader/>)}
 </>
 
 {!animateLoader ? (
-    <ReceipientProfiler selectedUser={{
+    <ReceipientProfilerBatch selectedUser={{
       email:receipientInfo?.email,
       firstName:receipientInfo?.firstname,
       lastName:receipientInfo?.lastname,
@@ -903,81 +1065,6 @@ const FTransaction = connect(mapStateToProps, {})(NewTransfer);
       </>
   );
 }
-
-
-const ReceipientProfiler  = ({selectedUser}) =>{
-
-  useEffect(()=>{
-    async function getAccontInfo(){
-      if(selectedUser.email.length>0){
-        
-      } 
-    }
-    getAccontInfo()
-  },[])
-  return(
-
-       <Flex
-       style={{display:selectedUser.email.length>0?"block":"none"}}
-      minH={'500px'} 
-      w="100%"
-      bg={useColorModeValue('gray.50', 'gray.800')}>
-      <Stack  w="100%" spacing={8} maxW={'lg'} >
-        
-        <Box
-
-          rounded={'lg'}
-          bg={useColorModeValue('white', 'gray.700')}
-          boxShadow={'lg'}
-          p={8}>
-          <Stack >
-
-           <Flex justifyContent="space-between" bg="#f5f5f5" padding="10px">
-             <Avatar
-                  size={'sm'}
-                  src={
-                    'https://avatars.githubusercontent.com/u/26296603?v=4'
-                  }
-                /> 
-            <h2> Receipient Wallet Information</h2>
-          
-          </Flex>
-
-            <div>
-     
-
-      <div id="container" >
-        <div id="content-box">
-                 <Text>Confirmation Detail</Text>
-              <Text color="darkblue" fontSize="25px" p="10px">Account Number: {selectedUser.walletDetails.accountNumber} </Text>
-              <Text color="darkblue" fontSize="25px" p="10px">Wallet Type: {selectedUser.walletDetails.type} </Text>
-              
-              <hr/>
-              <Text fontSize="20px" p="10px">FullName:{ " "+  selectedUser.firstName+ " " +selectedUser.lastName}</Text>
-              <Text fontSize="20px" p="10px">Email:{  " "+ selectedUser.email}</Text>      
-              
-               <Text fontSize="20px" p="10px">
-               You are about to make a credit transaction to the receipient { " "+  selectedUser.firstName+ " " +selectedUser.lastName} .
-               Please confirm the information details are correct
-               </Text>      
-           
-
-           <Text>https://github.com/saladinjake/trasferwise-app <br/> POWERED BY SIMBA</Text>          
-        </div>
-      </div>
-    </div>
-            
-            <Stack spacing={10}>
-              
-            </Stack>
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
-  )
-} 
-
-
 
 
 

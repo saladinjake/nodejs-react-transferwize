@@ -6,7 +6,7 @@ export const myTransactions = async (accountNumber) => {
     if (response.status === 200) {
       return response && response;
     }
-  });
+  })//.catch(err=> toast.error(err.message || err.toString()));
 };
 export const getWalletAccounts = async (emailId) => {
   let request = axios.get(`user/${emailId}/accounts`);
@@ -14,7 +14,7 @@ export const getWalletAccounts = async (emailId) => {
     if (response.status === 200) {
       return response && response;
     }
-  });
+  })//.catch(err=> toast.error(err.message || err.toString()));
 };
 
 export const getUserProfileById = async (Id) => {
@@ -23,7 +23,7 @@ export const getUserProfileById = async (Id) => {
     if (response.status === 200) {
       return response && response;
     }
-  });
+  })//.catch(err=> toast.error(err.message || err.toString()));
 };
 export const creditLedgerAccount = async (ledgerDetail) => {
  let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/credit`, ledgerDetail);  
@@ -31,7 +31,7 @@ export const creditLedgerAccount = async (ledgerDetail) => {
     if (response.status === 200) {
       return response && response;
     }
-  });
+  })//.catch(err=> toast.error(err.message || err.toString()));
 }
 export const debitLedgerAccount = async (ledgerDetail) => {
 	let request = axios.post(`/transactions/${ledgerDetail?.accountNumber}/debit`, ledgerDetail);
@@ -39,7 +39,7 @@ export const debitLedgerAccount = async (ledgerDetail) => {
     if (response.status === 200) {
       return response && response;
     }
-  });
+  })//.catch(err=> toast.error(err.message || err.toString()));
 }
 
 
@@ -60,6 +60,7 @@ export const sendMoneyOverseas = async (creditLedgerDetail,debitLedgerDetail) =>
    // console.log(creditLedgerDetail)
    // console.log(debitLedgerDetail)
   try{
+    //credit the reciever debit the giver
     const creditorAccount = await getWalletAccounts(creditLedgerDetail.receipientId)
     creditLedgerDetail.accountNumber = creditorAccount.data.data[0].accountNumber
     const debitorAccount = await getWalletAccounts(debitLedgerDetail.senderEmail)
@@ -74,10 +75,29 @@ export const sendMoneyOverseas = async (creditLedgerDetail,debitLedgerDetail) =>
      if(presignedSignatureDebit.status==200){ // if debit was successful
           return "OK"
       }else{
-       
-         //else reverse credit
+        try{
+         //else reverse credit made...
+         const senderAccount = await getWalletAccounts(creditLedgerDetail.senderEmail)
+         creditLedgerDetail.accountNumber = senderAccount.data.data[0].accountNumber
+         const presignedSignatureCredit = await creditLedgerAccount(creditLedgerDetail)
+         const receiverAccount = await getWalletAccounts(debitLedgerDetail.receipientId)
+         debitLedgerDetail.accountNumber = receiverAccount.data.data[0].accountNumber
+         const presignedSignatureDebit = await debitLedgerAccount(debitLedgerDetail)
+    
+         setTimeout(()=>{
+            if(presignedSignatureCredit.status==200 && presignedSignatureDebit.status==200){
+               toast.success("Your money was reversed back")
+            }else{
+              toast.error("Contact us at SIMBA if you dont receive your money. we are generous people!")
+            }
+         },1000)
+
+        }catch(error){
+          //else reverse credit
            toast.error("Transaction could not complete. Dont worry we will reverse any transaction that has been debited or credited with out properly derived state.")
            return 'FAILED'
+        }    
+         
       }
       
    }else{
@@ -106,7 +126,7 @@ export const reverseMoneyTransfered = async (creditLedgerDetail,debitLedgerDetai
     await debitLedgerAccount(creditLedgerDetail)
   
   }catch(error){
-    console.log("INOPERATIVE SWITCH OR ACCOUNT")
+    console.log("SERVICE DOWN TIME.. WE ARE WORKING TO SERVE YOU BETTER")
   }
 }
 
@@ -114,21 +134,23 @@ export const reverseMoneyTransfered = async (creditLedgerDetail,debitLedgerDetai
 
 
 export const deriveForeignExchangeAccountBalance = async (FROM="USD",TO='USD',AMOUNT=1) =>{
-    let result =[]
-    
+
       const currency_one = FROM;
       const currency_two = TO;
 
-      
-      let request = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency_one}`)
-      
-      if (!request.ok) {
-           throw new Error(`HTTP error! status: ${response.status}`);
+      try{
+        let request = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency_one}`)
+        if (!request.ok) {
+             throw new Error(`HTTP error! status: ${request.status}`);
+        }
+        let data = await request.json()
+        let rate = data.rates[currency_two];
+        return  (AMOUNT * rate).toFixed(2)
+
+      }catch(err){
+        console.log("Service down")
       }
-     
-      let data = await request.json()
-      let rate = data.rates[currency_two];
-      return  (AMOUNT * rate).toFixed(2)
+      
   
   
   }
@@ -148,58 +170,67 @@ export const deriveForeignExchangeAccountBalance = async (FROM="USD",TO='USD',AM
 export const userCannotProceedToPayment = async (myWalletDetails, fromCurrency,AmountToSend) =>{
   //todo: validate wallet existence: we are dealing with money here
   // no loose ends.. validate that the user is in our db
-
-
     /*this is an expensive function */
     /*it should only run if user is permitted*/
   let disableTransaction = true;
+  let resultingUserBalance =false;
+  let deductionValue = 0.00
   const loggedInUsersWallet = myWalletDetails;
-  let accountBalance = loggedInUsersWallet.balance // ALWAYS IN USD AS BASE CURRENCY
+  let accountBalanceInUSD = loggedInUsersWallet.balance // ALWAYS IN USD AS BASE CURRENCY
   const allowedTradingCurrencies = ["USD","NGN",'EUR'];
+  // USERS ACCOUNT BALANCE IN DIFFERENT CURRENCIES
   const keyValuePairBalance = {
           "USD":0.00  ,
           "EUR":0.00 ,
           "NGN":0.00 ,
   }
-  if(allowedTradingCurrencies.includes(fromCurrency)){
-    
+  if(allowedTradingCurrencies.includes(fromCurrency)){    
         //you can transact
-    //FIND ALL MY EQUI BALANCES
+    //FIND ALL pair balance of the amount to send
     await deriveForeignExchangeAccountBalance(
-      "USD","USD",
-      accountBalance) // SAME AS MY OWN BASE BALANCE
-    .then(USD=> keyValuePairBalance["USD"]=USD)
+       "USD","USD",
+      accountBalanceInUSD) // SAME AS MY OWN BASE BALANCE
+    .then(USD=>   keyValuePairBalance["USD"]=USD)
     await deriveForeignExchangeAccountBalance(
-      "USD","EUR",
-      accountBalance)//1000 USD =>839.00
+      "USD" ,"EUR",
+      accountBalanceInUSD)//1000 USD =>839.00
     .then(EUR=> keyValuePairBalance["EUR"]=EUR)
     await deriveForeignExchangeAccountBalance(
       "USD","NGN",
-      accountBalance) 
+      accountBalanceInUSD) 
       .then(NGN=> keyValuePairBalance["NGN"]=NGN)// SO SAD: 4,...,..000
       //CODE SWEETNESS...
-  console.log(keyValuePairBalance)
+       console.log(keyValuePairBalance)
+      // SINCE AMOUNT TO SEND CAN BE ANY CURRENCY WE CHECK IF OUR 
+      //BASE BALANCE CAN BE SUFFICIENT ENOUGH TO TRANSACT IF NOT JUST BAIL
+      //YOU CANT SPEND WHAT YOU DONT HAVE
+      //ITS A BANKING RULE OF LAW... MAYBE AM JUST SAYING!!!!
 
-    // SINCE AMOUNT TO SEND CAN BE ANY CURRENCY WE CHECK IF OUR 
-    //BASE BALANCE CAN BE SUFFICIENT ENOUGH TO TRANSACT IF NOT JUST BAIL
-    //YOU CANT SPEND WHAT YOU DONT HAVE
-    //ITS A BANKING RULE OF LAW... MAYBE AM JUST SAYING!!!!
-    let exchangeAccountBalance = keyValuePairBalance[fromCurrency]
-     if(exchangeAccountBalance > AmountToSend){
-        disableTransaction = false;
-        //TURN ON THE LIGHTS SPARKS AND BLOW!!
-        return disableTransaction
-     }else{
-      //you can't transact so sorry man.. you dont have money
-      /// what did you do with the bonus given to you by simba
-      //just asking????...........
-       return disableTransaction
-     }
-  }else{
-    //you cant transact any other currency
-    //we roll with the big guys US DOLLSSSS....... AND POUNDSSSSSS..
-    return disableTransaction
-  }
-  //AI DECISION MAKER RETURNS VALUE
- return failing
+      //get the equivalent exchange value
+
+
+      let exchangeAccountBalance = keyValuePairBalance[fromCurrency]
+       if(exchangeAccountBalance > AmountToSend){ // NOW WE ARE IN SYNC WITH ONE CURRENCY VALUE 
+          disableTransaction = false;
+          resultingUserBalance =keyValuePairBalance;
+
+          //TURN ON THE LIGHTS SPARKS AND BLOW!!
+          //DEBIT ON THE USER IS POSSIBLE
+          return {disableTransaction,resultingUserBalance}
+       }else{
+        disableTransaction = true;
+        resultingUserBalance = false;
+        //you can't transact so sorry man.. you dont have money
+        /// what did you do with the bonus given to you by simba
+        //just asking????...........
+         return {disableTransaction,resultingUserBalance}
+       }
+    }else{
+        disableTransaction = true; resultingUserBalance = false;
+      //you cant transact any other currency
+      //we roll with the big guys US DOLLSSSS....... AND POUNDSSSSSS..
+      return {disableTransaction,resultingUserBalance}
+    }
+    //AI DECISION MAKER RETURNS VALUE
+ return {disableTransaction,resultingUserBalance}
 }

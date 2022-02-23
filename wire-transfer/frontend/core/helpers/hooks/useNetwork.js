@@ -30,25 +30,25 @@ const useNetwork = () => {
 setInterval(()=>{
     var condition = navigator.onLine ? 'online' : 'offline';
     if (condition === 'online') {
-      console.log('ONLINE');
-        fetch('https://www.google.com/', { // Check for internet connectivity
+     // console.log('ONLINE');
+        fetch('https://jsonplaceholder.typicode.com/posts/1', { // Check for internet connectivity
             mode: 'no-cors',
             })
         .then(() => {
-            console.log('CONNECTED TO INTERNET');
+            //console.log('CONNECTED TO INTERNET');
             setIsOnline(true)
-            toast.closeAll();
+           // toast.closeAll();
         }).catch(() => {
-           console.log('INTERNET CONNECTIVITY ISSUE');
+           //console.log('INTERNET CONNECTIVITY ISSUE');
            setIsOnline(false)
 
         }  )
 
     }else{
-       console.log('OFFLINE')
+       //console.log('OFFLINE')
        setIsOnline(false)
     }
- }, 100);
+ }, 20000);
 
     
 
@@ -68,10 +68,10 @@ setInterval(()=>{
 
   const displayToast = () => {
     const onlineDuration = 35 *  (60 * 1000);
-    const offlineDuration = 30 * (60 * 1000);
+    const offlineDuration = 35 *  (60 * 1000);
     // If the User is loading the page for the first time, and he's online?
     // Then there's no need to disturb the User
-    if (!isOnline) {
+    if (!isOnline ) {
       // This closes all exiting Toasts!!!!!!!!!
       toast.closeAll();
     }
