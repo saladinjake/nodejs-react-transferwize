@@ -47,3 +47,10 @@ export const isEmpty = (fieldVar) =>{
 	}
 	return false
 }
+
+
+
+export const formatCurrency = (num,symbol=",")=>{
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, symbol);
+
+}

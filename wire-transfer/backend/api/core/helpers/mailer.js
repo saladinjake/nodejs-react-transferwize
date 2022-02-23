@@ -1,7 +1,11 @@
 import nodemailer from 'nodemailer';
 import debug from 'debug';
 import dotenv from "dotenv"
+import fs from "fs"
+import handlebars from "handlebars"
 dotenv.config()
+
+
 const mailer = async (mailData) => {
   const {
     to, subject, text, html,

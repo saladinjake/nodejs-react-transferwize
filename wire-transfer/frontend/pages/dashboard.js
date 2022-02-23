@@ -45,19 +45,25 @@ import Tradeoffs from "../core/views/components/Tradeoffs"
 import { FcLock } from 'react-icons/fc';
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-
 import RequestLoader from "../core/views/components/RequestLoader"
+import seoOptimization from "../core/helpers/utils/seoOptimizer";
+
+import Layout from "../core/views/components/Layouts"
+const pageSEO = seoOptimization(
+  "About",
+  "This is the shit in town.We power the web globally at simba. Hire us now"
+);
+
+
 const handleLogout = async () => {
     await logOut();
     setTimeout(() => {
       if(typeof window!==undefined){
          localStorage.clear()
          window.location.href="/login"
-
       }
     }, 2000);
   };
-
   const redirectTo = (url) =>{
     setTimeout(() => {
        if(typeof window!==undefined){
@@ -66,11 +72,7 @@ const handleLogout = async () => {
     }, 1000);
   }
 
-
-
-
 const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
-
   let isLoggedIn = false;
   const [id, setId] = useState("")
   const [email, setEmail] = useState("")
@@ -78,14 +80,13 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
   const [lastName, setLastName] = useState("")
   const [isAuthenticated,setIsAuthenticated] = useState(false)
   const [token,setToken] = useState("")
-
   useEffect(async()=>{
       if(typeof window!=="undefined"){
          
         if(window.localStorage && window.localStorage.getItem("user")){
           console.log(window.localStorage.getItem("user"))
           user = JSON.parse(window.localStorage.getItem("user"))
-          setId(user.id)
+          setId(user.id) // no longer id rather should uniquely identify user from the glance of the app
           setEmail(user.email)
           setFirstName(user.firstName)
           setLastName(user.lastName)
@@ -103,6 +104,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
 
   
   return (
+   
     <Flex
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 4 }}
@@ -154,6 +156,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
                   alignItems="flex-start"
                   spacing="1px"
                   ml="2">
+                  <div id="accountId" ></div>
                   <Text fontSize="md">{user?.firstName + " "+ user?.lastName }</Text>
                   <Text fontSize="xs" color="gray.600">
                    You are logged in
@@ -176,6 +179,7 @@ const MobileNav = ({ onOpen, auth: {user  },logout,  ...rest }) => {
         </Flex>
       </HStack>
     </Flex>
+
   );
 };
 
@@ -208,6 +212,7 @@ export default function Dashboard({
 
   return (
     <>
+     <Layout SEO={pageSEO}>
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarNavigationContent
         onClose={() => onClose}
@@ -233,6 +238,7 @@ export default function Dashboard({
          <Tradeoffs/>
       </Box>
     </Box>
+    </Layout>
       </>
   );
 }

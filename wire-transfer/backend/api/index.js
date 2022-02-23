@@ -6,8 +6,6 @@ import cors from 'cors';
 import bodyParser, { json, urlencoded } from 'body-parser';
 import debug from 'debug';
 import configJson from './core/config/config.ini';
-
-
 import authRoutes from './modules/auth/routes/user.route';
 import accountRoutes from './modules/e-transactions/routes/account.route';
 import transactionRoutes from './modules/e-transactions/routes/transaction.route';
@@ -15,8 +13,8 @@ import searchRoutes from './modules/auth/routes/search.route'
 /*express configurations*/
 import pool from "./core/models/db/connection.db"
 
-import swaggerUI from 'swagger-ui-express';
-import swaggerDocument from '../swagger.json';
+// import swaggerUI from 'swagger-ui-express';
+// import swaggerDocument from '../../swagger.json';
 
 dotenv.config();
 const app = express();
@@ -28,7 +26,11 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
-app.use('/transferwise/api/v1/documentations', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+
+/*swagger doc deley boot time of server
+TODO: MOVE DOCUMENTATION TO SEPERATE HOSTING
+*/
+// app.use('/transferwise/api/v1/documentations', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 app.use(cors("*"));
 app.use(function (req, res, next) {

@@ -1,6 +1,5 @@
 import React, { ReactNode,ReactElement, useState, useEffect } from 'react';
 import { login, logOut, setPrevPath } from "../../redux/actions/auth.action";
-
 import Currency from 'react-currency-icons'
 import {
   IconButton,
@@ -43,16 +42,29 @@ import { ReactText } from 'react';
 
 
 import { FcLock } from 'react-icons/fc';
-import { myTransactions, getWalletAccounts, creditLedgerAccount, debitLedgerAccount } from "../../services/transactions.services"
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useToast } from '@chakra-ui/react'
 import RequestLoader from "./RequestLoader"
 import  TransactionTables from "./TransactionTables"
 import { useRouter } from "next/router"
-const SIMBA_COMPANY_ID = 4;
-const BONUS_AMOUNT = 1000.00;
-const SIMBA_ACCOUNT_NUMBER = 2225137327
+import { 
+  fetchConversionRates,
+  deriveForeignExchangeAccountBalance,
+  myTransactions, getWalletAccounts,
+  creditLedgerAccount, debitLedgerAccount
+} from "../../services/transactions.services" 
+
+import { 
+  formatCurrency,
+  truncate } from "../../helpers/utils/functions";
+// console.log( deriveForeignExchangeAccountBalance("USD","NGN",100))
+import { 
+  SIMBA_COMPANY_ID, BONUS_AMOUNT, 
+  SIMBA_ACCOUNT_NUMBER,
+  SIMBA_COMPANY_EMAIL 
+} from "../../config/api_config/constants"
+import { Loader, SomethingWentWrong } from "./Feedback"
 
 
 
@@ -86,18 +98,23 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
    const [transactions, setTransactions] = useState([])
    const toastedBread = useToast()
    const [lastTrnx ,setLastTransaction] = useState({})
+   const [NEWBALANCE, SETNEWBALANCE] = useState(0);
+   const [EQUIVALENT_BALANCE_IN_NGN,setNGNBAL] = useState(0)
+   const [EQUIVALENT_BALANCE_IN_EUR, setEURBAL] = useState(0)
    const router = useRouter()
 
-
-
-  let isLoggedIn = false;
-  
+  let isLoggedIn = false;  
   const [id, setId] = useState("")
   const [email, setEmail] = useState("")
   const [firstName, setFirstName ] = useState("")
   const [lastName, setLastName] = useState("")
   const [isAuthenticated,setIsAuthenticated] = useState(false)
   const [token,setToken] = useState("")
+  const [myWalletAccount, setMyWalletAccount] = useState({})
+
+  const [animateLoader, setAnimateLoader] = useState(false)
+ const [ifSomethingWentWrong,setIfSomethingWentWrong] = useState(false)
+
 
   useEffect(async()=>{
       if(typeof window!=="undefined"){
@@ -121,8 +138,39 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
       }
   },[user])
 
+
+
+
+  const recalculateAtomicBalance = (wallet) =>{
+    if(wallet.accountNumber){
+      
+          try{
+
+            deriveForeignExchangeAccountBalance("USD",
+              "NGN",
+              wallet.balance).then(balNGN =>{
+                setNGNBAL(balNGN.toLocaleString())
+                 console.log(balNGN)
+              })
+            deriveForeignExchangeAccountBalance(
+              "USD","EUR",
+              wallet.balance).then(balEUR=>{
+                console.log(balEUR)
+                setEURBAL(balEUR.toLocaleString())
+              })
+
+              SETNEWBALANCE(wallet.balance.toLocaleString())
+              console.log(wallet.balance)
+
+          }catch(error){
+             setIfSomethingWentWrong(true)
+          }
+            
+    }
+  }
+
    useEffect(async()=>{
-   
+      setAnimateLoader(true)
       try{
       	if(!isAuthenticated){
          await logOut()
@@ -130,17 +178,30 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
          /*This checks if user exists and if user has account if not it creates the existing user account and set the balance to 1000 USD*/
          const userEmail = user?.email;
          console.log(userEmail)
-         const walletAccountDetails = await getWalletAccounts(userEmail);
+         let walletAccountDetails = await getWalletAccounts(userEmail);
+       
+
+         let existingAccount =  walletAccountDetails.data.data[0];
+        
+          //for reocuring users only
+          recalculateAtomicBalance(existingAccount)    
+
         // console.log(walletAccountDetails.data.data)
+        //for fresh time users who need bonus topups of our generousity as simba
          if('data' in walletAccountDetails.data &&  Array.isArray(walletAccountDetails?.data?.data) ){
-           const existingAccount =  walletAccountDetails.data.data[0];
-           console.log(walletAccountDetails.data.data[0])
+           let existingAccount =  walletAccountDetails.data.data[0];
+           // document.getElementById("accountId").innerHTML = existingAccount?.accountNumber;
+            
+             setMyWalletAccount({...walletAccountDetails.data.data[0]})
+             
+            
+           // console.log(walletAccountDetails.data.data[0])
            if('accountNumber' in existingAccount ){
-             console.log("true")
+             // console.log("true")
               const myTransactionLedgers = await myTransactions(existingAccount.accountNumber)
-              console.log(myTransactionLedgers)
+              // console.log(myTransactionLedgers)
               setTransactions([...myTransactionLedgers?.data?.data])
-              console.log(transactions)
+              // console.log(transactions)
 
               //if first timer then 
               //ledger into the user account 
@@ -155,6 +216,7 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
                   sendingCurrency:"USD",
                   receivingCurrency:"USD",
                   senderId: SIMBA_COMPANY_ID,
+                  senderEmail:SIMBA_COMPANY_EMAIL,
                   receipientId: userEmail
                 };
                 let creditorLedgerDetail ={
@@ -165,35 +227,33 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
                   sendingCurrency:"USD",
                   receivingCurrency:"USD",
                   senderId: SIMBA_COMPANY_ID,
+                  senderEmail:SIMBA_COMPANY_EMAIL,
                   receipientId: userEmail
                 }
                 await debitLedgerAccount(debitorLedgerDetail)
                 await creditLedgerAccount(creditorLedgerDetail)
                 const responseLedger = await myTransactions(existingAccount.accountNumber)
                 setTransactions([...responseLedger?.data?.data])
-
                 toastedBread({
                   title: 'CONGRATULATIONS FIRSTIMERS',
                   description: "Your wallet account has bee credited with 1000.00 USD. Please wait while transaction is completed.", //error.message,
                   status: 'success',
-                  duration: 9000,
+                  duration: 20000,
                   isClosable: true,
                 })
+                const tmpTrnx = [...responseLedger?.data?.data];
 
-                setTimeout(()=>{
-                  router.push("/login")
-                },2000)
-                
+
+             walletAccountDetails = await getWalletAccounts(userEmail);
+             existingAccount =  walletAccountDetails.data.data[0];
+        
+             recalculateAtomicBalance(existingAccount)
+               setAnimateLoader(false)
               }
-         
            }else{
              // new user has no account so automatically create one for user signed up
               console.log("false")
-
-
-
            }
-           
          }else{
            //app accessed in error
             toastedBread({
@@ -205,10 +265,12 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
           })
 
          }
+         setAnimateLoader(false)
          
          
       }catch(error){
-        
+         setAnimateLoader(false)
+          setIfSomethingWentWrong(true)
         toastedBread({
             title: 'An error occurred.',
             description: error?.message || error, //error.message,
@@ -221,37 +283,82 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
      
    },[])
 
-    const lastTransaction = transactions[transactions.length -1]  
+
+   // const fetchConversionRates = async (currencyFrom,currencyTo) => {
+   //    const result = await fetch(
+   //      //8c627c48be6db29a67c2b7cf
+   //      //ed66962687fdf4b5a9afb6c6
+   //      `https://v6.exchangerate-api.com/v6/8c627c48be6db29a67c2b7cf/pair/${currencyFrom}/${currencyTo}`
+   //    );
+   //    //console.log(result);
+   //    if (result.ok) {
+   //      const rates = await result.json();
+        
+   //      return  rates.conversion_rate
+        
+   //    }
+   //  };
+   
+
+    
+    
     //console.log(lastTransaction)
- 
+    const lastTransaction = transactions[transactions.length -1] ;
+    const availableUsersBalance =  lastTransaction?.newBalance
+    let bal = []
+
+
+     
   return (
     <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
 
 
               <Box p={4} >
       <SimpleGrid  bg="#fff" columns={{ base: 1, md: 3 }} spacing={10}>
-        <CardBalance
-          icon={ <Currency code="USD" size="small" />}
-          title={'Balance in Dollars'}
-          text={
-           lastTransaction?.newBalance
-          }
-        />
-        <CardBalance
-          icon={<Currency code="NGN" size="small" />}
-          title={'Balance in Naira'}
+        <>
+        
 
+
+        <>
+        {!animateLoader? (
+             <CardBalance
+          icon={<Currency code="USD"  size="small" />}
+          title={'Balance in USD'}
           text={
-            lastTransaction?.newbalancenaira
+            
+            !animateLoader? formatCurrency(NEWBALANCE || 0) :( <Loader/>)
           }
         />
-        <CardBalance
+          ): (<Loader/>)}
+        </>
+        </>
+
+        <>
+        {!animateLoader? (
+             <CardBalance
+          icon={<Currency code="NGN"  size="small" />}
+          title={'Balance in NGN'}
+          text={
+            
+            !animateLoader? formatCurrency(EQUIVALENT_BALANCE_IN_NGN|| 0) :( <Loader/>)
+          }
+        />
+          ): (<Loader/>)}
+        </>
+
+        <>
+        {!animateLoader? (
+             <CardBalance
           icon={<Currency code="EUR"  size="small" />}
           title={'Balance in Euros'}
           text={
-           lastTransaction?.newbalanceeuros
+            
+            !animateLoader? formatCurrency(EQUIVALENT_BALANCE_IN_EUR|| 0) :( <Loader/>)
           }
         />
+          ): (<Loader/>)}
+        </>
+        
       </SimpleGrid>
     </Box>
 
@@ -264,8 +371,9 @@ const  TransactionComponent = ({ auth: {user  } }) =>{
 
 
       
-
-      <TransactionTables data={transactions}/>
+{!animateLoader? (<TransactionTables data={transactions}/>):
+  ifSomethingWentWrong ? (<SomethingWentWrong />) :(<Loader/>)}
+      
 
       
     </Stack>

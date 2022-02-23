@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { useTable, usePagination } from "react-table";
 import {
   Table,
@@ -25,8 +25,44 @@ import {
   ChevronRightIcon,
   ChevronLeftIcon
 } from "@chakra-ui/icons";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
-function CustomTable({ columns, data }) {
+
+import { getUser } from "../../services/auth.services"
+
+function CustomTable({ columns, data,  auth: {user  } }) {
+
+  let isLoggedIn = false;
+  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
+  const [firstName, setFirstName ] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [token,setToken] = useState("")
+  useEffect(async()=>{
+      if(typeof window!=="undefined"){
+         
+        if(window.localStorage && window.localStorage.getItem("user")){
+          console.log(window.localStorage.getItem("user"))
+          user = JSON.parse(window.localStorage.getItem("user"))
+          setId(user.id) // no longer id rather should uniquely identify user from the glance of the app
+          setEmail(user.email)
+          setFirstName(user.firstName)
+          setLastName(user.lastName)
+          setIsAuthenticated(user.isAuthenticated)
+          setToken(user.token)
+          if (user.token && user.isAuthenticated) {
+             isLoggedIn = true;
+          }
+        }else{
+          await logOut()
+          setTimeout(()=>{window.location.href="/login"},2000)
+        }
+      }
+  },[user])
+
+  
   const {
     getTableProps,
     getTableBodyProps,
@@ -51,11 +87,55 @@ function CustomTable({ columns, data }) {
     usePagination
   );
 
-  data.forEach(transaction =>{
+  data.forEach( async (transaction) =>{
+    let givenTradingAmount =null;
     if(transaction.type ==="debit"){
-       transaction["cash_in_flow_debit"] = "- "+ transaction.amount
+       transaction.senderid = transaction.senderemail;
+       if(transaction.senderid== email ){
+
+         
+         const descriptionMessage = `
+         Dear ${firstName+ " "+ lastName}, 
+         Your wallet account was debited 
+         by ${transaction.tocurrency}${transaction.exchangeamount}
+         an equivalent of ${transaction.formcurrency}${transaction.amount}
+         ON THIS DAY ${transaction.createdon}. 
+         A payment was paid to ${transaction.receipientid}.`;
+         transaction.information = descriptionMessage;
+
+       }else{
+         let date = new Date(transaction.createdOn);
+         date = date.getFullYear()+ "-"+ date.getMonth()+ "-"+ date.getDay()
+                  const descriptionMessage = `
+         Dear ${firstName+ " "+ lastName}, 
+         Your wallet account was credit 
+         with ${transaction.tocurrency}${transaction.exchangeamount}
+         an equivalent of ${transaction.formcurrency}${transaction.amount}
+         ON THIS DAY ${date}. 
+         A payment was made from to ${transaction.senderemail}.`;
+         transaction.information = descriptionMessage;
+       }
+       transaction["cash_in_flow_debit"] = `- ${transaction.formcurrency}` + transaction.amount
     }else{
-      transaction["cash_in_flow_credit"] ='+ '+ transaction.amount
+
+       //if transactiontype is credit by user
+          transaction.senderid = transaction.senderemail;
+       if(transaction.senderid== email ){
+
+         
+         const descriptionMessage = `
+         
+         This payment was paid to ${transaction.receipientid}.`;
+         transaction.information = descriptionMessage;
+
+       }else{
+        const descriptionMessage = ` 
+         This payment was made from to ${transaction.senderemail}.`;
+         transaction.information = descriptionMessage;
+       }
+
+
+      transaction["cash_in_flow_credit"] =`+ ${transaction.tocurrency} ` + transaction.exchangeamount
     }
   })
 
@@ -68,7 +148,9 @@ function CustomTable({ columns, data }) {
           {headerGroups.map((headerGroup) => (
             <Tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column, index) => (
-                <Th key={Math.random(20)*10 + index} {...column.getHeaderProps()}>{column.render("Header")}</Th>
+                <Th key={Math.random(20)*10 + index} {...column.getHeaderProps({
+                  style: { minWidth: column.minWidth, width: column.width },
+                })}>{column.render("Header")}</Th>
               ))}
             </Tr>
           ))}
@@ -177,6 +259,21 @@ function CustomTable({ columns, data }) {
   );
 }
 
+
+CustomTable.propTypes = {
+  auth: PropTypes.object.isRequired,
+};
+
+
+
+const mapStateToProps = (state) => ({
+  auth: state.auth
+});
+
+const  CustomTableSwaggedUp = connect(mapStateToProps, {
+  
+})(CustomTable);
+
 function TableApplication({data}) {
   const columns = React.useMemo(
     () => [
@@ -186,39 +283,78 @@ function TableApplication({data}) {
         columns: [
           {
             Header: "senderid",
-            accessor: "senderid"
+            accessor: "senderid",
+            maxWidth: 100,
+            minWidth: 100,
+             width: 150,
           },
           {
             Header: "receipientid",
-            accessor: "receipientid"
+            accessor: "receipientid",
+            maxWidth: 100,
+            minWidth: 100,
+             width: 150,
+          },
+          {
+            Header: "Notification",
+            maxWidth: 600,
+            minWidth: 400,
+             width: 550,
+            accessor: "information"
           },
           {
             Header: "Debit Ledger",
-            accessor: "cash_in_flow_debit"
+            accessor: "cash_in_flow_debit",
+            maxWidth: 200,
+            minWidth: 200,
+             width: 250,
+             background:"darkblue",
+             color:"#fff",
           },
           {
             Header: "Credit Ledger",
-            accessor: "cash_in_flow_credit"
+            accessor: "cash_in_flow_credit",
+            maxWidth: 200,
+            minWidth: 200,
+             width: 250,
+             background:"green",
+             color:"#fff",
+
           },
           {
             Header: "Equivalent",
-            accessor: "exchangeamount"
+            accessor: "exchangeamount",
+            maxWidth: 200,
+            minWidth: 200,
+             width: 250,
           },
           {
             Header: "from currency",
-            accessor: "formcurrency"
+            accessor: "formcurrency",
+            maxWidth: 100,
+            minWidth: 100,
+             width: 150,
           },
           {
             Header: "to currency",
-            accessor: "tocurrency"
+            accessor: "tocurrency",
+            maxWidth: 100,
+            minWidth: 100,
+             width: 150,
           },
           {
             Header: "rate",
-            accessor: "rate"
+            accessor: "rate",
+            maxWidth: 100,
+            minWidth: 100,
+             width: 150,
           },
           {
             Header: "Transaction Type",
-            accessor: "type"
+            accessor: "type",
+            maxWidth: 100,
+            minWidth: 100,
+             width: 150,
           },
           
           
@@ -230,7 +366,7 @@ function TableApplication({data}) {
 
   //const data = React.useMemo(() => data, []);
 
-  return <CustomTable columns={columns} data={data} />;
+  return <CustomTableSwaggedUp columns={columns} data={data} />;
 }
 
 export default TableApplication;

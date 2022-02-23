@@ -1,12 +1,12 @@
 import { useToast as useToastUI } from "@chakra-ui/toast";
 
 const useToast = () => {
-  const toast = useToastUI();
+  const toast = useToast();
   const displayToast = ({
     description,
     status = "error",
     position = "top",
-    duration = 2000,
+    duration = 20000,
   }) => {
     toast.closeAll();
 
