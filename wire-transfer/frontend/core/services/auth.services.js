@@ -18,8 +18,8 @@ var contentType = "application/json"; //"multipart/form-data"
 const csrfSafeMethod = (method) => {
   // these HTTP methods do not require CSRF protection
   return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
-};
-/*enrollment api*/
+}
+
 export const loginUser = async (details) => {
   let request = axios.post("auth/signin", details);
   return request.then((response) => {
