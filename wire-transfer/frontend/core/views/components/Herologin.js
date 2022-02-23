@@ -186,21 +186,10 @@ const prevalidate = (setSubmitting)=>{
        setLoading(true);
       try {
         
+        console.log(values)
         const response = await registerUser(values);
-        console.log(response.data)
-       // toast.success("We have sent a verification mail to your email.");
-        // switch (response.code) {
-        //     case 201:
-        //      console.log(response);
-               
-        //       break;
-        //     case 400:
-        //     case 401:
-        //       console.log(response);
-        //       break;
-        //     default:
-        //       break;
-        //   }
+        console.log(response)
+       
 
 
        toastedBread({

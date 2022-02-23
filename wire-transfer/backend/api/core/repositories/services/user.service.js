@@ -8,10 +8,11 @@ class UserService {
   static async createUser(user) {
     try {
       const isUser = await User.findUserByEmail(user.email);
-
-      if (isUser) {
+      console.log(isUser)
+      if (typeof isUser=="object" && "email" in isUser) {
         throw new Error('a user with this email address already exist');
       }
+
 
       const newUser = user;
       newUser.type = 'client';
