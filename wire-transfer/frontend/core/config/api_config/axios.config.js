@@ -11,7 +11,7 @@ import axios from "axios";
 import  AppError from "../../helpers/utils/AppError"
 let baseURLProduction ='https://transferwise-apitest.herokuapp.com/api/v1/' // 'http://localhost:3000/api/v1/'
 let baseURLDEV= 'http://localhost:3000/api/v1/'
-let baseURL = baseURLProduction || baseURLDEV
+let baseURL =  baseURLDEV
 // if(process.env.NODE_ENV=="production"){
 //  let baseURL =  process.env.API_END_POINT ? process.env.API_END_POINT : "http://localhost:3000/api/v1/";
 // }

@@ -36,7 +36,7 @@ export const registerUser = async (details) => {
     if (response.status === 200) {
       return response && response;
     }
-  })//.catch(err=> toast.error(err.message || err.toString()));
+  })
 };
 
 

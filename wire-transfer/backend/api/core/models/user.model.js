@@ -30,6 +30,7 @@ class User extends Model {
       throw error;
     }
   }
+  
 
   async findUserById(id) {
     try {

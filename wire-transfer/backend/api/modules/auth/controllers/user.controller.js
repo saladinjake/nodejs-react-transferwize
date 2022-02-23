@@ -5,6 +5,7 @@ const response = new ResponseApi();
 class UserController {
   static async signUp(req, res) {
     const user = req.body;
+    console.log(user)
     try {
       const createdUser = await UserService.createUser(user);
       if (createdUser) {
