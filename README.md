@@ -1,6 +1,6 @@
 # trasferwise-app
 backend endpoint: https://transferwise-apitest.herokuapp.com/api/v1 
-##Coding Project   Hints: Be smart, don’t repeat yourself or reinvent the wheel.
+##Coding Project   Hints: Be smart, don’t repeat yourself or re-invent the wheel.
 
 ```Use as many packages/libraries as you can do. Use up-to-date software and bundles. Read the entire document here before jumping into action. Think twice. Model the application before you jump into coding.   Why? This coding challenge should give us a good understanding of  How well you can go from text to code, from requirements to product. How well you can execute on predefined requirements. How well you pay attention to detail so we can rely on you executing the work end to end. How creatively you execute on loose requirements (not defined in great detail). How well you can hack, organize, document, test, structure, and write your code. How well you can leverage existing things to build this app fast. ```
 
@@ -13,6 +13,8 @@ backend endpoint: https://transferwise-apitest.herokuapp.com/api/v1
 -    All users start with USD as their native currency but can receive EUR and GBP. All models and database tables have created_at and updated_at timestamps which are created automatically.   The app enables users to do the following: A user can register with his name, email address, password.
 -    A user can log in with his email address and password which is encrypted using a good encryption system (be smart, use a library). 
 -    You don’t need to implement to reset a password. Signup + Login are enough. When a user successfully logs in, he sees a page with all of his transactions, including the initial transaction from the signup (1000 USD).
+
+
 -     The page with all the transactions shows also the current balance for each currency.
 -     (e.g. start: 1000 USD, 0 EUR, 0 NGN) A user can create a new transaction on a new transaction page. A transaction consists of the sender and the receiver, the source currency, target currency, exchange rate, and the amount. A user can select the target currency. Check if a transaction is possible, so if a user has enough funds.   Example: User A sends to User B 100 EUR. But User B wants to receive that in USD.
 -      Therefore User A has -100EUR after that transaction and User B 113 USD, depending on the exchange rate.   
